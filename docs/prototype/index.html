@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ScamGuard AI - Penilaian Risiko & Respons Penipuan Digital</title>
+  
+  <!-- Apple Typography Fallback Stack -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Text"', '"SF Pro Display"', 'Inter', 'sans-serif'],
+            mono: ['"SF Mono"', 'Menlo', 'Monaco', 'Consolas', '"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            apple: {
+              black: '#000000',
+              canvas: '#000000',
+              surfaceA: '#161617',
+              surfaceB: '#1c1c1e',
+              surfaceC: '#2c2c2e',
+              surfaceLight: '#f5f5f7',
+              ink: '#1d1d1f',
+              blue: '#0071e3',
+              blueHover: '#0077ed',
+              blueLight: '#2997ff',
+              red: '#ff453a',
+              orange: '#ff9f0a',
+              green: '#30d158',
+              graySubtle: '#86868b',
+              grayBorder: 'rgba(255, 255, 255, 0.08)',
+              grayBorderLight: '#d2d2d7',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Apple Precision Aesthetics: No slop, no glow, no generic purple gradients */
+    body {
+      background-color: #000000;
+      color: #f5f5f7;
+      font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    
+    /* Apple Frosted Navbar & Surfaces */
+    .apple-glass {
+      background: rgba(22, 22, 23, 0.8);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+    
+    .apple-card {
+      background: #1c1c1e;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      transition: border-color 0.2s ease;
+    }
+    
+    .apple-card:hover {
+      border-color: rgba(255, 255, 255, 0.16);
+    }
+    
+    .apple-card-danger {
+      background: #1e1313;
+      border: 1px solid rgba(255, 69, 58, 0.35);
+    }
+
+    /* Apple Capsule Pill Buttons */
+    .apple-pill-primary {
+      background-color: #0071e3;
+      color: #ffffff;
+      border-radius: 980px;
+      padding: 8px 18px;
+      font-weight: 500;
+      transition: background-color 0.15s ease, transform 0.1s ease;
+    }
+    .apple-pill-primary:hover {
+      background-color: #0077ed;
+    }
+    .apple-pill-primary:active {
+      transform: scale(0.98);
+    }
+
+    .apple-pill-secondary {
+      background: rgba(255, 255, 255, 0.08);
+      color: #f5f5f7;
+      border-radius: 980px;
+      padding: 8px 16px;
+      font-weight: 500;
+      transition: background 0.15s ease, transform 0.1s ease;
+    }
+    .apple-pill-secondary:hover {
+      background: rgba(255, 255, 255, 0.14);
+    }
+    .apple-pill-secondary:active {
+      transform: scale(0.98);
+    }
+
+    /* Focus accessibility (Anti-Slop R-32) */
+    button:focus-visible, input:focus-visible, textarea:focus-visible {
+      outline: 2px solid #0071e3;
+      outline-offset: 2px;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #000000;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #2c2c2e;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #3a3a3c;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans antialiased text-[#f5f5f7] bg-black">
+
+  <!-- Apple Global Navigation Bar -->
+  <header class="sticky top-0 z-40 w-full apple-glass border-b border-white/[0.08]">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-12 flex items-center justify-between">
+      
+      <!-- Brand & Title -->
+      <div class="flex items-center space-x-3">
+        <span class="font-semibold text-sm tracking-tight text-white">ScamGuard</span>
+        <span class="text-xs text-apple-graySubtle">|</span>
+        <span class="text-xs text-apple-graySubtle hidden sm:inline">AI Agent Investigasi & Mitigasi Risiko</span>
+      </div>
+
+      <!-- Center Status: Transparent, Informative, No fake stats (Anti-Slop C-5) -->
+      <div class="hidden md:flex items-center space-x-2 text-xs text-apple-graySubtle font-mono">
+        <span class="w-2 h-2 rounded-full bg-apple-green inline-block"></span>
+        <span>IDwebhost Cloud VPS</span>
+        <span>&bull;</span>
+        <span>OpenClaw Core</span>
+      </div>
+
+      <!-- Right Navigation Actions (Anti-Slop R-24: real actions only) -->
+      <div class="flex items-center space-x-2">
+        <button onclick="openModal('modal-case-report')" class="text-xs text-apple-blueLight hover:underline font-medium px-2 py-1">
+          Laporan Kasus
+        </button>
+        <button onclick="scrollToEmergency()" class="text-xs bg-white/10 hover:bg-white/15 text-white px-3 py-1 rounded-full transition font-medium">
+          Panduan Darurat
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Editorial Hero Section (Apple Showcase Rhythm) -->
+  <section class="border-b border-white/[0.08] bg-[#0c0c0d] py-10 sm:py-14">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 text-center">
+      
+      <p class="text-xs font-semibold tracking-wider text-apple-blueLight uppercase mb-2">Digital Safety Companion</p>
+      <h1 class="text-2xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-white max-w-3xl mx-auto leading-tight">
+        Bukan sekadar mendeteksi: pahami tingkat risiko sebelum dampak meluas.
+      </h1>
+      <p class="text-sm sm:text-base text-apple-graySubtle max-w-2xl mx-auto mt-3 leading-relaxed">
+        Analisis bukti komunikasi digital secara multimodal, ukur tingkat paparan akun Anda melalui wawancara adaptif, dan peroleh langkah mitigasi resmi seketika.
+      </p>
+
+      <!-- Apple Segmented Control: Demo Presets (Anti-Slop R-26: fully interactive) -->
+      <div class="mt-8 flex flex-wrap items-center justify-center gap-2">
+        <span class="text-xs text-apple-graySubtle mr-1">Muat Contoh Kasus:</span>
+        <div class="inline-flex p-1 rounded-full bg-[#1c1c1e] border border-white/[0.08] text-xs">
+          <button onclick="loadScenario('bca_phishing')" id="pill-bca" class="px-3.5 py-1.5 rounded-full font-medium transition bg-white/15 text-white">
+            Phishing Bank (82%)
+          </button>
+          <button onclick="loadScenario('apk_undangan')" id="pill-apk" class="px-3.5 py-1.5 rounded-full font-medium transition text-apple-graySubtle hover:text-white">
+            APK Undangan (94%)
+          </button>
+          <button onclick="loadScenario('idwebhost_legit')" id="pill-idweb" class="px-3.5 py-1.5 rounded-full font-medium transition text-apple-graySubtle hover:text-white">
+            Resmi IDwebhost (12%)
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Main Workstation Grid -->
+  <main class="flex-1 max-w-6xl mx-auto px-4 sm:px-6 py-8 w-full">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      
+      <!-- LEFT COLUMN: Multimodal Input & Evidence Breakdown (5 Cols) -->
+      <div class="lg:col-span-5 space-y-6">
+        
+        <!-- Input Panel -->
+        <div class="apple-card rounded-2xl p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xs font-semibold uppercase tracking-wider text-apple-graySubtle">
+              1. Bukti Komunikasi Digital
+            </h2>
+            <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-black text-apple-graySubtle border border-white/[0.08]" id="badge-case-id">
+              SC-2026-0842
+            </span>
+          </div>
+
+          <!-- Apple Segmented Modal Tabs -->
+          <div class="flex p-1 bg-black rounded-xl border border-white/[0.08] text-xs mb-4">
+            <button onclick="switchTab('url')" id="tab-btn-url" class="flex-1 py-1.5 font-medium rounded-lg bg-[#2c2c2e] text-white transition">
+              URL
+            </button>
+            <button onclick="switchTab('screenshot')" id="tab-btn-screenshot" class="flex-1 py-1.5 font-medium rounded-lg text-apple-graySubtle hover:text-white transition">
+              Screenshot
+            </button>
+            <button onclick="switchTab('text')" id="tab-btn-text" class="flex-1 py-1.5 font-medium rounded-lg text-apple-graySubtle hover:text-white transition">
+              Teks Chat
+            </button>
+            <button onclick="switchTab('voice')" id="tab-btn-voice" class="flex-1 py-1.5 font-medium rounded-lg text-apple-graySubtle hover:text-white transition">
+              Suara
+            </button>
+          </div>
+
+          <!-- URL Input -->
+          <div id="tab-content-url" class="space-y-3">
+            <label for="input-url" class="block text-xs text-apple-graySubtle">
+              Tautan atau domain yang dicurigai:
+            </label>
+            <input type="text" id="input-url" value="https://id-bca-verifikasi-keamanan.xyz/login" class="w-full px-3.5 py-2.5 rounded-xl bg-black border border-white/[0.12] text-xs font-mono text-white focus:border-apple-blue" />
+            <p class="text-[11px] text-apple-graySubtle">
+              Analisis dilakukan secara statis di sandbox server tanpa membuka peramban pengguna.
+            </p>
+          </div>
+
+          <!-- Screenshot Input -->
+          <div id="tab-content-screenshot" class="hidden space-y-3">
+            <div class="border border-dashed border-white/[0.16] hover:border-white/[0.3] rounded-xl p-6 text-center transition bg-black/40 cursor-pointer">
+              <p class="text-xs text-white font-medium">Unggah tangkapan layar chat atau web</p>
+              <p class="text-[11px] text-apple-graySubtle mt-1">Mendukung OCR otomatis untuk membaca teks pada gambar (JPG, PNG)</p>
+            </div>
+            <div class="p-2.5 rounded-lg bg-black border border-white/[0.08] flex items-center justify-between text-xs font-mono">
+              <span class="text-apple-graySubtle text-[11px]">tangkapan_pesan_wa.png</span>
+              <span class="text-apple-green text-[10px]">OCR AKTIF</span>
+            </div>
+          </div>
+
+          <!-- Text Input -->
+          <div id="tab-content-text" class="hidden space-y-3">
+            <label for="input-text" class="block text-xs text-apple-graySubtle">
+              Salin isi pesan WhatsApp, SMS, atau email:
+            </label>
+            <textarea id="input-text" rows="3" class="w-full p-3 rounded-xl bg-black border border-white/[0.12] text-xs text-white focus:border-apple-blue" placeholder="Tempel teks pesan di sini..."></textarea>
+          </div>
+
+          <!-- Voice Input -->
+          <div id="tab-content-voice" class="hidden space-y-3">
+            <div class="p-6 rounded-xl bg-black/50 border border-white/[0.08] text-center">
+              <button class="w-12 h-12 rounded-full bg-white/10 hover:bg-white/15 text-white flex items-center justify-center mx-auto transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m-4 0h8m-4-8a3 3 0 003-3V5a3 3 0 00-6 0v6a3 3 0 003 3z"/></svg>
+              </button>
+              <p class="text-xs text-white mt-2 font-medium">Mulai Rekam Penjelasan</p>
+              <p class="text-[11px] text-apple-graySubtle mt-0.5">Dikonversi menjadi transkrip bukti secara otomatis</p>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <button onclick="recalculateAnalysis()" class="mt-5 w-full apple-pill-primary text-xs py-3 flex items-center justify-center space-x-1.5">
+            <span>Perbarui Penilaian Risiko</span>
+          </button>
+        </div>
+
+        <!-- Evidence Breakdown Panel -->
+        <div class="apple-card rounded-2xl p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-xs font-semibold uppercase tracking-wider text-apple-graySubtle">
+              2. Indikator yang Ditemukan (Mengapa?)
+            </h3>
+            <span class="text-[11px] font-mono text-apple-graySubtle" id="badge-indicator-count">
+              4 Temuan
+            </span>
+          </div>
+
+          <div class="space-y-3" id="indicator-list">
+            <!-- Indicator cards rendered dynamically -->
+          </div>
+
+          <!-- Categories confidence list -->
+          <div class="mt-5 pt-4 border-t border-white/[0.08]">
+            <span class="text-[11px] text-apple-graySubtle uppercase tracking-wider block mb-2 font-medium">Kemungkinan Kategori:</span>
+            <div class="flex flex-wrap gap-2 text-xs font-mono" id="category-chips">
+              <!-- Chips rendered dynamically -->
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT COLUMN: Triple Dimension, Adaptive Interview & Emergency Mitigation (7 Cols) -->
+      <div class="lg:col-span-7 space-y-6">
+        
+        <!-- TRIPLE DIMENSION METRIC TILES (Section 7 PRD) -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          
+          <!-- Metric 1: Content Risk -->
+          <div class="apple-card rounded-2xl p-4 flex flex-col justify-between" id="tile-content-risk">
+            <div>
+              <span class="text-[11px] text-apple-graySubtle uppercase tracking-wider block">Content Risk</span>
+              <div class="flex items-baseline mt-1">
+                <span class="text-3xl sm:text-4xl font-semibold text-apple-red font-mono" id="val-content-risk">82%</span>
+              </div>
+              <span class="inline-block mt-2 px-2 py-0.5 rounded text-[10px] font-semibold tracking-wide bg-apple-red/15 text-apple-red" id="badge-content-risk">
+                VERY HIGH RISK
+              </span>
+            </div>
+            <p class="text-[11px] text-apple-graySubtle mt-3 leading-snug">
+              Ditemukan indikator konsisten pada struktur domain dan formulir.
+            </p>
+          </div>
+
+          <!-- Metric 2: Confidence -->
+          <div class="apple-card rounded-2xl p-4 flex flex-col justify-between" id="tile-confidence">
+            <div>
+              <span class="text-[11px] text-apple-graySubtle uppercase tracking-wider block">Confidence</span>
+              <div class="flex items-baseline mt-1">
+                <span class="text-3xl sm:text-4xl font-semibold text-apple-blueLight font-mono" id="val-confidence">86%</span>
+              </div>
+              <span class="inline-block mt-2 px-2 py-0.5 rounded text-[10px] font-semibold tracking-wide bg-apple-blue/20 text-apple-blueLight">
+                BUKTI KUAT
+              </span>
+            </div>
+            <p class="text-[11px] text-apple-graySubtle mt-3 leading-snug">
+              Didukung oleh telemetri domain DNS, catatan SSL, dan pencocokan pola.
+            </p>
+          </div>
+
+          <!-- Metric 3: User Exposure -->
+          <div class="apple-card rounded-2xl p-4 flex flex-col justify-between" id="tile-user-exposure">
+            <div>
+              <span class="text-[11px] text-apple-graySubtle uppercase tracking-wider block">User Exposure</span>
+              <div class="flex items-baseline mt-1">
+                <span class="text-3xl sm:text-4xl font-semibold text-apple-orange font-mono" id="val-user-exposure">10%</span>
+              </div>
+              <span class="inline-block mt-2 px-2 py-0.5 rounded text-[10px] font-semibold tracking-wide bg-apple-orange/15 text-apple-orange" id="badge-user-exposure">
+                PAPARAN MINIMAL
+              </span>
+            </div>
+            <p class="text-[11px] text-apple-graySubtle mt-3 leading-snug" id="desc-user-exposure">
+              Anda baru menerima pesan dan belum berinteraksi lanjut.
+            </p>
+          </div>
+
+        </div>
+
+        <!-- ADAPTIVE INTERVIEW ENGINE (Section 19 & 20 PRD) -->
+        <div class="apple-card rounded-2xl p-6">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h3 class="text-sm font-semibold text-white">Wawancara Adaptif: Evaluasi Paparan Akun</h3>
+              <p class="text-xs text-apple-graySubtle mt-0.5">Jawab pertanyaan berikut agar sistem dapat menentukan tingkat kedaruratan akun Anda:</p>
+            </div>
+            <span class="text-[11px] font-mono text-apple-blueLight px-2.5 py-1 rounded-full bg-apple-blue/10">
+              Interaktif
+            </span>
+          </div>
+
+          <!-- Interview Steps Container -->
+          <div class="space-y-4" id="interview-wizard">
+            
+            <!-- Step 1: Open Link -->
+            <div class="p-4 rounded-xl bg-black/60 border border-white/[0.08]" id="step-1-box">
+              <div class="flex items-start justify-between">
+                <div>
+                  <span class="text-[10px] font-semibold uppercase text-apple-blueLight tracking-wider">Langkah 1</span>
+                  <p class="text-xs sm:text-sm font-medium text-white mt-0.5">Apakah Anda sudah membuka tautan tersebut?</p>
+                </div>
+                <span class="text-[11px] font-mono text-apple-graySubtle" id="ans-1-status">Menunggu</span>
+              </div>
+              <div class="mt-3 flex gap-2">
+                <button onclick="answerStep(1, true)" id="btn-step1-yes" class="apple-pill-secondary text-xs">
+                  Sudah Membuka
+                </button>
+                <button onclick="answerStep(1, false)" id="btn-step1-no" class="apple-pill-secondary text-xs">
+                  Belum Membuka
+                </button>
+              </div>
+            </div>
+
+            <!-- Step 2: Credential Entry -->
+            <div class="p-4 rounded-xl bg-black/60 border border-white/[0.08] opacity-40 pointer-events-none transition-opacity" id="step-2-box">
+              <div class="flex items-start justify-between">
+                <div>
+                  <span class="text-[10px] font-semibold uppercase text-apple-blueLight tracking-wider">Langkah 2</span>
+                  <p class="text-xs sm:text-sm font-medium text-white mt-0.5">Apakah Anda sempat memasukkan username, no handphone, atau password?</p>
+                </div>
+                <span class="text-[11px] font-mono text-apple-graySubtle" id="ans-2-status">Terkunci</span>
+              </div>
+              <div class="mt-3 flex gap-2">
+                <button onclick="answerStep(2, true)" id="btn-step2-yes" class="apple-pill-secondary text-xs">
+                  Ya, Memasukkan Kredensial
+                </button>
+                <button onclick="answerStep(2, false)" id="btn-step2-no" class="apple-pill-secondary text-xs">
+                  Tidak
+                </button>
+              </div>
+            </div>
+
+            <!-- Step 3: OTP Entry -->
+            <div class="p-4 rounded-xl bg-black/60 border border-white/[0.08] opacity-40 pointer-events-none transition-opacity" id="step-3-box">
+              <div class="flex items-start justify-between">
+                <div>
+                  <span class="text-[10px] font-semibold uppercase text-apple-blueLight tracking-wider">Langkah 3</span>
+                  <p class="text-xs sm:text-sm font-medium text-white mt-0.5">Apakah Anda sempat memasukkan kode OTP (SMS/Email) atau PIN?</p>
+                </div>
+                <span class="text-[11px] font-mono text-apple-graySubtle" id="ans-3-status">Terkunci</span>
+              </div>
+              <div class="mt-3 flex gap-2">
+                <button onclick="answerStep(3, true)" id="btn-step3-yes" class="apple-pill-secondary text-xs text-apple-red hover:bg-apple-red/20">
+                  Ya, Memasukkan OTP
+                </button>
+                <button onclick="answerStep(3, false)" id="btn-step3-no" class="apple-pill-secondary text-xs">
+                  Tidak Memasukkan OTP
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-white/[0.08] flex items-center justify-between text-xs text-apple-graySubtle">
+            <span>Status Progres: <strong id="interview-progress-text" class="text-white font-mono">0 / 3 Terjawab</strong></span>
+            <button onclick="resetInterview()" class="text-apple-blueLight hover:underline font-medium">
+              Ulangi Pertanyaan
+            </button>
+          </div>
+        </div>
+
+        <!-- ACTION MITIGATION / EMERGENCY CARD (Section 22 PRD) -->
+        <div id="section-emergency" class="apple-card rounded-2xl p-6 transition-all duration-300">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <span class="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-apple-green/15 text-apple-green" id="badge-emergency-state">
+                PREVENTION MODE
+              </span>
+              <h3 class="text-base font-semibold text-white mt-1.5" id="emergency-title">
+                Langkah Pencegahan (Normal)
+              </h3>
+              <p class="text-xs text-apple-graySubtle mt-0.5" id="emergency-subtitle">
+                Tingkat paparan masih rendah. Amankan perangkat Anda dengan langkah berikut:
+              </p>
+            </div>
+          </div>
+
+          <!-- Actions Checklist (Anti-Slop R-26: grounded and clear) -->
+          <div class="space-y-2.5 text-xs" id="action-checklist">
+            <!-- Rendered dynamically -->
+          </div>
+
+          <div class="mt-5 pt-4 border-t border-white/[0.08] flex items-center justify-between text-xs">
+            <span class="text-apple-graySubtle text-[11px]">Prinsip Privasi: ScamGuard tidak meminta password atau kode rahasia Anda.</span>
+            <button onclick="openModal('modal-case-report')" class="apple-pill-primary text-xs">
+              Buka Rekap Dokumen
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- INCIDENT TIMELINE (Section 24 PRD) -->
+    <section class="mt-8 apple-card rounded-2xl p-6">
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h3 class="text-sm font-semibold text-white">Kronologi Peristiwa (Incident Timeline)</h3>
+          <p class="text-xs text-apple-graySubtle mt-0.5">Memisahkan secara eksplisit antara pernyataan terkonfirmasi pengguna dan inferensi teknis sistem.</p>
+        </div>
+        <span class="text-[11px] font-mono text-apple-graySubtle px-2 py-1 rounded bg-black border border-white/[0.08]">
+          Tersinkronisasi
+        </span>
+      </div>
+
+      <div class="relative border-l border-white/[0.12] ml-4 pl-6 space-y-6 text-xs" id="timeline-events">
+        
+        <div class="relative">
+          <span class="absolute -left-[31px] top-1 w-2.5 h-2.5 rounded-full bg-apple-blueLight ring-4 ring-black"></span>
+          <div class="flex items-center gap-2">
+            <span class="font-mono text-apple-graySubtle text-[11px]">09:15:20 WIB</span>
+            <span class="px-1.5 py-0.2 rounded bg-white/10 text-white text-[10px] font-medium">BUKTI DITERIMA</span>
+          </div>
+          <p class="text-white mt-1 font-medium">Pengguna memasukkan tautan untuk dianalisis.</p>
+          <span class="text-[11px] text-apple-graySubtle">Sumber: Input Pengguna &bull; Status: Dikonfirmasi</span>
+        </div>
+
+        <div class="relative">
+          <span class="absolute -left-[31px] top-1 w-2.5 h-2.5 rounded-full bg-apple-red ring-4 ring-black"></span>
+          <div class="flex items-center gap-2">
+            <span class="font-mono text-apple-graySubtle text-[11px]">09:15:24 WIB</span>
+            <span class="px-1.5 py-0.2 rounded bg-apple-red/20 text-apple-red text-[10px] font-medium">PENILAIAN AWAL</span>
+          </div>
+          <p class="text-white mt-1 font-medium">Sistem mengidentifikasi indikator peniruan identitas dan permintaan kredensial.</p>
+          <span class="text-[11px] text-apple-graySubtle">Hasil: Content Risk 82% &bull; Confidence 86%</span>
+        </div>
+
+        <div id="timeline-dynamic-items" class="space-y-6"></div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- CASE REPORT MODAL (Apple Sheet Style, Anti-Slop R-32 Keyboard Escape Support) -->
+  <div id="modal-case-report" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="modal-case-title">
+    <div class="apple-card max-w-2xl w-full rounded-3xl p-6 border-white/[0.16] shadow-2xl relative max-h-[90vh] overflow-y-auto">
+      
+      <div class="flex items-center justify-between border-b border-white/[0.08] pb-4">
+        <div>
+          <h3 id="modal-case-title" class="text-lg font-semibold text-white">Laporan Kasus Insiden</h3>
+          <p class="text-xs text-apple-graySubtle font-mono mt-0.5" id="modal-case-header">CASE #SC-2026-0842 &bull; 15 September 2026</p>
+        </div>
+        <button onclick="closeModal('modal-case-report')" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition" aria-label="Tutup dialog">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <!-- Report Body -->
+      <div class="py-5 space-y-5 text-xs">
+        
+        <!-- Summary Numbers -->
+        <div class="grid grid-cols-3 gap-3 p-4 rounded-xl bg-black border border-white/[0.08] text-center font-mono">
+          <div>
+            <span class="text-apple-graySubtle text-[10px] block">CONTENT RISK</span>
+            <strong class="text-xl text-apple-red font-semibold" id="modal-content-risk">82%</strong>
+          </div>
+          <div>
+            <span class="text-apple-graySubtle text-[10px] block">USER EXPOSURE</span>
+            <strong class="text-xl text-apple-orange font-semibold" id="modal-user-exposure">10%</strong>
+          </div>
+          <div>
+            <span class="text-apple-graySubtle text-[10px] block">CONFIDENCE</span>
+            <strong class="text-xl text-apple-blueLight font-semibold" id="modal-confidence">86%</strong>
+          </div>
+        </div>
+
+        <!-- Assessment Verdict -->
+        <div class="p-4 rounded-xl bg-black border border-white/[0.08]">
+          <span class="text-[10px] font-semibold uppercase text-apple-graySubtle block mb-1">Status Penilaian</span>
+          <p class="text-white text-xs leading-relaxed" id="modal-assessment-text">
+            Terindikasi memiliki tingkat risiko tinggi. Ditemukan beberapa indikator social engineering dan domain tidak konsisten dengan institusi resmi.
+          </p>
+        </div>
+
+        <!-- Confirmed User Actions -->
+        <div>
+          <span class="text-[11px] font-semibold uppercase text-apple-graySubtle block mb-2">Tindakan Pengguna yang Dikonfirmasi</span>
+          <ul class="space-y-1.5 text-white" id="modal-user-actions-list">
+            <li class="flex items-center gap-2 text-xs"><span class="text-apple-green font-bold">&check;</span> Menerima konten yang mencurigakan</li>
+            <li class="flex items-center gap-2 text-xs" id="modal-action-link"><span class="text-apple-graySubtle font-bold">&bull;</span> Belum membuka tautan</li>
+            <li class="flex items-center gap-2 text-xs" id="modal-action-cred"><span class="text-apple-graySubtle font-bold">&bull;</span> Belum memasukkan kredensial</li>
+            <li class="flex items-center gap-2 text-xs" id="modal-action-otp"><span class="text-apple-graySubtle font-bold">&bull;</span> Belum memasukkan OTP</li>
+          </ul>
+        </div>
+
+        <!-- Mitigation Steps -->
+        <div>
+          <span class="text-[11px] font-semibold uppercase text-apple-graySubtle block mb-2">Rekomendasi Tindakan Pengamanan</span>
+          <ol class="list-decimal list-inside space-y-1 text-apple-graySubtle text-xs" id="modal-mitigation-list">
+            <li>Tutup pesan dan jangan membuka tautan yang dikirimkan.</li>
+            <li>Jangan memberikan kode verifikasi atau data rahasia kepada pihak manapun.</li>
+            <li>Laporkan nomor pengirim melalui kanal resmi institusi terkait.</li>
+          </ol>
+        </div>
+
+      </div>
+
+      <div class="pt-4 border-t border-white/[0.08] flex items-center justify-between text-xs">
+        <span class="text-[10px] text-apple-graySubtle">Dihasilkan oleh ScamGuard AI pada IDwebhost Hosting</span>
+        <button onclick="window.print()" class="apple-pill-primary text-xs">
+          Cetak Dokumen
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Apple Global Footer -->
+  <footer class="border-t border-white/[0.08] bg-[#0c0c0d] py-6 text-xs text-apple-graySubtle">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+      <div>
+        <span class="text-white font-medium">ScamGuard AI</span> &bull; 
+        <span>IDwebhost AI HackFest 2026</span> &bull; 
+        <span>Digital Safety & Public Good</span>
+      </div>
+      <p class="text-[11px] text-apple-graySubtle">
+        Penilaian risiko merupakan indikator berdasarkan bukti yang ada, bukan vonis hukum mutlak.
+      </p>
+    </div>
+  </footer>
+
+  <!-- Application Logic -->
+  <script>
+    // State Model
+    const state = {
+      scenario: 'bca_phishing',
+      contentRisk: 82,
+      confidence: 86,
+      userExposure: 10,
+      activeTab: 'url',
+      answers: {
+        openedLink: null,
+        enteredPassword: null,
+        enteredOTP: null
+      }
+    };
+
+    function switchTab(tab) {
+      state.activeTab = tab;
+      const tabs = ['url', 'screenshot', 'text', 'voice'];
+      tabs.forEach(t => {
+        const btn = document.getElementById('tab-btn-' + t);
+        const content = document.getElementById('tab-content-' + t);
+        if (t === tab) {
+          btn.className = 'flex-1 py-1.5 font-medium rounded-lg bg-[#2c2c2e] text-white transition';
+          content.classList.remove('hidden');
+        } else {
+          btn.className = 'flex-1 py-1.5 font-medium rounded-lg text-apple-graySubtle hover:text-white transition';
+          content.classList.add('hidden');
+        }
+      });
+    }
+
+    function loadScenario(type) {
+      state.scenario = type;
+      resetInterview();
+      
+      // Update Segmented Control Buttons
+      const pills = ['bca', 'apk', 'idweb'];
+      pills.forEach(p => {
+        const el = document.getElementById('pill-' + p);
+        if ((type === 'bca_phishing' && p === 'bca') ||
+            (type === 'apk_undangan' && p === 'apk') ||
+            (type === 'idwebhost_legit' && p === 'idweb')) {
+          el.className = 'px-3.5 py-1.5 rounded-full font-medium transition bg-white/15 text-white';
+        } else {
+          el.className = 'px-3.5 py-1.5 rounded-full font-medium transition text-apple-graySubtle hover:text-white';
+        }
+      });
+
+      if (type === 'bca_phishing') {
+        state.contentRisk = 82;
+        state.confidence = 86;
+        document.getElementById('input-url').value = 'https://id-bca-verifikasi-keamanan.xyz/login';
+        document.getElementById('badge-case-id').innerText = 'SC-2026-0842';
+        setIndicators([
+          { title: 'Ketidaksesuaian Domain (Domain Mismatch)', impact: 'Dampak Tinggi', desc: 'Domain terdaftar bukan kepemilikan PT Bank Central Asia Tbk.', level: 'red' },
+          { title: 'Permintaan Kredensial Rahasia', impact: 'Dampak Tinggi', desc: 'Formulir meminta input password dan kode OTP verifikasi secara simultan.', level: 'red' },
+          { title: 'Bahasa Urgensi Buatan', impact: 'Dampak Sedang', desc: 'Pesan memicu kepanikan dengan klaim rekening akan diblokir dalam 15 menit.', level: 'orange' },
+          { title: 'Peniruan Tampilan Resmi', impact: 'Dampak Sedang', desc: 'Meniru palet warna dan logo perbankan tanpa sertifikasi otentik.', level: 'orange' }
+        ]);
+        setCategories([
+          { name: 'Pencurian Kredensial', score: '78%' },
+          { name: 'Peniruan Identitas Merek', score: '72%' },
+          { name: 'Social Engineering', score: '69%' }
+        ]);
+      } else if (type === 'apk_undangan') {
+        state.contentRisk = 94;
+        state.confidence = 91;
+        document.getElementById('input-url').value = 'https://bit.ly/Surat-Undangan-Pernikahan-Digital.apk';
+        document.getElementById('badge-case-id').innerText = 'SC-2026-0911';
+        setIndicators([
+          { title: 'Ekstensi Berbahaya (.APK)', impact: 'Kritis', desc: 'Distribusi paket aplikasi Android yang disamarkan sebagai dokumen surat undangan.', level: 'red' },
+          { title: 'Potensi Pembajakan SMS & OTP', impact: 'Kritis', desc: 'Meminta izin pembacaan SMS latar belakang untuk meneruskan kode transaksi perbankan.', level: 'red' },
+          { title: 'Pengirim Tidak Terverifikasi', impact: 'Dampak Tinggi', desc: 'Pesan dikirim dari kontak baru tanpa riwayat interaksi.', level: 'red' }
+        ]);
+        setCategories([
+          { name: 'Malware SMS Forwarder', score: '95%' },
+          { name: 'Pembajakan Akun', score: '88%' },
+          { name: 'Eksploitasi Izin Sistem', score: '84%' }
+        ]);
+      } else if (type === 'idwebhost_legit') {
+        state.contentRisk = 12;
+        state.confidence = 94;
+        document.getElementById('input-url').value = 'https://member.idwebhost.com/clientarea.php';
+        document.getElementById('badge-case-id').innerText = 'SC-2026-0105';
+        setIndicators([
+          { title: 'Domain Resmi Terverifikasi', impact: 'Resiko Rendah', desc: 'Sertifikat TLS/SSL diterbitkan resmi untuk PT Web Media Technology Indonesia (IDwebhost).', level: 'green' },
+          { title: 'Infrastruktur DNS Konsisten', impact: 'Resiko Rendah', desc: 'Alamat IP mengarah pada segmen jaringan hosting resmi IDwebhost.', level: 'green' },
+          { title: 'Ketiadaan Pola Manipulasi', impact: 'Aman', desc: 'Struktur notifikasi sesuai dengan standar tagihan layanan berkala.', level: 'green' }
+        ]);
+        setCategories([
+          { name: 'Komunikasi Resmi', score: '96%' },
+          { name: 'Pemberitahuan Tagihan Sah', score: '91%' }
+        ]);
+      }
+
+      updateUI();
+    }
+
+    function setIndicators(list) {
+      const container = document.getElementById('indicator-list');
+      document.getElementById('badge-indicator-count').innerText = list.length + ' Temuan';
+      container.innerHTML = list.map(item => {
+        let colorClass = 'text-apple-red bg-apple-red/10';
+        let barColor = 'bg-apple-red';
+        if (item.level === 'orange') {
+          colorClass = 'text-apple-orange bg-apple-orange/10';
+          barColor = 'bg-apple-orange';
+        } else if (item.level === 'green') {
+          colorClass = 'text-apple-green bg-apple-green/10';
+          barColor = 'bg-apple-green';
+        }
+
+        return `
+          <div class="p-3.5 rounded-xl bg-black/60 border border-white/[0.08] flex items-start gap-3">
+            <span class="w-1.5 h-1.5 rounded-full ${barColor} mt-2 shrink-0"></span>
+            <div class="flex-1">
+              <div class="flex items-center justify-between">
+                <h4 class="text-xs font-semibold text-white">${item.title}</h4>
+                <span class="text-[10px] font-semibold ${colorClass} px-2 py-0.5 rounded-full">${item.impact}</span>
+              </div>
+              <p class="text-[11px] text-apple-graySubtle mt-1 leading-relaxed">${item.desc}</p>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function setCategories(list) {
+      const container = document.getElementById('category-chips');
+      container.innerHTML = list.map(c => `
+        <span class="px-2.5 py-1 rounded-full bg-black text-apple-graySubtle border border-white/[0.08] text-[11px]">
+          ${c.name} <strong class="text-white">${c.score}</strong>
+        </span>
+      `).join('');
+    }
+
+    function answerStep(step, val) {
+      if (step === 1) {
+        state.answers.openedLink = val;
+        document.getElementById('ans-1-status').innerText = val ? 'Sudah Membuka' : 'Belum Membuka';
+        document.getElementById('ans-1-status').className = val ? 'text-[11px] font-mono font-medium text-apple-orange' : 'text-[11px] font-mono font-medium text-apple-green';
+        
+        if (val) {
+          state.userExposure = 35;
+          unlockStep(2);
+        } else {
+          state.userExposure = 10;
+          lockStep(2);
+          lockStep(3);
+        }
+      } else if (step === 2) {
+        state.answers.enteredPassword = val;
+        document.getElementById('ans-2-status').innerText = val ? 'Ya, Kredensial Dimasukkan' : 'Tidak';
+        document.getElementById('ans-2-status').className = val ? 'text-[11px] font-mono font-medium text-apple-red' : 'text-[11px] font-mono font-medium text-apple-green';
+        
+        if (val) {
+          state.userExposure = 70;
+          unlockStep(3);
+        } else {
+          state.userExposure = 35;
+          lockStep(3);
+        }
+      } else if (step === 3) {
+        state.answers.enteredOTP = val;
+        document.getElementById('ans-3-status').innerText = val ? 'Ya, OTP Dimasukkan' : 'Tidak';
+        document.getElementById('ans-3-status').className = val ? 'text-[11px] font-mono font-medium text-apple-red' : 'text-[11px] font-mono font-medium text-apple-green';
+        
+        if (val) {
+          state.userExposure = 85;
+        } else {
+          state.userExposure = 70;
+        }
+      }
+
+      updateUI();
+      updateTimeline();
+    }
+
+    function unlockStep(step) {
+      const el = document.getElementById('step-' + step + '-box');
+      el.classList.remove('opacity-40', 'pointer-events-none');
+      document.getElementById('ans-' + step + '-status').innerText = 'Menunggu Jawaban';
+      document.getElementById('ans-' + step + '-status').className = 'text-[11px] font-mono text-apple-blueLight';
+    }
+
+    function lockStep(step) {
+      const el = document.getElementById('step-' + step + '-box');
+      el.classList.add('opacity-40', 'pointer-events-none');
+      document.getElementById('ans-' + step + '-status').innerText = 'Terkunci';
+      document.getElementById('ans-' + step + '-status').className = 'text-[11px] font-mono text-apple-graySubtle';
+      if (step === 2) state.answers.enteredPassword = null;
+      if (step === 3) state.answers.enteredOTP = null;
+    }
+
+    function resetInterview() {
+      state.answers = { openedLink: null, enteredPassword: null, enteredOTP: null };
+      state.userExposure = 10;
+      lockStep(2);
+      lockStep(3);
+      document.getElementById('ans-1-status').innerText = 'Menunggu';
+      document.getElementById('ans-1-status').className = 'text-[11px] font-mono text-apple-graySubtle';
+      document.getElementById('timeline-dynamic-items').innerHTML = '';
+      updateUI();
+    }
+
+    function updateUI() {
+      // Content risk
+      document.getElementById('val-content-risk').innerText = state.contentRisk + '%';
+      const badgeContent = document.getElementById('badge-content-risk');
+      if (state.contentRisk >= 75) {
+        badgeContent.innerText = 'VERY HIGH RISK';
+        badgeContent.className = 'inline-block mt-2 px-2 py-0.5 rounded text-[10px] font-semibold tracking-wide bg-apple-red/15 text-apple-red';
+      } else if (state.contentRisk >= 50) {
+        badgeContent.innerText = 'HIGH RISK';
+        badgeContent.className = 'inline-block mt-2 px-2 py-0.5 rounded text-[10px] font-semibold tracking-wide bg-apple-orange/15 text-apple-orange';
+      } else {
+        badgeContent.innerText = 'LOW RISK / SAFE';
+        badgeContent.className = 'inline-block mt-2 px-2 py-0.5 rounded text-[10px] font-semibold tracking-wide bg-apple-green/15 text-apple-green';
+      }
+
+      // Confidence
+      document.getElementById('val-confidence').innerText = state.confidence + '%';
+
+      // User exposure
+      document.getElementById('val-user-exposure').innerText = state.userExposure + '%';
+      const badgeExposure = document.getElementById('badge-user-exposure');
+      const descExposure = document.getElementById('desc-user-exposure');
+      
+      if (state.userExposure >= 85) {
+        badgeExposure.innerText = 'CRITICAL EXPOSURE';
+        badgeExposure.className = 'inline-block mt-2 px-2 py-0.5 rounded text-[10px] font-semibold tracking-wide bg-apple-red text-white';
+        descExposure.innerText = 'Kredensial dan kode OTP telah dikirimkan ke pihak tidak resmi.';
+        triggerEmergencyMode(true);
+      } else if (state.userExposure >= 70) {
+        badgeExposure.innerText = 'HIGH EXPOSURE';
+        badgeExposure.className = 'inline-block mt-2 px-2 py-0.5 rounded text-[10px] font-semibold tracking-wide bg-apple-red/15 text-apple-red';
+        descExposure.innerText = 'Password akun telah dimasukkan pada formulir tidak resmi.';
+        triggerEmergencyMode(true);
+      } else if (state.userExposure >= 30) {
+        badgeExposure.innerText = 'MEDIUM EXPOSURE';
+        badgeExposure.className = 'inline-block mt-2 px-2 py-0.5 rounded text-[10px] font-semibold tracking-wide bg-apple-orange/15 text-apple-orange';
+        descExposure.innerText = 'Tautan dibuka, namun data kredensial belum dimasukkan.';
+        triggerEmergencyMode(false);
+      } else {
+        badgeExposure.innerText = 'PAPARAN MINIMAL';
+        badgeExposure.className = 'inline-block mt-2 px-2 py-0.5 rounded text-[10px] font-semibold tracking-wide bg-apple-green/15 text-apple-green';
+        descExposure.innerText = 'Anda baru menerima pesan dan belum berinteraksi lanjut.';
+        triggerEmergencyMode(false);
+      }
+
+      // Progress counter
+      let answeredCount = 0;
+      if (state.answers.openedLink !== null) answeredCount++;
+      if (state.answers.enteredPassword !== null) answeredCount++;
+      if (state.answers.enteredOTP !== null) answeredCount++;
+      document.getElementById('interview-progress-text').innerText = `${answeredCount} / 3 Terjawab`;
+    }
+
+    function triggerEmergencyMode(isEmergency) {
+      const section = document.getElementById('section-emergency');
+      const badgeState = document.getElementById('badge-emergency-state');
+      const title = document.getElementById('emergency-title');
+      const subtitle = document.getElementById('emergency-subtitle');
+      const checklist = document.getElementById('action-checklist');
+
+      if (isEmergency) {
+        section.className = 'apple-card-danger rounded-2xl p-6 transition-all duration-300';
+        badgeState.className = 'text-[10px] font-semibold px-2 py-0.5 rounded-full bg-apple-red text-white';
+        badgeState.innerText = 'RESPONS PRIORITAS TINGGI (DARURAT)';
+        title.innerText = 'Tindakan Penyelamatan Darurat (Segera)';
+        title.className = 'text-base font-semibold text-apple-red mt-1.5';
+        subtitle.innerText = 'Data otentikasi telah diberikan pada tautan mencurigakan. Lakukan pengamanan akun berikut sekarang:';
+
+        checklist.innerHTML = `
+          <div class="p-3.5 rounded-xl bg-black border border-apple-red/30 flex items-start gap-3">
+            <span class="text-apple-red font-bold">1.</span>
+            <div>
+              <strong class="text-white font-medium">Tolak seluruh konfirmasi OTP yang masuk ke perangkat Anda</strong>
+              <p class="text-apple-graySubtle text-[11px] mt-0.5">Pelaku sedang mencoba mengautentikasi sesi baru. Jangan setujui notifikasi transaksi apapun.</p>
+            </div>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-black border border-white/[0.08] flex items-start gap-3">
+            <span class="text-white font-bold">2.</span>
+            <div>
+              <strong class="text-white font-medium">Kunci sementara rekening atau kartu debit/kredit</strong>
+              <p class="text-apple-graySubtle text-[11px] mt-0.5">Gunakan menu Pengaturan Kartu pada aplikasi mobile banking resmi untuk mengunci transaksi online.</p>
+            </div>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-black border border-white/[0.08] flex items-start gap-3">
+            <span class="text-white font-bold">3.</span>
+            <div>
+              <strong class="text-white font-medium">Ubah password dari kanal resmi yang terpercaya</strong>
+              <p class="text-apple-graySubtle text-[11px] mt-0.5">Segera lakukan reset password dan PIN transaksi hanya melalui aplikasi resmi.</p>
+            </div>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-black border border-white/[0.08] flex items-start gap-3">
+            <span class="text-white font-bold">4.</span>
+            <div>
+              <strong class="text-white font-medium">Hubungi pusat kontak resmi institusi perbankan terkait</strong>
+              <p class="text-apple-graySubtle text-[11px] mt-0.5">Halo BCA (1500888), Mandiri Call (14000), Kontak BRI (14017), BNI Call (1500046).</p>
+            </div>
+          </div>
+        `;
+      } else {
+        section.className = 'apple-card rounded-2xl p-6 transition-all duration-300';
+        badgeState.className = 'text-[10px] font-semibold px-2 py-0.5 rounded-full bg-apple-green/15 text-apple-green';
+        badgeState.innerText = 'PREVENTION MODE';
+        title.innerText = 'Langkah Pencegahan (Normal)';
+        title.className = 'text-base font-semibold text-white mt-1.5';
+        subtitle.innerText = 'Tingkat paparan masih rendah. Amankan perangkat Anda dengan langkah berikut:';
+
+        checklist.innerHTML = `
+          <div class="p-3 rounded-xl bg-black border border-white/[0.08] flex items-start gap-3">
+            <span class="text-apple-green font-bold">1.</span>
+            <div>
+              <strong class="text-white font-medium">Jangan membuka atau menyebarkan tautan tersebut</strong>
+              <p class="text-apple-graySubtle text-[11px] mt-0.5">Hapus atau tandai percakapan sebagai spam untuk mencegah akses yang tidak disengaja.</p>
+            </div>
+          </div>
+
+          <div class="p-3 rounded-xl bg-black border border-white/[0.08] flex items-start gap-3">
+            <span class="text-apple-green font-bold">2.</span>
+            <div>
+              <strong class="text-white font-medium">Konfirmasi informasi melalui kanal resmi</strong>
+              <p class="text-apple-graySubtle text-[11px] mt-0.5">Kunjungi website resmi institusi secara mandiri untuk memverifikasi program promo atau pemberitahuan.</p>
+            </div>
+          </div>
+
+          <div class="p-3 rounded-xl bg-black border border-white/[0.08] flex items-start gap-3">
+            <span class="text-apple-green font-bold">3.</span>
+            <div>
+              <strong class="text-white font-medium">Simpan dokumen kasus sebagai catatan bukti</strong>
+              <p class="text-apple-graySubtle text-[11px] mt-0.5">Gunakan ringkasan laporan kasus ScamGuard bila sewaktu-waktu diperlukan pelaporan aduan resmi.</p>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    function updateTimeline() {
+      const container = document.getElementById('timeline-dynamic-items');
+      let html = '';
+
+      if (state.answers.openedLink !== null) {
+        html += `
+          <div class="relative">
+            <span class="absolute -left-[31px] top-1 w-2.5 h-2.5 rounded-full ${state.answers.openedLink ? 'bg-apple-orange' : 'bg-apple-green'} ring-4 ring-black"></span>
+            <div class="flex items-center gap-2">
+              <span class="font-mono text-apple-graySubtle text-[11px]">09:16:05 WIB</span>
+              <span class="px-1.5 py-0.2 rounded bg-white/10 text-white text-[10px] font-medium">RESPONS PENGGUNA</span>
+            </div>
+            <p class="text-white mt-1 font-medium">${state.answers.openedLink ? 'Pengguna mengonfirmasi telah membuka tautan tersebut.' : 'Pengguna mengonfirmasi belum membuka tautan.'}</p>
+            <span class="text-[11px] text-apple-graySubtle">Sumber: Wawancara Adaptif &bull; Status: Dikonfirmasi</span>
+          </div>
+        `;
+      }
+
+      if (state.answers.enteredPassword !== null) {
+        html += `
+          <div class="relative">
+            <span class="absolute -left-[31px] top-1 w-2.5 h-2.5 rounded-full ${state.answers.enteredPassword ? 'bg-apple-red' : 'bg-apple-green'} ring-4 ring-black"></span>
+            <div class="flex items-center gap-2">
+              <span class="font-mono text-apple-graySubtle text-[11px]">09:16:40 WIB</span>
+              <span class="px-1.5 py-0.2 rounded bg-apple-red/20 text-apple-red text-[10px] font-medium">PAPARAN KREDENSIAL</span>
+            </div>
+            <p class="text-white mt-1 font-medium">${state.answers.enteredPassword ? 'Pengguna mengonfirmasi telah memasukkan kredensial autentikasi.' : 'Pengguna tidak memasukkan data kredensial.'}</p>
+            <span class="text-[11px] text-apple-graySubtle">Dampak: Paparan naik menjadi 70% &bull; Status: Dikonfirmasi</span>
+          </div>
+        `;
+      }
+
+      if (state.answers.enteredOTP !== null) {
+        html += `
+          <div class="relative">
+            <span class="absolute -left-[31px] top-1 w-2.5 h-2.5 rounded-full ${state.answers.enteredOTP ? 'bg-apple-red' : 'bg-apple-green'} ring-4 ring-black"></span>
+            <div class="flex items-center gap-2">
+              <span class="font-mono text-apple-graySubtle text-[11px]">09:17:10 WIB</span>
+              <span class="px-1.5 py-0.2 rounded bg-apple-red text-white text-[10px] font-medium">INSIDEN OTP</span>
+            </div>
+            <p class="text-white mt-1 font-medium">${state.answers.enteredOTP ? 'Pengguna mengonfirmasi telah menyerahkan kode OTP. Mode darurat aktif.' : 'Pengguna menolak memberikan kode OTP.'}</p>
+            <span class="text-[11px] text-apple-graySubtle">Dampak: Paparan 85% &bull; Status: Dikonfirmasi</span>
+          </div>
+        `;
+      }
+
+      container.innerHTML = html;
+    }
+
+    // Modal Operations with Escape key listener (Anti-Slop R-32)
+    function openModal(id) {
+      const modal = document.getElementById(id);
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+
+      document.getElementById('modal-content-risk').innerText = state.contentRisk + '%';
+      document.getElementById('modal-user-exposure').innerText = state.userExposure + '%';
+      document.getElementById('modal-confidence').innerText = state.confidence + '%';
+      
+      const linkEl = document.getElementById('modal-action-link');
+      if (state.answers.openedLink) {
+        linkEl.innerHTML = '<span class="text-apple-orange font-bold">&check;</span> Telah membuka tautan mencurigakan';
+      } else {
+        linkEl.innerHTML = '<span class="text-apple-graySubtle font-bold">&bull;</span> Belum membuka tautan';
+      }
+
+      const credEl = document.getElementById('modal-action-cred');
+      if (state.answers.enteredPassword) {
+        credEl.innerHTML = '<span class="text-apple-red font-bold">&check;</span> Telah memasukkan password akun';
+      } else {
+        credEl.innerHTML = '<span class="text-apple-graySubtle font-bold">&bull;</span> Belum memasukkan password';
+      }
+
+      const otpEl = document.getElementById('modal-action-otp');
+      if (state.answers.enteredOTP) {
+        otpEl.innerHTML = '<span class="text-apple-red font-bold">&check;</span> Telah memasukkan kode OTP rahasia';
+      } else {
+        otpEl.innerHTML = '<span class="text-apple-graySubtle font-bold">&bull;</span> Belum memasukkan OTP';
+      }
+
+      // Trap Escape key
+      window.addEventListener('keydown', handleEscapeKey);
+    }
+
+    function closeModal(id) {
+      const modal = document.getElementById(id);
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      window.removeEventListener('keydown', handleEscapeKey);
+    }
+
+    function handleEscapeKey(e) {
+      if (e.key === 'Escape') {
+        closeModal('modal-case-report');
+      }
+    }
+
+    function recalculateAnalysis() {
+      // Functional feedback (Anti-Slop R-26)
+      const btn = event.currentTarget;
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '<span>Mengevaluasi Bukti...</span>';
+      btn.disabled = true;
+      setTimeout(() => {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        alert('Evaluasi Selesai: Analisis bukti terkini telah diperbarui oleh mesin ScamGuard.');
+      }, 600);
+    }
+
+    function scrollToEmergency() {
+      document.getElementById('section-emergency').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Initialize Default Scenario on load
+    document.addEventListener('DOMContentLoaded', () => {
+      loadScenario('bca_phishing');
+    });
+  </script>
+</body>
+</html>
