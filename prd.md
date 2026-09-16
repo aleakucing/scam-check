@@ -161,29 +161,46 @@ REPORT
 
 # 5. Target Users
 
-## Primary User
+## 5.1 Primary User
 
-Masyarakat umum yang menerima:
+Masyarakat umum dan khususnya **Kelompok Lansia / Para Orang Tua (Senior Citizens usia 50–75+ tahun)** yang menerima komunikasi digital mencurigakan berupa:
 
-* link mencurigakan
-* SMS
-* WhatsApp message
-* email
-* undangan digital
-* tawaran hadiah
-* lowongan kerja
-* investasi
-* marketplace message
-* impersonation message
-* banking-related communication
+* link mencurigakan / website tiruan
+* SMS penipuan (hadiah pulsa, tilang elektronik, tunggakan BPJS)
+* WhatsApp message (undangan pernikahan APK, paket kurir J&T/JNE APK)
+* pesan impersonasi (mengaku sebagai anak/kerabat yang ganti nomor dan butuh uang cepat)
+* perbankan (perubahan skema tarif transfer bank, verifikasi akun palsu)
+* penipuan investasi bodong atau kupon undian belanja
+* voice call / telepon penipuan yang meminta kode OTP atau mentransfer uang
 
-## Secondary User
+### Profil & Kerentanan Khusus Pengguna Lansia (Para Orang Tua)
 
-* keluarga yang membantu anggota keluarga
-* mahasiswa
-* pekerja
-* UMKM
-* pengguna dengan literasi keamanan digital rendah
+Lansia merupakan target utama para pelaku kejahatan siber di Indonesia karena faktor-faktor berikut:
+
+1. **Faktor Fisiologis & Penglihatan (Presbiopi & Penurunan Motorik)**:
+   * Penurunan daya akomodasi mata membuat teks kecil (<14px) dan kontras rendah (seperti font tipis abu-abu) sangat sulit dibaca.
+   * Penurunan motorik halus dan getaran jari (tremor ringan) membuat tombol kecil sering salah terpencet (*fat-finger error*).
+2. **Faktor Psikologis & Social Engineering**:
+   * Tingginya rasa percaya pada figur otoritas (Bank, Polisi, Pegawai BUMN) atau rasa khawatir berlebih ketika diancam "rekening akan diblokir" atau "terkena surat tilang".
+   * Rasa cemas saat mendapati pesan yang mengaku dari anak atau cucu yang sedang mengalami musibah.
+3. **Keterbatasan Literasi Digital Teknis**:
+   * Kesulitan membedakan domain resmi (`bca.co.id`) dengan domain tiruan (`id-bca-verifikasi.xyz`).
+   * Tidak menyadari bahaya ekstensi file `.apk` yang dikirimkan melalui chat WhatsApp dengan judul palsu "Surat Undangan.apk" atau "Foto Paket.apk".
+   * Kesulitan mengetik URL panjang pada keyboard layar sentuh smartphone yang kecil.
+4. **Kebutuhan Esensial bagi Lansia**:
+   * Tampilan visual yang bersih, tenang, huruf besar (min. 16–18px), dan kontras tinggi (WCAG 2.2 AAA).
+   * Tombol aksi yang lebar dan memiliki jarak aman agar tidak salah tekan.
+   * Nada komunikasi AI yang menenangkan, tidak menimbulkan kepanikan (*anti-panic*), dan bebas dari jargon siber yang rumit.
+   * Input suara (tombol mikrofon besar) agar lansia dapat bercerita atau mendiktekan pesan tanpa repot mengetik.
+   * Narasi suara (*read aloud* / Text-to-Speech) yang membacakan ringkasan risiko dan langkah aman secara tenang.
+   * Kemudahan meneruskan laporan kepada anak/keluarga untuk validasi bersama (*Family Guardian Mode*).
+
+## 5.2 Secondary User
+
+* **Keluarga Pendamping (Family Caregivers & Anak Dewasa)**: Anggota keluarga yang sering dimintai bantuan oleh orang tua mereka untuk mengecek keaslian pesan atau menangani insiden setelah orang tua terlanjur mengklik tautan.
+* **Masyarakat Awam & UMKM**: Pengguna yang menjalankan bisnis kecil dan sering menerima pesanan palsu atau bukti transfer manipulatif.
+* **Pekerja & Mahasiswa**: Pengguna aktif komunikasi digital yang membutuhkan verifikasi cepat terhadap penawaran lowongan kerja atau transaksi online.
+* **Pengguna dengan Literasi Keamanan Digital Rendah**: Pengguna baru internet (*next billion users*) yang belum terbiasa dengan ancaman siber modern.
 
 ---
 
@@ -1276,95 +1293,237 @@ Angka di atas merupakan contoh desain dan harus dikalibrasi berdasarkan dataset 
 
 ---
 
-# 37. Frontend
+# 37. Frontend & Design System Ramah Lansia
 
-Recommended:
+Frontend ScamGuard AI dirancang dengan filosofi **Inklusif, Anti-Panik, dan Aksesibel Lintas Perangkat (Laptop & Smartphone)**, dengan fokus khusus pada kemudahan penggunaan bagi **Para Orang Tua dan Lansia** serta pendamping keluarga.
+
+## 37.1 Rekomendasi Tech Stack Frontend
 
 ```text
-Next.js
+Next.js 14+ (App Router) / Vite React
 TypeScript
 Tailwind CSS
-shadcn/ui
+shadcn/ui + Radix UI Primitives (A11y Compliant)
+Lucide Icons (Bentuk Ikon Jelas & Sederhana)
+Web Speech API (Browser Voice Recognition & Text-to-Speech)
 ```
 
-Core screens:
+## 37.2 Evaluasi Design System: Stripe vs. Spacious-Material
 
-```text
-Landing
- ↓
-Analyze
- ↓
-Risk Result
- ↓
-Adaptive Interview
- ↓
-Exposure Result
- ↓
-Recommended Actions
- ↓
-Case Report
+Dalam perancangan awal, sempat dipertimbangkan penggunaan **Stripe Design System**. Namun setelah dilakukan evaluasi kegunaan (*usability review*) terhadap karakteristik pengguna lansia, diputuskan untuk mengadopsi **OpenDesign Spacious-Material Framework**:
+
+| Parameter Evaluasi | Stripe Design System | OpenDesign Spacious-Material (Dipilih) | Alasan Keputusan untuk Lansia |
+| :--- | :--- | :--- | :--- |
+| **Tipografi & Berat Huruf** | Söhne `weight: 300` (sangat tipis), tracking negatif (-1.4px) | Inter / Open Sans `weight: 500-700` (Medium - Bold) | Font tipis (*ultralight*) sangat sulit terbaca oleh mata lansia dengan presbiopi. Huruf tebal dan berjarak normal meningkatkan keterbacaan (*legibility*). |
+| **Ukuran Teks Minimum** | Micro/nano text 8px–12px, label 13px | Minimum body 16px, tombol 16–18px, heading 24–36px | Teks di bawah 14px memicu kelelahan visual (*eye strain*) pada layar ponsel. |
+| **Kontras & Warna** | Palet gelap (*dark canvas*), teks abu-abu redup `#64748d` | Kontras tinggi WCAG 2.2 AAA (Teks `#0F172A` di atas kanvas terang `#FFFFFF` / `#F8FAFC`) | Mata lansia mengalami penurunan sensitivitas kontras (*contrast sensitivity*). Kontras 7:1+ wajib diterapkan. |
+| **Ruang & Jarak Sentuh** | Densitas tinggi (*compact layout*) untuk efisiensi tabel keuangan | *Spacious 8pt baseline grid*, padding 20–28px, tombol min. 48–56px | Mencegah salah tekan (*fat-finger error*) akibat tremor atau ketidakakuratan jempol pada layar smartphone. |
+| **Beban Kognitif** | Banyak istilah finansial teknis dan grafik mikro | Kartu tunggal bertahap (*step-by-step progressive disclosure*) | Lansia mudah bingung jika dihadapkan pada antarmuka yang terlalu ramai atau banyak menu bertumpuk. |
+
+## 37.3 Spesifikasi Token Desain OpenDesign Spacious-Material
+
+Sistem desain menggunakan token CSS terstandarisasi untuk konsistensi di laptop dan smartphone:
+
+```css
+:root {
+  /* Warna Kanvas & Permukaan */
+  --sg-canvas-bg: #F8FAFC;        /* Slate 50 - Kanvas terang, bersih, tidak menyilaukan */
+  --sg-surface-card: #FFFFFF;      /* Pure White - Kartu elevasi */
+  --sg-surface-subtle: #F1F5F9;    /* Slate 100 - Area sekunder */
+  
+  /* Tipografi & Kontras Tinggi (WCAG AAA) */
+  --sg-text-main: #0F172A;         /* Slate 900 - Kontras tajam terhadap putih (16:1) */
+  --sg-text-muted: #334155;        /* Slate 700 - Teks pendukung terbaca jelas (8.5:1) */
+  --sg-border-default: #CBD5E1;    /* Slate 300 - Garis batas tegas dan terlihat nyata */
+  
+  /* Palet Aksi & Status (Tenang & Anti-Panik) */
+  --sg-primary: #1D4ED8;           /* Blue 700 - Warna aksi utama, memberi rasa aman */
+  --sg-primary-hover: #1E40AF;
+  
+  --sg-status-safe-bg: #DCFCE7;    /* Green 100 */
+  --sg-status-safe-text: #15803D;  /* Green 700 - Aman / Risiko Rendah */
+  --sg-status-safe-border: #86EFAC;
+  
+  --sg-status-warn-bg: #FEF3C7;    /* Amber 100 */
+  --sg-status-warn-text: #B45309;  /* Amber 700 - Waspada / Hati-hati */
+  --sg-status-warn-border: #FCD34D;
+  
+  --sg-status-danger-bg: #FEE2E2;  /* Red 100 */
+  --sg-status-danger-text: #B91C1C;/* Red 700 - Sangat Berisiko (bukan merah neon yang menakut-nakuti) */
+  --sg-status-danger-border: #FCA5A5;
+
+  /* Jarak & Ukuran Interaksi Lansia */
+  --sg-touch-target-min: 48px;     /* Minimum area sentuh */
+  --sg-touch-button-height: 56px;  /* Tinggi tombol utama pada smartphone */
+  --sg-radius-card: 16px;          /* Sudut membulat lembut dan bersahabat */
+  --sg-radius-pill: 9999px;        /* Kapsul untuk tombol aksi */
+}
 ```
 
-UX utama:
+## 37.4 Pedoman Khusus Desain Ramah Lansia (Senior Accessibility Guidelines)
 
-> **Kirim → Analisis → Pahami → Jawab → Lindungi**
+1. **Pengatur Ukuran Teks Instan (Font Scaler)**:
+   * Pengguna dapat memilih 3 tingkat ukuran teks di pojok atas:
+     * **Standar (100%)**: Teks dasar 16px.
+     * **Besar (125%)**: Teks dasar 18px, tombol 20px.
+     * **Sangat Besar (150%)**: Teks dasar 20px, tombol 22px, heading 32px+.
+2. **Input Suara Multimodal Ramah Lansia (Big Voice Button)**:
+   * Tombol mikrofon berukuran besar (minimal 64px) dengan label jelas: *"Tekan untuk Berbicara / Bacakan Pesan Anda"*.
+   * Menggunakan Speech-to-Text browser untuk mengubah cerita lisan orang tua ("Ini ada SMS dari nomor baru katanya saya menang hadiah...") menjadi teks analisis.
+3. **Narasi Suara AI (Text-to-Speech / "Dengarkan Penjelasan")**:
+   * Setiap kartu hasil analisis memiliki tombol audio *"Dengarkan Penjelasan"* dengan ikon speaker yang mencolok.
+   * AI membacakan ringkasan risiko dan rekomendasi langkah aman dalam bahasa Indonesia yang bertempo santai dan santun.
+4. **Tone Komunikasi Anti-Panik**:
+   * Menghindari efek suara sirene, kelap-kelip merah, atau tulisan huruf kapital semua yang menakut-nakuti.
+   * Menggunakan pendekatan menenangkan: *"Tenang, jangan panik. Ikuti langkah pengamanan sederhana di bawah ini bersama-sama."*
+5. **Mode Pendampingan Keluarga (Family Guardian Mode)**:
+   * Tombol satu sentuhan *"Minta Bantuan Anak / Keluarga via WhatsApp"*.
+   * Menghasilkan pesan WhatsApp otomatis dengan format ringkas yang siap dikirimkan ke anak atau kerabat untuk memverifikasi bersama.
+6. **Hotline Resmi 1-Sentuhan (One-Tap Direct Dial)**:
+   * Untuk kasus perbankan atau pembajakan akun, tombol telepon darurat langsung membuka dialer ponsel dengan nomor resmi perbankan (BCA 1500888, BRI 14017, Mandiri 14000, BNI 1500046) sehingga orang tua tidak perlu mencari-cari nomor telepon lagi.
 
 ---
 
-# 38. Main Dashboard
+# 38. Main Dashboard & Matriks Responsif (Laptop vs Smartphone)
 
-Dashboard menampilkan:
+Antarmuka ScamGuard AI dirancang adaptif penuh untuk dua skenario penggunaan utama:
 
-```text
-Recent Cases
+## 38.1 Tampilan Smartphone / HP (Layar Sentuh 360px – 480px)
 
-CASE #SC-2026-0001
-Content Risk       82%
-User Exposure      70%
-Confidence         86%
-
-Status:
-HIGH PRIORITY
-```
-
-Jangan menggunakan dashboard:
+Ponsel adalah perangkat utama tempat orang tua menerima SMS atau WhatsApp mencurigakan:
 
 ```text
-Scams Detected: 1,204
+┌──────────────────────────────────────────────┐
+│  🛡️ ScamGuard AI          [ Huruf: A A A ]   │
+│  Bantuan Cek Pesan & Link Mencurigakan      │
+├──────────────────────────────────────────────┤
+│                                              │
+│  PILIH CARA PERIKSA:                         │
+│  ┌────────────────────────────────────────┐  │
+│  │ 🎙️  TEKAN & BICARA (SUARA)             │  │
+│  │    "Ceritakan atau bacakan pesan Anda" │  │
+│  └────────────────────────────────────────┘  │
+│  ┌──────────────────┐  ┌──────────────────┐  │
+│  │ 🔗 Tulis Link    │  │ 📷 Kirim Foto    │  │
+│  └──────────────────┘  └──────────────────┘  │
+│                                              │
+│  HASIL ANALISIS CEPAT:                       │
+│  ┌────────────────────────────────────────┐  │
+│  │ ⚠️ PERLU WASPADA (Risiko: 82%)         │  │
+│  │ "Pesan ini bukan dari pihak resmi"     │  │
+│  │ [ 🔊 Dengarkan Penjelasan ]            │  │
+│  └────────────────────────────────────────┘  │
+│                                              │
+│  PERTANYAAN SINGKAT:                         │
+│  "Apakah Anda sudah mengklik link tersebut?" │
+│  ┌──────────────────┐  ┌──────────────────┐  │
+│  │    SUDAH         │  │    BELUM         │  │
+│  │   (Ukuran 56px)  │  │   (Ukuran 56px)  │  │
+│  └──────────────────┘  └──────────────────┘  │
+│                                              │
+├──────────────────────────────────────────────┤
+│ [ STICKY BOTTOM BAR ]                        │
+│ [ 📲 Bagikan ke Anak via WA ] [ 📞 Telp Bank]│
+└──────────────────────────────────────────────┘
 ```
 
-seolah-olah semua assessment adalah scam yang sudah terkonfirmasi.
+Karakteristik Tampilan HP:
+* Alur layar tunggal (*vertical single-column stack*).
+* Tombol CTA berada di zona jangkauan jempol (*bottom thumb zone*).
+* Sticky Bottom Bar untuk aksi darurat dan berbagi ke anak tanpa perlu scroll.
+* Kartu pertanyaan berukuran besar dengan pilihan `[ SUDAH ]` / `[ BELUM ]` yang kontras dan jelas.
 
-Gunakan:
+## 38.2 Tampilan Laptop & Tablet (Widescreen 1024px – 1440px+)
+
+Laptop biasanya digunakan oleh pengguna di kantor/rumah, atau oleh anak/keluarga yang sedang mendampingi orang tua secara langsung:
 
 ```text
-Cases Analyzed
-High-Risk Assessments
-High-Priority Cases
-Recommendations Generated
+┌─────────────────────────────────────────────────────────────────────────────────────────────┐
+│  🛡️ ScamGuard AI | Teman Pengaman Digital Anda                    [ Ukuran Huruf: A- / A+ ]  │
+├────────────────────────────────────────┬────────────────────────────────────────────────────┤
+│  KOLOM KIRI: BUKTI KOMUNIKASI          │  KOLOM KANAN: PENILAIAN RISIKO & TINDAKAN          │
+│                                        │                                                    │
+│  Tab Pilihan:                          │  ┌──────────────────────────────────────────────┐  │
+│  [ 🔗 URL ] [ 📷 Gambar ] [ 🎙️ Suara ] │  │  TINGKAT RISIKO: 82% (SANGAT TINGGI)         │  │
+│                                        │  │  Tingkat Keyakinan AI: 86%                   │  │
+│  Kotak Input URL / Upload:             │  │  [ 🔊 Bacakan Hasil Analisis ]               │  │
+│  ┌──────────────────────────────────┐  │  └──────────────────────────────────────────────┘  │
+│  │ https://id-bca-verifikasi.xyz    │  │                                                    │
+│  └──────────────────────────────────┘  │  Indikator yang Ditemukan:                         │
+│                                        │  ✓ Domain bukan milik resmi bank                   │
+│  Tangkapan Layar Sandbox:              │  ✓ Meminta nomor kartu ATM dan PIN                 │
+│  ┌──────────────────────────────────┐  │  ✓ Menggunakan bahasa ancaman blokir               │
+│  │ [ Pratinjau Tampilan Tiruan ]   │  │                                                    │
+│  │ (Dianalisis aman di server)      │  │  Wawancara Bertahap (Adaptive Interview):          │
+│  └──────────────────────────────────┘  │  "Apakah Anda sudah memasukkan kode OTP?"          │
+│                                        │  [ SUDAH ]                [ BELUM ]                │
+│  Riwayat Bukti Tersimpan:              │                                                    │
+│  • Tangkapan layar SMS (14:32)         │  Tingkat Paparan Pengguna: 85% (Tinggi)            │
+│  • Link mencurigakan (14:30)           │  Langkah Darurat Segera:                           │
+│                                        │  1. Blokir kartu via aplikasi resmi BCA Mobile     │
+│                                        │  2. Hubungi HaloBCA resmi: 1500888                 │
+│                                        │  [ 📲 Bagikan Kasus ke WhatsApp Anak / Keluarga ]  │
+└────────────────────────────────────────┴────────────────────────────────────────────────────┘
 ```
+
+Karakteristik Tampilan Laptop:
+* Layout dua kolom seimbang (*side-by-side workstation*).
+* Menampilkan bukti di sebelah kiri dan panduan investigasi di sebelah kanan secara berdampingan tanpa perlu bolak-balik halaman.
+* Ruang drag-and-drop file gambar yang luas dengan feedback visual jelas.
 
 ---
 
-# 39. Case Detail UI
+# 39. Detail Tampilan & Alur Komponen Kasus
+
+Alur komponen disusun secara linear mengikuti psikologi lansia:
+
+```text
+1. Masukkan Bukti (Ketik / Upload / Bicara)
+       ↓
+2. Pahami Skor Risiko & Dengarkan Audio Penjelasan
+       ↓
+3. Jawab Pertanyaan Sederhana (Sudah / Belum)
+       ↓
+4. Lihat Langkah Penyelamatan Akun (Besar & Bernomor)
+       ↓
+5. Bagikan ke Keluarga atau Hubungi Bantuan Resmi
+```
+
+Format kartu detail kasus mengutamakan keterbacaan instan:
 
 ```text
 CASE #SC-2026-0001
 
-┌──────────────────────────┐
-│ CONTENT RISK             │
-│                          │
-│          82%             │
-│     VERY HIGH            │
-└──────────────────────────┘
+┌─────────────────────────────────────────────────────────┐
+│ TINGKAT RISIKO KONTEN                                   │
+│                                                         │
+│                      82%                                │
+│           SANGAT MENCURIGAKAN                           │
+│                                                         │
+│ Tingkat Keyakinan Evidence: 86%                         │
+│ [ 🔊 Dengarkan Penjelasan ]                             │
+└─────────────────────────────────────────────────────────┘
 
-Confidence: 86%
+Tanda-tanda Bahaya yang Ditemukan:
+✓ Alamat website bukan milik bank resmi
+✓ Meminta nomor kartu dan PIN rahasia Anda
+✓ Mengancam akun akan diblokir dalam 24 jam
+✓ Menggunakan logo bank tanpa izin resmi
 
-Indicators
-✓ Domain mismatch
-✓ Credential request
-✓ Urgency
-✓ Brand impersonation
+───────────────────────────────────────────────────────────
+
+TINGKAT PAPARAN PENGGUNA: 85% (RISIKO TINGGI)
+Tindakan yang sudah dilakukan:
+✓ Membuka tautan
+✓ Mengisi nomor rekening & password
+✓ Memasukkan kode OTP
+
+Langkah Penyelamatan Segera:
+1. Hubungi Call Center Resmi Bank Sekarang: 1500888
+2. Blokir sementara kartu ATM via aplikasi mobile resmi
+3. Jangan pernah memberikan kode OTP tambahan kepada siapa pun
+[ 📲 Bagikan ke Anak / Keluarga via WhatsApp ]
+```
 
 ───────────────────────────
 
@@ -1578,36 +1737,41 @@ Integrasi harus mengikuti ToS platform dan ketentuan kompetisi.
 
 ## MUST HAVE
 
-* URL analysis
+* URL analysis (statis & sandbox screenshot)
 * Screenshot upload
-* OCR
+* OCR (Tesseract / Vision text extraction)
 * Evidence analysis
-* Content Risk Score
-* Confidence Score
-* User Exposure Score
-* Adaptive Interview
-* Emergency Mode
-* Recommended Actions
-* Incident Timeline
-* Incident Report
-* Web interface
-* OpenClaw Agent
-* VPS deployment
+* Content Risk Score (0–100%)
+* Confidence Score (0–100%)
+* User Exposure Score (0–100%)
+* Adaptive Interview Engine (pertanyaan adaptif berbasis aksi pengguna)
+* Emergency Mode (langkah penyelamatan akun)
+* Recommended Actions (langkah mitigasi konkret)
+* Incident Timeline & Incident Report
+* **Senior-Friendly Responsive Web Interface** (Matriks Laptop 2-kolom & Smartphone Mobile-First)
+* **OpenDesign Spacious-Material Design System** (Kontras tinggi WCAG 2.2 AAA, tombol 48–56px, palet anti-panik)
+* **Aksesibilitas Lansia**:
+  * Pengatur Ukuran Huruf Instan (Standar 100%, Besar 125%, Sangat Besar 150%)
+  * Input Suara (Browser Speech-to-Text dengan tombol mikrofon besar)
+  * Narasi Suara (Browser Text-to-Speech untuk membacakan hasil analisa & langkah aman)
+  * Mode Pendampingan Keluarga (Tombol 1-klik "Kirim ke Anak/Keluarga via WhatsApp")
+  * Hotline Darurat 1-Sentuhan (Direct dial call center resmi bank BCA, BRI, Mandiri, BNI)
+* OpenClaw Agent workflow
+* VPS deployment (IDwebhost AI Hosting / Cloud VPS)
 
 ## SHOULD HAVE
 
-* Case history
-* Evidence Vault
-* PDF report
-* browser voice
-* multilingual UI
+* Case history (riwayat pemeriksaan lokal)
+* Evidence Vault (penyimpanan bukti insiden terenkripsi)
+* PDF report export
+* Pengalihan tema kontras tinggi tambahan (High-Contrast Light / Soft Dark)
+* Deteksi file APK Android mencurigakan (ekstensi .apk)
 
 ## NICE TO HAVE
 
-* WhatsApp
-* voice conversation
-* family assistance mode
-* advanced reputation sources
+* Integrasi bot WhatsApp langsung (WhatsApp Cloud API)
+* Voice call conversation bot interaktif
+* Advanced threat intelligence reputation sources
 
 ## DO NOT BUILD YET
 

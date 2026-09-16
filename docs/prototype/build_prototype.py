@@ -1,4 +1,6 @@
-<!DOCTYPE html>
+import os
+
+html_content = r'''<!DOCTYPE html>
 <html lang="id" class="font-scale-standard">
 <head>
   <meta charset="UTF-8" />
@@ -1389,3 +1391,10 @@
   </script>
 </body>
 </html>
+'''
+
+output_path = r'C:\ibra\project\web\lomba-idwebshost\docs\prototype\index.html'
+with open(output_path, 'w', encoding='utf-8') as f:
+    f.write(html_content)
+
+print(f"File successfully written to {output_path}. Size: {len(html_content)} bytes")
