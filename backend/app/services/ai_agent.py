@@ -5,6 +5,7 @@ import httpx
 from ..config import settings
 from ..models.schemas import AnalyzeRequest, AnalyzeResponse, Indicator, CategoryScore
 from .heuristic_analyzer import analyze_heuristic
+from .privacy import mask_sensitive_data
 
 logger = logging.getLogger("scamguard.ai")
 
@@ -47,14 +48,29 @@ async def analyze_with_ai(req: AnalyzeRequest) -> AnalyzeResponse:
             model_name = settings.GEMINI_MODEL
             url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={settings.GEMINI_API_KEY}"
             
-            prompt_content = f"Tipe Bukti: {req.type}\nKonten yang dianalisis:\n{req.content}"
+            # Construct Multimodal Parts
+            parts = [{"text": SYSTEM_PROMPT}]
+
+            if req.type == "screenshot" and req.image_base64:
+                # Multimodal Image Processing via inline_data
+                parts.append({
+                    "inline_data": {
+                        "mime_type": "image/jpeg",
+                        "data": req.image_base64
+                    }
+                })
+                parts.append({
+                    "text": f"Tipe Bukti: {req.type}\nDeskripsi tambahan: {req.content}\nAnalisis visual tangkapan layar di atas untuk mendeteksi manipulasi desain, logo tiruan, nomor tidak resmi, atau teks penipuan."
+                })
+            else:
+                parts.append({
+                    "text": f"Tipe Bukti: {req.type}\nKonten yang dianalisis:\n{req.content}"
+                })
+
             payload = {
                 "contents": [
                     {
-                        "parts": [
-                            {"text": SYSTEM_PROMPT},
-                            {"text": prompt_content}
-                        ]
+                        "parts": parts
                     }
                 ],
                 "generationConfig": {
@@ -71,13 +87,15 @@ async def analyze_with_ai(req: AnalyzeRequest) -> AnalyzeResponse:
                     parsed = json.loads(candidate)
 
                     case_id = f"SC-{datetime.now().strftime('%Y%m%d')}-{abs(hash(req.content)) % 9000 + 1000}"
+                    summary_text = mask_sensitive_data(parsed.get("summary", "Analisis AI selesai."))
+
                     return AnalyzeResponse(
                         case_id=case_id,
                         timestamp=datetime.now().strftime("%Y-%m-%d %H:%M:%S WIB"),
                         content_risk=int(parsed.get("content_risk", 75)),
                         confidence=int(parsed.get("confidence", 85)),
                         risk_level=parsed.get("risk_level", "HIGH RISK"),
-                        summary=parsed.get("summary", "Analisis AI selesai."),
+                        summary=summary_text,
                         categories=[CategoryScore(**c) for c in parsed.get("categories", [])],
                         indicators=[Indicator(**i) for i in parsed.get("indicators", [])],
                         initial_exposure=10,

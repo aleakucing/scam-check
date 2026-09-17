@@ -10,6 +10,7 @@ from .models.schemas import (
 from .services.ai_agent import analyze_with_ai
 from .services.exposure_evaluator import evaluate_exposure
 from .services.heuristic_analyzer import analyze_heuristic
+from .services.privacy import mask_sensitive_data
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("scamguard.api")
@@ -45,13 +46,20 @@ def health():
         "status": "healthy",
         "version": settings.VERSION,
         "ai_engine": f"Gemini ({settings.GEMINI_MODEL})" if has_gemini else "Built-in Heuristic Safety Engine",
-        "ai_key_configured": has_gemini
+        "ai_key_configured": has_gemini,
+        "ssrf_protection": "active",
+        "pii_masking": "active"
     }
 
 @app.post("/api/analyze", response_model=AnalyzeResponse)
 async def analyze_endpoint(req: AnalyzeRequest):
     if not req.content or len(req.content.strip()) == 0:
         raise HTTPException(status_code=400, detail="Konten bukti tidak boleh kosong.")
+    
+    # Payload sanity check (max 10MB base64)
+    if req.image_base64 and len(req.image_base64) > 10 * 1024 * 1024:
+        raise HTTPException(status_code=413, detail="Ukuran berkas gambar melebihi batas 10MB.")
+
     try:
         response = await analyze_with_ai(req)
         return response
@@ -70,6 +78,9 @@ def interview_endpoint(req: InterviewRequest):
 
 @app.post("/api/report")
 def generate_report(req: CaseReportRequest):
+    # Apply Sensitive Data Masking to protect victim privacy (PRD Section 41)
+    clean_evidence = mask_sensitive_data(req.evidence_content)
+
     # Formatted Case Report document text
     lines = [
         "==================================================================",
@@ -77,7 +88,7 @@ def generate_report(req: CaseReportRequest):
         "==================================================================",
         f"ID KASUS       : {req.case_id}",
         f"TIPE BUKTI     : {req.evidence_type.upper()}",
-        f"KONTEN BUKTI   : {req.evidence_content}",
+        f"KONTEN BUKTI   : {clean_evidence}",
         "------------------------------------------------------------------",
         "PENILAIAN TIGA DIMENSI RISIKO:",
         f"1. Content Risk     : {req.content_risk}%",
@@ -92,7 +103,8 @@ def generate_report(req: CaseReportRequest):
         "INDIKATOR RISIKO YANG DITEMUKAN:"
     ]
     for idx, ind in enumerate(req.indicators, start=1):
-        lines.append(f"{idx}. [{ind.impact}] {ind.title}: {ind.desc}")
+        clean_desc = mask_sensitive_data(ind.desc)
+        lines.append(f"{idx}. [{ind.impact}] {ind.title}: {clean_desc}")
 
     lines.extend([
         "------------------------------------------------------------------",
@@ -105,7 +117,8 @@ def generate_report(req: CaseReportRequest):
 
     return {
         "case_id": req.case_id,
-        "formatted_text": "\n".join(lines)
+        "formatted_text": "\n".join(lines),
+        "masked_evidence": clean_evidence
     }
 
 if __name__ == "__main__":

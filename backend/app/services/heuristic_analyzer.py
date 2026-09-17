@@ -3,6 +3,8 @@ import urllib.parse
 from datetime import datetime
 from typing import Dict, Any, List
 from ..models.schemas import AnalyzeRequest, AnalyzeResponse, Indicator, CategoryScore
+from .privacy import mask_sensitive_data
+from .url_security import validate_url_safety
 
 BANK_KEYWORDS = ["bca", "bri", "mandiri", "bni", "cimb", "bsi", "permata", "dana", "ovo", "gopay"]
 SCAM_KEYWORDS = [
@@ -15,6 +17,7 @@ LEGIT_DOMAINS = [
     "idwebhost.com", "google.com", "kemkominfo.go.id", "polri.go.id"
 ]
 SUSPICIOUS_TLDS = [".xyz", ".top", ".club", ".icu", ".site", ".online", ".live", ".work", ".click", ".buzz", ".link"]
+SHORTENER_DOMAINS = ["bit.ly", "tinyurl.com", "s.id", "t.ly", "is.gd", "cutt.ly", "linktr.ee", "rb.gy", "shorturl.at"]
 
 def analyze_heuristic(req: AnalyzeRequest) -> AnalyzeResponse:
     content = req.content.strip().lower()
@@ -26,10 +29,40 @@ def analyze_heuristic(req: AnalyzeRequest) -> AnalyzeResponse:
     confidence = 80
     summary = "Konten diperiksa melalui mesin analisis statis heuristik ScamGuard."
 
-    if req.type == "url" or content.startswith("http://") or content.startswith("https://") or any(tld in content for tld in [".com", ".id", ".co.id", ".xyz", ".online"]):
+    is_url_type = req.type == "url" or content.startswith("http://") or content.startswith("https://") or any(tld in content for tld in [".com", ".id", ".co.id", ".xyz", ".online", ".apk"])
+
+    if is_url_type:
+        # SSRF & URL Safety Validation (PRD Section 42)
+        raw_url = req.content if "://" in req.content else f"http://{req.content}"
+        is_safe_target, ssrf_msg = validate_url_safety(raw_url)
+        if not is_safe_target:
+            indicators.append(Indicator(
+                title="Akses Jaringan Terlarang (SSRF Protection)",
+                impact="KRITIS",
+                level="red",
+                desc=ssrf_msg
+            ))
+            return AnalyzeResponse(
+                case_id=case_id,
+                timestamp=datetime.now().strftime("%Y-%m-%d %H:%M:%S WIB"),
+                content_risk=98,
+                confidence=95,
+                risk_level="VERY HIGH RISK",
+                summary=f"Pemeriksaan URL dihentikan: {ssrf_msg}",
+                categories=[
+                    CategoryScore(name="Pelanggaran Keamanan Jaringan", score="98%"),
+                    CategoryScore(name="Eksploitasi SSRF", score="95%")
+                ],
+                indicators=indicators,
+                initial_exposure=10,
+                evidence_type=req.type,
+                source_model="ScamGuard Heuristic Safety Engine v2.0 (SSRF Shield)"
+            )
+
         # URL / Domain Analysis
-        parsed = urllib.parse.urlparse(req.content if "://" in req.content else f"http://{req.content}")
+        parsed = urllib.parse.urlparse(raw_url)
         hostname = (parsed.hostname or content).lower()
+        url_path = (parsed.path or "").lower()
 
         # Check if officially known legit
         is_known_legit = any(hostname == d or hostname.endswith("." + d) for d in LEGIT_DOMAINS)
@@ -61,8 +94,28 @@ def analyze_heuristic(req: AnalyzeRequest) -> AnalyzeResponse:
             has_suspicious_tld = any(hostname.endswith(tld) for tld in SUSPICIOUS_TLDS)
             is_ip_address = bool(re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$", hostname))
             has_hyphens = hostname.count("-") >= 2
+            is_shortener = any(hostname == s or hostname.endswith("." + s) for s in SHORTENER_DOMAINS)
+            has_apk_in_url = url_path.endswith(".apk") or ".apk" in content
 
             score_increment = 0
+
+            if has_apk_in_url:
+                score_increment += 55
+                indicators.append(Indicator(
+                    title="Tautan Langsung Berkas Berbahaya (.APK Malware)",
+                    impact="KRITIS",
+                    level="red",
+                    desc="Tautan mengarah langsung ke pengunduhan file aplikasi Android (.APK) di luar Google Play Store. Sangat berisiko memuat trojan pencuri SMS OTP."
+                ))
+
+            if is_shortener:
+                score_increment += 35
+                indicators.append(Indicator(
+                    title="Penggunaan Layanan Pemendek Tautan (URL Shortener)",
+                    impact="TINGGI",
+                    level="orange",
+                    desc=f"Domain '{hostname}' adalah layanan pemendek URL yang menyembunyikan alamat tujuan asli. Sering dimanfaatkan pelaku untuk mengelabui filter keamanan."
+                ))
 
             if matched_banks:
                 score_increment += 40
@@ -110,13 +163,13 @@ def analyze_heuristic(req: AnalyzeRequest) -> AnalyzeResponse:
                 ))
 
             content_risk = min(98, max(25, 20 + score_increment))
-            confidence = 86
+            confidence = 88
             
             if content_risk >= 75:
-                summary = f"Ditemukan beberapa indikator konsisten pada struktur domain '{hostname}'. Terdeteksi indikasi manipulasi reputasi dan impersonasi merek."
+                summary = f"Ditemukan beberapa indikator konsisten pada struktur target '{hostname}'. Terdeteksi indikasi manipulasi reputasi dan penipuan siber."
                 categories = [
                     CategoryScore(name="Phishing Finansial", score=f"{min(98, content_risk + 5)}%"),
-                    CategoryScore(name="Pencurian Kredensial", score=f"{min(95, content_risk)}%"),
+                    CategoryScore(name="Penyebaran Malware / APK", score=f"{min(98, content_risk + 2)}%" if has_apk_in_url else "65%"),
                     CategoryScore(name="Social Engineering", score="82%")
                 ]
             else:
@@ -127,7 +180,7 @@ def analyze_heuristic(req: AnalyzeRequest) -> AnalyzeResponse:
                 ]
 
     else:
-        # Text or Voice analysis
+        # Text, Voice, or Screenshot OCR analysis
         matched_scam_words = [w for w in SCAM_KEYWORDS if w in content]
         matched_banks = [b for b in BANK_KEYWORDS if b in content]
         has_phone_number = bool(re.search(r"(\+62|62|08)[0-9]{8,12}", content))
@@ -202,13 +255,16 @@ def analyze_heuristic(req: AnalyzeRequest) -> AnalyzeResponse:
     else:
         risk_level = "LOW RISK / SAFE"
 
+    # Apply sensitive PII masking to summary
+    clean_summary = mask_sensitive_data(summary)
+
     return AnalyzeResponse(
         case_id=case_id,
         timestamp=datetime.now().strftime("%Y-%m-%d %H:%M:%S WIB"),
         content_risk=content_risk,
         confidence=confidence,
         risk_level=risk_level,
-        summary=summary,
+        summary=clean_summary,
         categories=categories,
         indicators=indicators,
         initial_exposure=10,
