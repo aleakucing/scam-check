@@ -689,11 +689,18 @@
 
       </div>
 
-      <div class="pt-4 border-t border-[#E2E8F0] flex items-center justify-between">
+      <div class="pt-4 border-t border-[#E2E8F0] flex flex-wrap items-center justify-between gap-2">
         <span class="text-xs text-[#64748B]">ScamGuard AI • IDwebhost Hosting</span>
-        <button onclick="window.print()" class="sg-btn-primary text-xs py-2 px-4">
-          Print / Export PDF
-        </button>
+        <div class="flex items-center gap-2">
+          <button onclick="copyOfficialReport()" id="btn-copy-report" class="sg-btn-secondary text-xs py-2 px-3.5 flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            <span>Copy Text Report</span>
+          </button>
+          <button onclick="window.print()" class="sg-btn-primary text-xs py-2 px-4 flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+            <span>Print / PDF</span>
+          </button>
+        </div>
       </div>
 
     </div>
@@ -778,7 +785,22 @@
       startInvestigation();
     }
 
-    function startInvestigation() {
+    function getEvidenceInput() {
+      if (state.activeTab === 'url') {
+        return document.getElementById('input-url').value.trim() || 'https://id-bca-verifikasi-keamanan.xyz/login';
+      } else if (state.activeTab === 'text') {
+        return document.getElementById('input-text').value.trim() || 'Nasabah Yth, rekening Anda terancam diblokir. Segera konfirmasi data di https://bca-update.xyz';
+      } else if (state.activeTab === 'screenshot') {
+        return document.getElementById('input-text').value.trim() || 'Bukti tangkapan layar transaksi / pesan perbankan mencurigakan';
+      } else if (state.activeTab === 'voice') {
+        return document.getElementById('input-text').value.trim() || 
+               document.getElementById('voice-transcript-text').innerText.replace(/^"|"$/g, '').trim() ||
+               'Panggilan telepon mengatasnamakan bank meminta nomor kartu dan kode OTP verifikasi';
+      }
+      return '';
+    }
+
+    async function startInvestigation() {
       const loadingEl = document.getElementById('analysis-loading-state');
       const outputEl = document.getElementById('output-section');
       const btn = document.getElementById('btn-start-investigation');
@@ -789,9 +811,66 @@
       btn.disabled = true;
       btn.classList.add('opacity-70');
 
-      applyScenarioData(state.scenario);
+      const content = getEvidenceInput();
+      const evidenceType = state.activeTab;
 
-      // Simulate structured checklist progress
+      // Try Backend API (Docker proxy or local development)
+      let apiSuccess = false;
+      const endpoints = ['/api/analyze', 'http://localhost:8000/api/analyze'];
+
+      for (const ep of endpoints) {
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 3500);
+
+          const res = await fetch(ep, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              type: evidenceType,
+              content: content
+            }),
+            signal: controller.signal
+          });
+          clearTimeout(timeoutId);
+
+          if (res.ok) {
+            const data = await res.json();
+            state.contentRisk = data.content_risk;
+            state.confidence = data.confidence;
+            state.caseId = data.case_id;
+
+            document.getElementById('badge-case-id').innerText = data.case_id;
+            document.getElementById('modal-case-header').innerText = `${data.case_id} • September 17, 2026`;
+            document.getElementById('modal-assessment-text').innerText = data.summary;
+
+            if (data.indicators && data.indicators.length > 0) {
+              setIndicators(data.indicators.map(i => ({
+                title: i.title,
+                level: i.impact,
+                desc: i.desc
+              })));
+            }
+
+            if (data.categories && data.categories.length > 0) {
+              setCategories(data.categories);
+            }
+
+            resetInterview();
+            updateUI();
+            apiSuccess = true;
+            break;
+          }
+        } catch (err) {
+          // Try next endpoint or fall back
+        }
+      }
+
+      if (!apiSuccess) {
+        // Built-in intelligent client fallback
+        applyScenarioData(state.scenario, content);
+      }
+
       setTimeout(() => {
         loadingEl.classList.add('hidden');
         outputEl.classList.remove('hidden');
@@ -800,7 +879,7 @@
         state.hasAnalyzed = true;
 
         outputEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 500);
+      }, 450);
     }
 
     function resetToInputOnly() {
@@ -810,13 +889,29 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    function applyScenarioData(type) {
+    function applyScenarioData(type, customContent) {
       resetInterview();
+
+      if (customContent && !['bca_phishing', 'apk_undangan', 'idwebhost_legit'].includes(type)) {
+        const lower = customContent.toLowerCase();
+        if (lower.includes('bca') || lower.includes('bank') || lower.includes('bri') || lower.includes('mandiri')) {
+          type = 'bca_phishing';
+        } else if (lower.includes('apk') || lower.includes('undangan') || lower.includes('nikah')) {
+          type = 'apk_undangan';
+        } else if (lower.includes('idwebhost')) {
+          type = 'idwebhost_legit';
+        }
+      }
+
+      const caseNum = Math.floor(Math.random() * 8999 + 1000);
+      const caseId = 'SC-2026-' + caseNum;
+      document.getElementById('badge-case-id').innerText = caseId;
+      document.getElementById('modal-case-header').innerText = `${caseId} • September 17, 2026`;
 
       if (type === 'bca_phishing') {
         state.contentRisk = 82;
         state.confidence = 86;
-        document.getElementById('badge-case-id').innerText = 'SC-2026-0842';
+        document.getElementById('modal-assessment-text').innerText = 'High risk indicators detected. Domain mismatch from official bank infrastructure and credential harvesting elements.';
         setIndicators([
           { title: 'Domain mismatch', level: 'HIGH', desc: 'Domain differs from official bca.co.id organization infrastructure.' },
           { title: 'Credential harvesting form', level: 'HIGH', desc: 'Form requests card number, CVV, and PIN simultaneously.' },
@@ -831,7 +926,7 @@
       } else if (type === 'apk_undangan') {
         state.contentRisk = 94;
         state.confidence = 91;
-        document.getElementById('badge-case-id').innerText = 'SC-2026-0911';
+        document.getElementById('modal-assessment-text').innerText = 'Critical risk indicators detected. Android package (.APK) disguise with background SMS forwarding capabilities.';
         setIndicators([
           { title: 'Malicious Android package (.APK)', level: 'CRITICAL', desc: 'Message disguises executable Android payload as a digital wedding invitation.' },
           { title: 'SMS background forwarding capability', level: 'CRITICAL', desc: 'Payload requests READ_SMS and RECEIVE_SMS permissions to hijack banking OTPs.' },
@@ -845,7 +940,7 @@
       } else if (type === 'idwebhost_legit') {
         state.contentRisk = 12;
         state.confidence = 94;
-        document.getElementById('badge-case-id').innerText = 'SC-2026-0105';
+        document.getElementById('modal-assessment-text').innerText = 'Low risk. Domain and network certificates match authentic PT Web Media Technology Indonesia (IDwebhost) production infrastructure.';
         setIndicators([
           { title: 'Verified organizational domain', level: 'LOW', desc: 'TLS/SSL certificate issued officially to PT Web Media Technology Indonesia (IDwebhost).' },
           { title: 'Consistent DNS and IP routing', level: 'LOW', desc: 'Resolves directly to IDwebhost production hosting network segments.' },
@@ -854,6 +949,17 @@
         setCategories([
           { name: 'Legitimate Communication', score: 'Very High' },
           { name: 'Verified Service Provider', score: 'High' }
+        ]);
+      } else {
+        state.contentRisk = 76;
+        state.confidence = 82;
+        setIndicators([
+          { title: 'Unverified digital identity', level: 'MEDIUM', desc: 'Sender or target lacks cryptographic validation or registered institutional domain.' },
+          { title: 'High-risk interaction pattern', level: 'MEDIUM', desc: 'Prompts recipient to disclose sensitive personal data or click external redirection.' }
+        ]);
+        setCategories([
+          { name: 'Suspicious Communication', score: 'Medium' },
+          { name: 'Potential Social Engineering', score: 'Medium' }
         ]);
       }
 
@@ -867,10 +973,11 @@
       container.innerHTML = list.map(item => {
         let badgeStyle = 'bg-red-50 text-[#DC2626] border-red-200';
         let dotColor = 'bg-[#DC2626]';
-        if (item.level === 'MEDIUM') {
+        const lvl = (item.level || '').toUpperCase();
+        if (lvl === 'MEDIUM' || lvl === 'ORANGE' || lvl === 'SEDANG') {
           badgeStyle = 'bg-amber-50 text-[#B45309] border-amber-200';
           dotColor = 'bg-[#F59E0B]';
-        } else if (item.level === 'LOW') {
+        } else if (lvl === 'LOW' || lvl === 'GREEN' || lvl === 'AMAN') {
           badgeStyle = 'bg-green-50 text-[#16A34A] border-green-200';
           dotColor = 'bg-[#16A34A]';
         }
@@ -900,7 +1007,7 @@
       `).join('');
     }
 
-    function answerStep(step, val) {
+    async function answerStep(step, val) {
       if (step === 1) {
         state.answers.openedLink = val;
         const statusEl = document.getElementById('ans-1-status');
@@ -935,7 +1042,7 @@
         statusEl.className = val ? 'text-xs font-mono font-bold px-2 py-0.5 rounded bg-red-100 border border-red-300 text-[#DC2626]' : 'text-xs font-mono font-medium px-2 py-0.5 rounded bg-green-50 border border-green-200 text-[#16A34A]';
         
         if (val) {
-          state.userExposure = 85;
+          state.userExposure = 90;
         } else {
           state.userExposure = 70;
         }
@@ -943,6 +1050,72 @@
 
       updateUI();
       updateTimeline();
+
+      // Background sync with /api/interview
+      const endpoints = ['/api/interview', 'http://localhost:8000/api/interview'];
+      for (const ep of endpoints) {
+        try {
+          const resp = await fetch(ep, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              case_id: document.getElementById('badge-case-id').innerText,
+              content_risk: state.contentRisk,
+              opened_link: state.answers.openedLink,
+              entered_credentials: state.answers.enteredPassword,
+              entered_otp: state.answers.enteredOTP
+            })
+          });
+          if (resp.ok) {
+            const data = await resp.json();
+            if (data.user_exposure !== undefined) {
+              state.userExposure = data.user_exposure;
+              updateUI();
+            }
+            break;
+          }
+        } catch (e) {}
+      }
+    }
+
+    async function copyOfficialReport() {
+      const caseId = document.getElementById('badge-case-id').innerText;
+      const content = getEvidenceInput();
+      let text = `==================================================================\n`;
+      text += `             SCAMGUARD AI - LAPORAN INSIDEN RESMI                 \n`;
+      text += `==================================================================\n`;
+      text += `ID KASUS       : ${caseId}\n`;
+      text += `TANGGAL        : September 17, 2026\n`;
+      text += `TIPE BUKTI     : ${state.activeTab.toUpperCase()}\n`;
+      text += `KONTEN BUKTI   : ${content}\n`;
+      text += `------------------------------------------------------------------\n`;
+      text += `PENILAIAN TIGA DIMENSI RISIKO:\n`;
+      text += `1. Content Risk     : ${state.contentRisk} / 100\n`;
+      text += `2. Confidence Score : ${state.confidence}%\n`;
+      text += `3. User Exposure    : ${state.userExposure} / 100\n`;
+      text += `------------------------------------------------------------------\n`;
+      text += `STATUS TINDAKAN PENGGUNA:\n`;
+      text += `- Membuka Tautan     : ${state.answers.openedLink ? 'YA' : (state.answers.openedLink === false ? 'TIDAK' : 'Belum Dijawab')}\n`;
+      text += `- Input Kredensial   : ${state.answers.enteredPassword ? 'YA (KREDENSIAL DISERAHKAN)' : (state.answers.enteredPassword === false ? 'TIDAK' : 'Belum Dijawab')}\n`;
+      text += `- Input Kode OTP     : ${state.answers.enteredOTP ? 'YA (KRITIS - OTP DISERAHKAN)' : (state.answers.enteredOTP === false ? 'TIDAK' : 'Belum Dijawab')}\n`;
+      text += `------------------------------------------------------------------\n`;
+      text += `KESIMPULAN AUDIT:\n`;
+      text += `${document.getElementById('modal-assessment-text').innerText}\n`;
+      text += `==================================================================\n`;
+
+      try {
+        await navigator.clipboard.writeText(text);
+        const btn = document.getElementById('btn-copy-report');
+        if (btn) {
+          const span = btn.querySelector('span');
+          if (span) {
+            span.innerText = 'Copied to Clipboard!';
+            setTimeout(() => { span.innerText = 'Copy Text Report'; }, 2000);
+          }
+        }
+      } catch (err) {
+        alert('Laporan insiden:\n\n' + text);
+      }
     }
 
     function unlockStep(step) {
