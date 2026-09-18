@@ -49,3 +49,10 @@ __pycache__/
 venv/
 .env
 
+# Database & Persistent Store
+backend/data/
+*.db
+*.sqlite
+*.sqlite3
+
+

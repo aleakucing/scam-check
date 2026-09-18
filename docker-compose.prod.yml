@@ -5,14 +5,15 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: scamguard-backend
+    container_name: scamguard-backend-prod
     restart: unless-stopped
     environment:
-      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
       - GEMINI_MODEL=${GEMINI_MODEL:-gemini-1.5-flash}
       - PORT=8000
       - HOST=0.0.0.0
+      - ENVIRONMENT=production
     volumes:
       - scamguard_data:/app/data
     expose:
@@ -22,19 +23,31 @@ services:
       interval: 20s
       timeout: 5s
       retries: 3
+    networks:
+      - scamguard-net
 
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: scamguard-frontend
+    container_name: scamguard-frontend-prod
     restart: unless-stopped
     ports:
       - "80:80"
+      - "443:443"
     volumes:
-      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx/production.conf:/etc/nginx/conf.d/default.conf:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - certbot_data:/var/www/certbot:ro
     depends_on:
       - backend
+    networks:
+      - scamguard-net
 
 volumes:
   scamguard_data:
+  certbot_data:
+
+networks:
+  scamguard-net:
+    driver: bridge

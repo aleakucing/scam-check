@@ -43,27 +43,29 @@ Dokumentasi lengkap terkait spesifikasi produk dan sistem desain tersedia di:
 
 ```mermaid
 flowchart TD
-    User["Pengguna (Laptop / Smartphone)"] -->|HTTP / HTTPS| Nginx["Nginx Reverse Proxy (Port 80)"]
-    Nginx -->|Static Assets| Frontend["Frontend UI (HTML5, Tailwind CSS, Vanilla JS)"]
-    Nginx -->|API Requests /api/*| Backend["FastAPI Backend Service (Python 3.12, Port 8000)"]
+    User["Pengguna (Laptop / Smartphone)"] -->|HTTP / HTTPS| Nginx["Nginx Reverse Proxy (Port 80/443)"]
+    Nginx -->|Static SPA Assets| Frontend["Frontend UI (Svelte 5 Runes, Tailwind CSS, Vite)"]
+    Nginx -->|API Requests /api/*| Backend["Backend API Service (Bun 1.4 + Hono, Port 8000)"]
     
     subgraph Engine ["Intelligent Analysis Layer"]
         Backend --> Heuristic["Indonesian Cyber Heuristic Rules Engine"]
         Backend --> Gemini["Google Gemini Multimodal API (Optional)"]
         Backend --> ExposureEvaluator["User Exposure & Emergency State Machine"]
+        Backend --> SQLite["Evidence Vault (bun:sqlite WAL Mode)"]
     end
 
     Backend --> ReportGen["Official Incident Case Report Generator"]
 ```
 
-- **Frontend**: Single Page Application bebas dependensi kompilasi kompleks (HTML5, Tailwind CSS via CDN, Lucide Icons, Web Speech API).
-- **Backend API**: Python 3.12 + FastAPI + Pydantic v2 + Uvicorn.
+- **Frontend**: Svelte 5 (Runes architecture `$state`, `$derived`) + Tailwind CSS + Lucide Icons + Vite.
+- **Backend API**: Bun 1.4 Runtime + Hono v4 Framework + TypeScript + `bun:sqlite` Evidence Vault.
 - **AI & Heuristic Engine**:
   - *Primary*: Google Gemini 1.5 Flash multimodal vision & text API.
   - *Autonomous Fallback*: Built-in Indonesian Cybersecurity Heuristic Rules Engine yang tetap bekerja 100% offline tanpa ketergantungan API eksternal.
-- **Web Server & Reverse Proxy**: Nginx Alpine dengan kompresi Gzip, CORS headers, dan isolasi jaringan.
-- **Containerization**: Docker Compose untuk deployment satu perintah.
+- **Web Server & Reverse Proxy**: Nginx Alpine dengan kompresi Gzip, CORS headers, rate limiting, dan isolasi jaringan.
+- **Containerization**: Multi-stage Docker Compose untuk deployment otomatis sekali jalan.
 - **Target Infrastruktur**: IDwebhost Cloud VPS (Ubuntu 24.04 LTS, IP: `103.30.146.185`).
+- **Legacy Archive**: Implementasi awal (Python FastAPI & Vanilla HTML) tersimpan rapi di direktori `legacy/`.
 
 ---
 

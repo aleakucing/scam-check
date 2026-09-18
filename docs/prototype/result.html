@@ -1,0 +1,1555 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>Hasil Investigasi Siber - KrosCheck PRO</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "surface-dim": "#e5d3fa",
+            "surface-container-highest": "#ecdcff",
+            "secondary-container": "#c5afff",
+            "tertiary-container": "#506066",
+            "primary-container": "#681bff",
+            "on-surface-variant": "#494457",
+            "surface-bright": "#fef7ff",
+            "on-secondary-fixed-variant": "#4e3a82",
+            "status-scam-bg": "#FEECEE",
+            "status-safe-green": "#0F9D58",
+            "outline": "#7a7489",
+            "on-secondary-container": "#523e86",
+            "inverse-surface": "#372b48",
+            "surface-variant": "#ecdcff",
+            "secondary-fixed": "#e9ddff",
+            "border-subtle": "#E5E7EB",
+            "surface-tint": "#6920ff",
+            "surface-container-high": "#f1e3ff",
+            "on-tertiary": "#ffffff",
+            "surface-ice-blue": "#DDEEF5",
+            "primary-fixed-dim": "#cdbdff",
+            "on-secondary": "#ffffff",
+            "surface": "#fef7ff",
+            "surface-container": "#f5eaff",
+            "tertiary": "#39484e",
+            "inverse-primary": "#cdbdff",
+            "primary-fixed": "#e8deff",
+            "on-error": "#ffffff",
+            "error-container": "#ffdad6",
+            "status-safe-bg": "#E6F4EA",
+            "on-tertiary-fixed-variant": "#3a494f",
+            "outline-variant": "#cbc3da",
+            "on-primary-fixed-variant": "#5000d0",
+            "on-primary-container": "#dcd0ff",
+            "on-secondary-fixed": "#210754",
+            "on-background": "#211632",
+            "on-tertiary-container": "#c9dae1",
+            "on-primary": "#ffffff",
+            "on-primary-fixed": "#20005f",
+            "tertiary-fixed-dim": "#b8c9d0",
+            "brand-violet-hover": "#5512D6",
+            "on-error-container": "#93000a",
+            "on-surface": "#211632",
+            "surface-container-lowest": "#ffffff",
+            "on-tertiary-fixed": "#0e1e23",
+            "brand-violet-vibrant": "#681BFF",
+            "primary": "#4e00cd",
+            "border-purple-subtle": "#EBE4FF",
+            "error": "#ba1a1a",
+            "surface-container-low": "#faf0ff",
+            "tertiary-fixed": "#d4e5ec",
+            "brand-indigo-hero": "#1C004F",
+            "background": "#fef7ff",
+            "secondary": "#66529b",
+            "secondary-fixed-dim": "#cfbcff",
+            "inverse-on-surface": "#f8edff",
+            "status-scam-red": "#E52534"
+          },
+          borderRadius: {
+            DEFAULT: "1rem",
+            lg: "1.5rem",
+            xl: "2rem",
+            full: "9999px"
+          },
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    @layer base {
+      html, body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+      }
+    }
+    .sg-card {
+      background-color: #FFFFFF;
+      border-radius: 1.25rem;
+      box-shadow: 0 4px 20px -2px rgba(28, 0, 79, 0.05);
+      transition: all 0.2s ease-in-out;
+    }
+    .sg-btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 9999px;
+      background-color: #F8FAFC;
+      border: 1px solid #E2E8F0;
+      color: #1C004F;
+      font-weight: 600;
+      font-size: 0.8125rem;
+      transition: all 0.15s ease;
+      cursor: pointer;
+    }
+    .sg-btn-secondary:hover {
+      background-color: #F1EAFF;
+      border-color: #C5AFFF;
+      color: #4E00CD;
+    }
+    .checklist-done-text {
+      text-decoration: line-through;
+      color: #94A3B8;
+    }
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #print-area, #print-area * {
+        visibility: visible;
+      }
+      #print-area {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body class="min-h-screen flex flex-col bg-surface text-on-surface antialiased">
+
+  <!-- STICKY SITE HEADER -->
+  <header class="sticky top-0 z-40 bg-surface-container-lowest/95 backdrop-blur-xl border-b border-border-subtle shadow-xs">
+    <div class="max-w-[1280px] mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      
+      <!-- Left: Brand Logo & Back to Home -->
+      <div class="flex items-center gap-4">
+        <a href="landingpage.html" class="flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors text-xs sm:text-sm font-semibold py-1.5 px-3 rounded-full hover:bg-surface-container-low" title="Kembali ke Beranda">
+          <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+          <span class="hidden sm:inline">Kembali</span>
+        </a>
+
+        <div class="h-5 w-[1px] bg-border-subtle hidden sm:block"></div>
+
+        <a href="landingpage.html" class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-full bg-brand-violet-vibrant text-on-primary flex items-center justify-center font-bold shadow-xs shrink-0">
+            <span class="material-symbols-outlined text-[18px]">verified_user</span>
+          </div>
+          <div class="flex flex-col">
+            <div class="flex items-center gap-1.5">
+              <span class="font-bold text-base text-brand-indigo-hero leading-tight">KrosCheck</span>
+              <span class="px-1.5 py-0.2 rounded bg-surface-container text-primary text-[10px] font-bold">PRO</span>
+            </div>
+            <span class="text-[10px] text-on-surface-variant leading-none">Cyber Threat Investigation</span>
+          </div>
+        </a>
+      </div>
+
+      <!-- Right: Navigation & Actions -->
+      <div class="flex items-center gap-2.5">
+        <button onclick="openModal('modal-case-history')" class="sg-btn-secondary text-xs py-1.5 px-3">
+          <span class="material-symbols-outlined text-[16px]">history</span>
+          <span class="hidden sm:inline">Riwayat</span>
+          <span id="badge-history-count" class="px-1.5 py-0.2 rounded-full bg-surface-container text-primary font-mono text-[10px] font-bold">0</span>
+        </button>
+
+        <a href="landingpage.html" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-brand-violet-vibrant text-on-primary text-xs font-bold hover:bg-brand-violet-hover transition shadow-xs">
+          <span class="material-symbols-outlined text-[16px]">add</span>
+          <span>Periksa Baru</span>
+        </a>
+
+        <a href="tel:1500888" class="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-status-scam-bg text-status-scam-red text-xs font-bold hover:bg-red-100 transition border border-red-200">
+          <span class="material-symbols-outlined text-[16px]">emergency</span>
+          <span>Hotline 1500888</span>
+        </a>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="flex-1 max-w-[1240px] w-full mx-auto px-4 sm:px-6 py-8" id="investigation-view">
+    
+    <!-- SKELETON / LOADING STATE -->
+    <div id="loading-state" class="py-16 text-center max-w-lg mx-auto space-y-6">
+      <div class="w-16 h-16 rounded-full bg-surface-container-high mx-auto flex items-center justify-center relative">
+        <span class="material-symbols-outlined text-brand-violet-vibrant text-[36px] animate-pulse">security</span>
+        <span class="absolute inset-0 rounded-full border-2 border-brand-violet-vibrant border-t-transparent animate-spin"></span>
+      </div>
+      <div>
+        <h2 class="text-xl font-bold text-brand-indigo-hero">Sedang Menganalisis Bukti Siber...</h2>
+        <p class="text-xs text-on-surface-variant mt-1">Memproses verifikasi tanda tangan digital, heuristik ancaman, dan pemindaian AI.</p>
+      </div>
+
+      <div class="p-4 rounded-xl bg-surface-container-low text-left space-y-2 text-xs font-mono">
+        <div class="flex items-center gap-2 text-status-safe-green">
+          <span class="material-symbols-outlined text-[16px]">check_circle</span>
+          <span>1. Normalisasi teks bukti & de-obfuscation URL</span>
+        </div>
+        <div class="flex items-center gap-2 text-status-safe-green">
+          <span class="material-symbols-outlined text-[16px]">check_circle</span>
+          <span>2. Pengecekan reputasi host & TLD berisiko (.xyz, .top)</span>
+        </div>
+        <div class="flex items-center gap-2 text-brand-violet-vibrant font-bold">
+          <span class="material-symbols-outlined text-[16px] animate-spin">progress_activity</span>
+          <span>3. Evaluasi rekayasa sosial & manipulasi urgensi...</span>
+        </div>
+        <div class="flex items-center gap-2 text-on-surface-variant/60">
+          <span class="material-symbols-outlined text-[16px]">radio_button_unchecked</span>
+          <span>4. Kalkulasi Matriks Risiko Tiga Dimensi (3D)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- REPORT CARD & AUDIT METADATA HEADER -->
+    <div id="results-content" class="hidden space-y-8">
+      
+      <!-- EVIDENCE BANNER -->
+      <div class="sg-card p-6 border border-border-subtle bg-white">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-border-subtle">
+          <div class="space-y-1">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="font-mono font-bold text-sm text-primary px-2.5 py-0.5 rounded-full bg-surface-container" id="badge-case-id">KC-2026-0842</span>
+              <span class="px-2.5 py-0.5 rounded-full bg-status-safe-bg text-status-safe-green text-xs font-bold" id="badge-audit-status">TERVERIFIKASI SISTEM</span>
+              <span class="text-xs text-on-surface-variant font-mono" id="audit-timestamp">September 17, 2026 • 20:00 WIB</span>
+            </div>
+            <h1 class="text-xl sm:text-2xl font-bold text-brand-indigo-hero">
+              Laporan Hasil Investigasi Ancaman Siber
+            </h1>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2">
+            <button onclick="toggleAudioNarration()" id="btn-audio-narrator" class="sg-btn-secondary">
+              <span class="material-symbols-outlined text-[16px] text-brand-violet-vibrant">volume_up</span>
+              <span id="btn-audio-text">Dengarkan Audio</span>
+            </button>
+            <button onclick="printReport()" class="sg-btn-secondary">
+              <span class="material-symbols-outlined text-[16px]">print</span>
+              <span>Cetak PDF</span>
+            </button>
+            <button onclick="shareToFamilyWhatsApp()" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#25D366] text-white text-xs font-bold hover:bg-[#1EBE5D] transition shadow-xs">
+              <span class="material-symbols-outlined text-[16px]">share</span>
+              <span>Kirim ke WA Keluarga</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Evidence Summary Box -->
+        <div class="mt-4 p-4 rounded-xl bg-surface-container-low border border-surface-container flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="flex items-start gap-3 truncate">
+            <div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-primary shrink-0 mt-0.5">
+              <span class="material-symbols-outlined text-[20px]" id="evidence-icon">link</span>
+            </div>
+            <div class="truncate">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant block">Bukti yang Diperiksa (<span id="evidence-type-label">URL</span>):</span>
+              <strong class="text-xs sm:text-sm font-mono text-brand-indigo-hero block truncate mt-0.5" id="evidence-content-display">
+                https://id-bca-verifikasi-keamanan.xyz/login
+              </strong>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2 shrink-0">
+            <button onclick="copyEvidenceText()" class="text-xs text-primary hover:underline font-semibold flex items-center gap-1">
+              <span class="material-symbols-outlined text-[14px]">content_copy</span>
+              <span>Salin</span>
+            </button>
+            <a href="landingpage.html" class="text-xs text-on-surface-variant hover:text-primary font-semibold flex items-center gap-1 ml-2">
+              <span class="material-symbols-outlined text-[14px]">edit</span>
+              <span>Ganti Input</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- THREE CORE METRIC CARDS (3-DIMENSIONAL MATRIX) -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        <!-- CARD 1: CONTENT RISK SCORE -->
+        <div class="sg-card p-6 border border-border-subtle flex flex-col justify-between" id="card-content-risk">
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Content Risk (Bahaya Konten)</span>
+              <span class="material-symbols-outlined text-status-scam-red text-[20px]">security</span>
+            </div>
+            
+            <div class="flex items-baseline mt-3">
+              <span class="text-[64px] font-extrabold leading-none tracking-tight text-status-scam-red" id="val-content-risk">82</span>
+              <span class="text-xl font-medium text-on-surface-variant/60 ml-2">/ 100</span>
+            </div>
+
+            <div class="mt-3">
+              <span class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide bg-status-scam-bg text-status-scam-red border border-red-200" id="badge-content-risk">
+                VERY HIGH RISK
+              </span>
+            </div>
+          </div>
+
+          <div class="mt-6 pt-4 border-t border-border-subtle text-xs text-on-surface-variant">
+            <p id="desc-content-risk" class="leading-relaxed">
+              Konten mengandung indikator rekayasa sosial, manipulasi urgensi, atau file berbahaya (.APK) yang mengancam data pengguna.
+            </p>
+          </div>
+        </div>
+
+        <!-- CARD 2: CONFIDENCE SCORE -->
+        <div class="sg-card p-6 border border-border-subtle flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Confidence (Tingkat Keyakinan)</span>
+              <span class="material-symbols-outlined text-primary text-[20px]">verified</span>
+            </div>
+            
+            <div class="flex items-baseline mt-3">
+              <span class="text-[64px] font-extrabold leading-none tracking-tight text-primary" id="val-confidence">92%</span>
+            </div>
+
+            <div class="mt-3">
+              <span class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide bg-surface-container text-primary border border-purple-subtle" id="badge-confidence">
+                KEYAKINAN TINGGI
+              </span>
+            </div>
+          </div>
+
+          <div class="mt-6 pt-4 border-t border-border-subtle text-xs text-on-surface-variant">
+            <p class="leading-relaxed">
+              Kualitas bukti digital terverifikasi dengan korelasi database pola serangan siber Indonesia.
+            </p>
+          </div>
+        </div>
+
+        <!-- CARD 3: USER EXPOSURE SCORE -->
+        <div class="sg-card p-6 border border-border-subtle flex flex-col justify-between" id="card-user-exposure">
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">User Exposure (Paparan Akun)</span>
+              <span class="material-symbols-outlined text-amber-500 text-[20px]">account_box</span>
+            </div>
+            
+            <div class="flex items-baseline mt-3">
+              <span class="text-[64px] font-extrabold leading-none tracking-tight text-amber-500" id="val-user-exposure">10</span>
+              <span class="text-xl font-medium text-on-surface-variant/60 ml-2">/ 100</span>
+            </div>
+
+            <div class="mt-3">
+              <span class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide bg-status-safe-bg text-status-safe-green border border-green-200" id="badge-user-exposure">
+                PAPARAN MINIMAL
+              </span>
+            </div>
+          </div>
+
+          <div class="mt-6 pt-4 border-t border-border-subtle text-xs text-on-surface-variant">
+            <p class="leading-relaxed" id="desc-user-exposure">
+              Anda baru menerima pesan dan belum berinteraksi atau memasukkan kredensial rahasia.
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- WHY THIS SCORE & CATEGORIES -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- LEFT: WHY THIS SCORE (8 Cols) -->
+        <div class="lg:col-span-8 sg-card p-6 border border-border-subtle">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-brand-violet-vibrant text-[22px]">manage_search</span>
+              <h3 class="text-lg font-bold text-brand-indigo-hero">Mengapa Skor Ini Diberikan?</h3>
+            </div>
+            <span class="text-xs font-mono font-semibold text-on-surface-variant px-2.5 py-0.5 rounded-full bg-surface-container" id="badge-indicator-count">3 Indikator Teridentifikasi</span>
+          </div>
+
+          <div class="space-y-3" id="indicator-list">
+            <!-- Dynamic Indicators rendered via JS -->
+          </div>
+        </div>
+
+        <!-- RIGHT: THREAT CATEGORIES & CALLOUT (4 Cols) -->
+        <div class="lg:col-span-4 sg-card p-6 border border-border-subtle flex flex-col justify-between">
+          <div>
+            <div class="flex items-center gap-2 mb-3">
+              <span class="material-symbols-outlined text-primary text-[20px]">category</span>
+              <h3 class="text-xs font-bold uppercase tracking-wider text-on-surface-variant">
+                Kategori & Pola Ancaman
+              </h3>
+            </div>
+            <div class="space-y-2" id="category-list">
+              <!-- Dynamic Categories rendered via JS -->
+            </div>
+          </div>
+
+          <div class="mt-6 p-4 rounded-xl bg-surface-container-low border border-surface-container text-xs text-on-surface-variant">
+            <span class="font-bold text-brand-indigo-hero block mb-1">Penting:</span>
+            <span>Klasifikasi ini dirancang untuk mendeteksi penipuan sejak dini sebelum transaksi perbankan atau pembobolan akun terjadi.</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ADAPTIVE INTERVIEW & SENIOR OPERATOR -->
+      <div class="sg-card p-6 border border-border-subtle">
+        
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border-subtle">
+          <div>
+            <div class="flex items-center gap-1.5 text-primary text-xs font-bold uppercase tracking-wider">
+              <span class="material-symbols-outlined text-[16px]">quiz</span>
+              <span>Wawancara Risiko Bertingkat</span>
+            </div>
+            <h3 class="text-lg font-bold text-brand-indigo-hero mt-0.5">
+              Apakah Anda Sudah Sempat Berinteraksi Dengan Pelaku?
+            </h3>
+            <p class="text-xs text-on-surface-variant">
+              Jawab pertanyaan berikut untuk mengevaluasi apakah akun bank atau password Anda sedang terancam.
+            </p>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <button onclick="openOperatorModal()" class="px-4 py-2 rounded-full bg-brand-violet-vibrant hover:bg-brand-violet-hover text-on-primary text-xs font-bold flex items-center gap-2 transition shadow-md cursor-pointer active:scale-95">
+              <span class="material-symbols-outlined text-[18px]">phone_in_talk</span>
+              <span>📞 Buka Panggilan Suara Lansia</span>
+            </button>
+            <div class="text-xs font-mono text-on-surface-variant">
+              <span>Progres:</span>
+              <strong class="text-brand-indigo-hero" id="interview-progress-text">0 / 3</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Question Stack -->
+        <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+          
+          <!-- Question 1 -->
+          <div class="p-4 rounded-xl bg-surface-container-low border border-border-subtle flex flex-col justify-between" id="step-1-box">
+            <div>
+              <div class="flex items-center justify-between">
+                <span class="text-[10px] font-bold uppercase text-on-surface-variant tracking-wider">Langkah 1</span>
+                <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-white border border-border-subtle text-on-surface-variant" id="ans-1-status">Menunggu</span>
+              </div>
+              <h4 class="text-xs font-bold text-brand-indigo-hero mt-2">Membuka Tautan / Berkas?</h4>
+              <p class="text-xs text-on-surface-variant mt-1">Apakah Anda sempat mengklik link atau mengunduh berkas yang dikirimkan?</p>
+            </div>
+            <div class="mt-4 flex gap-2">
+              <button onclick="answerStep(1, true)" id="btn-step1-yes" class="sg-btn-secondary text-xs flex-1 py-1.5">Ya, Dibuka</button>
+              <button onclick="answerStep(1, false)" id="btn-step1-no" class="sg-btn-secondary text-xs flex-1 py-1.5">Tidak</button>
+            </div>
+          </div>
+
+          <!-- Question 2 -->
+          <div class="p-4 rounded-xl bg-surface-container-low border border-border-subtle flex flex-col justify-between opacity-40 pointer-events-none transition-opacity" id="step-2-box">
+            <div>
+              <div class="flex items-center justify-between">
+                <span class="text-[10px] font-bold uppercase text-on-surface-variant tracking-wider">Langkah 2</span>
+                <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-white border border-border-subtle text-on-surface-variant" id="ans-2-status">Terkunci</span>
+              </div>
+              <h4 class="text-xs font-bold text-brand-indigo-hero mt-2">Memasukkan Data / Password?</h4>
+              <p class="text-xs text-on-surface-variant mt-1">Apakah Anda sempat mengetik nomor kartu ATM, PIN, username m-Banking, atau password?</p>
+            </div>
+            <div class="mt-4 flex gap-2">
+              <button onclick="answerStep(2, true)" id="btn-step2-yes" class="sg-btn-secondary text-xs flex-1 py-1.5 text-status-scam-red">Ya, Diisi</button>
+              <button onclick="answerStep(2, false)" id="btn-step2-no" class="sg-btn-secondary text-xs flex-1 py-1.5">Tidak</button>
+            </div>
+          </div>
+
+          <!-- Question 3 -->
+          <div class="p-4 rounded-xl bg-surface-container-low border border-border-subtle flex flex-col justify-between opacity-40 pointer-events-none transition-opacity" id="step-3-box">
+            <div>
+              <div class="flex items-center justify-between">
+                <span class="text-[10px] font-bold uppercase text-on-surface-variant tracking-wider">Langkah 3 (Kritis)</span>
+                <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-white border border-border-subtle text-on-surface-variant" id="ans-3-status">Terkunci</span>
+              </div>
+              <h4 class="text-xs font-bold text-brand-indigo-hero mt-2">Menyerahkan Kode SMS / OTP?</h4>
+              <p class="text-xs text-on-surface-variant mt-1">Apakah Anda sempat membacakan atau memasukkan kode OTP rahasia yang dikirim via SMS?</p>
+            </div>
+            <div class="mt-4 flex gap-2">
+              <button onclick="answerStep(3, true)" id="btn-step3-yes" class="sg-btn-secondary text-xs flex-1 py-1.5 font-bold text-status-scam-red">Ya, Diberikan</button>
+              <button onclick="answerStep(3, false)" id="btn-step3-no" class="sg-btn-secondary text-xs flex-1 py-1.5">Tidak</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- EMERGENCY MITIGATION CHECKLIST & HOTLINES -->
+      <div class="sg-card p-6 border border-border-subtle" id="section-mitigations">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-border-subtle">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-status-safe-bg text-status-safe-green border border-green-200" id="badge-emergency-state">
+                PANDUAN PENCEGAHAN
+              </span>
+              <span class="text-xs text-on-surface-variant font-mono" id="checklist-progress-text">0 / 3 Dilakukan</span>
+            </div>
+            <h3 class="text-lg font-bold text-brand-indigo-hero mt-1" id="emergency-title">
+              Rekomendasi Tindakan Mandiri
+            </h3>
+            <p class="text-xs text-on-surface-variant" id="emergency-subtitle">
+              Ikuti panduan berikut untuk mencegah paparan kejahatan siber lebih lanjut:
+            </p>
+          </div>
+
+          <!-- Quick Hotline Buttons -->
+          <div class="flex items-center gap-1.5 flex-wrap">
+            <a href="tel:1500888" class="px-3 py-1.5 rounded-lg bg-surface-container-low hover:bg-surface-container text-xs font-bold text-brand-indigo-hero border border-border-subtle flex items-center gap-1">
+              <span class="material-symbols-outlined text-[16px] text-primary">call</span>
+              <span>HaloBCA (1500888)</span>
+            </a>
+            <a href="tel:14017" class="px-3 py-1.5 rounded-lg bg-surface-container-low hover:bg-surface-container text-xs font-bold text-brand-indigo-hero border border-border-subtle flex items-center gap-1">
+              <span class="material-symbols-outlined text-[16px] text-primary">call</span>
+              <span>BRI (14017)</span>
+            </a>
+            <a href="tel:14000" class="px-3 py-1.5 rounded-lg bg-surface-container-low hover:bg-surface-container text-xs font-bold text-brand-indigo-hero border border-border-subtle flex items-center gap-1">
+              <span class="material-symbols-outlined text-[16px] text-primary">call</span>
+              <span>Mandiri (14000)</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="mt-6 space-y-3" id="action-checklist">
+          <!-- Dynamic Checklist Items -->
+        </div>
+      </div>
+
+      <!-- INCIDENT TIMELINE -->
+      <div class="sg-card p-6 border border-border-subtle">
+        <div class="flex items-center gap-2 mb-4">
+          <span class="material-symbols-outlined text-primary text-[20px]">timeline</span>
+          <h3 class="text-sm font-bold uppercase tracking-wider text-brand-indigo-hero">
+            Kronologi Audit & Rekam Insiden
+          </h3>
+        </div>
+        <div class="relative pl-6 space-y-4 border-l-2 border-border-subtle text-xs" id="timeline-container">
+          <!-- Dynamic Timeline Items -->
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: INTERACTIVE SENIOR PHONE OPERATOR (Ramah Lansia 1-per-1)           -->
+  <!-- ========================================================================= -->
+  <div id="modal-phone-operator" class="fixed inset-0 z-50 bg-brand-indigo-hero/70 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="bg-white max-w-lg w-full rounded-2xl p-6 sm:p-8 shadow-2xl space-y-6 border border-purple-subtle relative animate-in fade-in zoom-in duration-200">
+      
+      <!-- Top Call Banner -->
+      <div class="flex items-center justify-between pb-4 border-b border-border-subtle">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-full bg-status-safe-bg text-status-safe-green flex items-center justify-center animate-pulse shadow-inner">
+            <span class="material-symbols-outlined text-[28px]">support_agent</span>
+          </div>
+          <div>
+            <span class="text-[11px] font-bold text-status-safe-green uppercase tracking-wider flex items-center gap-1">
+              <span class="w-2 h-2 rounded-full bg-status-safe-green animate-ping"></span>
+              Panggilan Bantuan Aktif
+            </span>
+            <h3 class="text-base font-bold text-brand-indigo-hero">Operator Panduan ScamGuard</h3>
+          </div>
+        </div>
+
+        <button onclick="closeOperatorModal()" class="w-8 h-8 rounded-full bg-surface-container hover:bg-surface-container-high flex items-center justify-center text-on-surface-variant transition">
+          <span class="material-symbols-outlined text-[18px]">close</span>
+        </button>
+      </div>
+
+      <!-- VIEW 1: QUESTION STEP -->
+      <div id="operator-view-question" class="space-y-6">
+        <div>
+          <span class="px-3 py-1 rounded-full bg-surface-container text-primary font-mono text-xs font-bold" id="operator-step-badge">
+            Pertanyaan 1 dari 3
+          </span>
+          <h2 class="text-xl sm:text-2xl font-extrabold text-brand-indigo-hero mt-3 leading-snug" id="operator-question-text">
+            Apakah Bapak/Ibu sempat menekan atau membuka tautan yang dikirimkan ini?
+          </h2>
+          <p class="text-xs text-on-surface-variant mt-2 leading-relaxed" id="operator-question-sub">
+            Pilih salah satu tombol di bawah sesuai kejadian sebenarnya:
+          </p>
+        </div>
+
+        <!-- Audio Speaking Wave Animation -->
+        <div id="operator-speech-wave" class="hidden p-2.5 rounded-lg bg-surface-container-low border border-border-subtle flex items-center justify-center gap-2 text-primary text-xs font-semibold">
+          <span class="material-symbols-outlined text-[18px] animate-spin">graphic_eq</span>
+          <span>Operator sedang membacakan pertanyaan...</span>
+        </div>
+
+        <!-- Big Touch Friendly Buttons -->
+        <div class="grid grid-cols-1 gap-3 pt-2">
+          <button onclick="handleOperatorAnswer(true)" class="w-full py-4 px-6 rounded-xl bg-status-scam-bg hover:bg-red-100 text-status-scam-red border border-red-200 font-bold text-base flex items-center justify-between transition shadow-xs active:scale-[0.99] cursor-pointer">
+            <span id="operator-text-yes">Ya, Tautan Sempat Saya Buka</span>
+            <span class="material-symbols-outlined text-[24px]">arrow_forward</span>
+          </button>
+          <button onclick="handleOperatorAnswer(false)" class="w-full py-4 px-6 rounded-xl bg-status-safe-bg hover:bg-green-100 text-status-safe-green border border-green-200 font-bold text-base flex items-center justify-between transition shadow-xs active:scale-[0.99] cursor-pointer">
+            <span id="operator-text-no">Tidak, Belum Pernah Dibuka</span>
+            <span class="material-symbols-outlined text-[24px]">check</span>
+          </button>
+        </div>
+
+        <div class="flex items-center justify-between pt-2 text-xs text-on-surface-variant">
+          <button onclick="speakCurrentOperatorQuestion()" class="text-primary hover:underline font-semibold flex items-center gap-1">
+            <span class="material-symbols-outlined text-[16px]">replay</span>
+            <span>Ulangi Suara</span>
+          </button>
+          <span>Pemeriksaan Terenkripsi & Rahasia</span>
+        </div>
+      </div>
+
+      <!-- VIEW 2: EMERGENCY RESPONSE (OTP / Password Leaked) -->
+      <div id="operator-view-emergency" class="hidden space-y-6">
+        <div class="p-4 rounded-xl bg-status-scam-bg border border-red-300 text-center space-y-2">
+          <div class="w-14 h-14 mx-auto rounded-full bg-red-600 text-white flex items-center justify-center shadow-lg animate-bounce">
+            <span class="material-symbols-outlined text-[32px]">warning</span>
+          </div>
+          <h3 class="text-lg font-extrabold text-status-scam-red">Peringatan Kritis! Rekening Berisiko Dibobol</h3>
+          <p class="text-xs text-on-surface-variant leading-relaxed">
+            Data rahasia atau kode OTP sempat diserahkan. Pelaku sedang mencoba mengambil alih saldo rekening bank Anda sekarang!
+          </p>
+        </div>
+
+        <div class="space-y-2">
+          <span class="text-xs font-bold text-brand-indigo-hero uppercase tracking-wider block">Tekan untuk Telepon Darurat Bank Sekarang:</span>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <a href="tel:1500888" class="p-3 rounded-xl bg-surface-container-low border border-border-subtle hover:border-primary flex items-center justify-between text-xs font-bold text-brand-indigo-hero transition">
+              <span>HaloBCA (1500888)</span>
+              <span class="material-symbols-outlined text-primary text-[18px]">call</span>
+            </a>
+            <a href="tel:14017" class="p-3 rounded-xl bg-surface-container-low border border-border-subtle hover:border-primary flex items-center justify-between text-xs font-bold text-brand-indigo-hero transition">
+              <span>Contact BRI (14017)</span>
+              <span class="material-symbols-outlined text-primary text-[18px]">call</span>
+            </a>
+            <a href="tel:14000" class="p-3 rounded-xl bg-surface-container-low border border-border-subtle hover:border-primary flex items-center justify-between text-xs font-bold text-brand-indigo-hero transition">
+              <span>Mandiri Call (14000)</span>
+              <span class="material-symbols-outlined text-primary text-[18px]">call</span>
+            </a>
+            <a href="tel:1500046" class="p-3 rounded-xl bg-surface-container-low border border-border-subtle hover:border-primary flex items-center justify-between text-xs font-bold text-brand-indigo-hero transition">
+              <span>BNI Call (1500046)</span>
+              <span class="material-symbols-outlined text-primary text-[18px]">call</span>
+            </a>
+          </div>
+        </div>
+
+        <button onclick="closeOperatorModal()" class="w-full py-3 rounded-xl bg-brand-indigo-hero text-on-primary font-bold text-xs hover:bg-brand-violet-vibrant transition">
+          Buka Langkah Mitigasi Lengkap di Layar
+        </button>
+      </div>
+
+      <!-- VIEW 3: SAFE RESPONSE -->
+      <div id="operator-view-safe" class="hidden space-y-6 text-center">
+        <div class="w-14 h-14 mx-auto rounded-full bg-status-safe-bg text-status-safe-green flex items-center justify-center shadow-lg">
+          <span class="material-symbols-outlined text-[32px]">verified</span>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold text-status-safe-green">Pemeriksaan Selesai • Rekening Anda Aman</h3>
+          <p class="text-xs text-on-surface-variant mt-1 leading-relaxed">
+            Bapak/Ibu belum pernah memasukkan password atau menyerahkan kode OTP. Rekening Anda aman dari pembobolan. Hapus dan abaikan pesan penipuan tersebut.
+          </p>
+        </div>
+        <button onclick="closeOperatorModal()" class="w-full py-3 rounded-xl bg-brand-violet-vibrant text-on-primary font-bold text-xs hover:bg-brand-violet-hover transition">
+          Tutup & Kembali ke Hasil Laporan
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: CASE HISTORY (Riwayat Kasus)                                       -->
+  <!-- ========================================================================= -->
+  <div id="modal-case-history" class="fixed inset-0 z-50 bg-brand-indigo-hero/60 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white max-w-lg w-full rounded-2xl p-6 shadow-2xl flex flex-col gap-4 border border-border-subtle">
+      <div class="flex items-center justify-between pb-3 border-b border-border-subtle">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary text-[22px]">history</span>
+          <h3 class="text-base font-bold text-brand-indigo-hero">Riwayat Pemeriksaan di Perangkat Ini</h3>
+        </div>
+        <button onclick="closeModal('modal-case-history')" class="text-on-surface-variant hover:text-on-surface">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <div class="max-h-[360px] overflow-y-auto space-y-2.5" id="history-items-container">
+        <!-- Dynamic History Items -->
+      </div>
+
+      <div class="flex items-center justify-between pt-3 border-t border-border-subtle">
+        <button onclick="clearAllHistory()" class="text-xs text-status-scam-red hover:underline font-semibold">
+          Hapus Riwayat
+        </button>
+        <button onclick="closeModal('modal-case-history')" class="sg-btn-secondary text-xs">
+          Tutup
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- TOAST NOTIFICATION CONTAINER                                              -->
+  <!-- ========================================================================= -->
+  <div id="toast-notice" class="fixed bottom-6 right-6 z-50 bg-brand-indigo-hero text-on-primary px-4 py-3 rounded-xl text-xs font-semibold shadow-2xl transition-all duration-200 flex items-center gap-2 opacity-0 pointer-events-none">
+    <span class="material-symbols-outlined text-[18px] text-primary-fixed-dim" id="toast-icon">info</span>
+    <span id="toast-message">Pesan notifikasi</span>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- JAVASCRIPT APP LOGIC                                                      -->
+  <!-- ========================================================================= -->
+  <script>
+    // State management
+    const state = {
+      caseId: 'KC-2026-0842',
+      contentRisk: 82,
+      confidence: 92,
+      userExposure: 10,
+      evidenceType: 'url',
+      evidenceContent: '',
+      uploadedImageBase64: null,
+      answers: {
+        openedLink: null,
+        enteredPassword: null,
+        enteredOTP: null
+      },
+      completedMitigations: {},
+      timelineEvents: [],
+      isSpeaking: false
+    };
+
+    // Sensitive Data Masking Helper (PII Privacy in Browser)
+    function maskSensitiveData(text) {
+      if (!text) return '';
+      let masked = text;
+      // Phone numbers
+      masked = masked.replace(/(\+?62|08)(\d{2,4})[-. ]?(\d{2,4})[-. ]?(\d{3,4})/g, (m, p1, p2, p3, p4) => {
+        return `${p1}${p2}-****-${p4.slice(-2)}`;
+      });
+      // 16-digit ATM card
+      masked = masked.replace(/\b(\d{4})[-. ]?(\d{4})[-. ]?(\d{4})[-. ]?(\d{4})\b/g, (m, c1, c2, c3, c4) => {
+        return `${c1} **** **** ${c4}`;
+      });
+      // OTP / PIN
+      masked = masked.replace(/\b(otp\s*[:=]?\s*|pin\s*[:=]?\s*|kode\s*verifikasi\s*[:=]?\s*)(\d{4,6})\b/gi, (m, p, d) => {
+        return p + '*'.repeat(d.length);
+      });
+      return masked;
+    }
+
+    // Modal helpers
+    function openModal(id) {
+      const el = document.getElementById(id);
+      if (el) {
+        el.classList.remove('hidden');
+        el.classList.add('flex');
+      }
+    }
+
+    function closeModal(id) {
+      const el = document.getElementById(id);
+      if (el) {
+        el.classList.add('hidden');
+        el.classList.remove('flex');
+      }
+    }
+
+    // Toast Notice
+    function showToast(msg, type = 'info') {
+      const toast = document.getElementById('toast-notice');
+      const text = document.getElementById('toast-message');
+      const icon = document.getElementById('toast-icon');
+      if (!toast || !text) return;
+
+      text.innerText = msg;
+      if (type === 'error') {
+        icon.innerText = 'error';
+        toast.className = 'fixed bottom-6 right-6 z-50 bg-status-scam-red text-white px-4 py-3 rounded-xl text-xs font-bold shadow-2xl flex items-center gap-2 opacity-100';
+      } else if (type === 'success') {
+        icon.innerText = 'check_circle';
+        toast.className = 'fixed bottom-6 right-6 z-50 bg-status-safe-green text-white px-4 py-3 rounded-xl text-xs font-bold shadow-2xl flex items-center gap-2 opacity-100';
+      } else {
+        icon.innerText = 'info';
+        toast.className = 'fixed bottom-6 right-6 z-50 bg-brand-indigo-hero text-white px-4 py-3 rounded-xl text-xs font-semibold shadow-2xl flex items-center gap-2 opacity-100';
+      }
+
+      setTimeout(() => {
+        toast.classList.remove('opacity-100');
+        toast.classList.add('opacity-0', 'pointer-events-none');
+      }, 3500);
+    }
+
+    // Dynamic Heuristic Fallback Engine
+    function analyzeDynamicHeuristic(content, type) {
+      const lower = (content || '').toLowerCase();
+      let contentRisk = 20;
+      let confidence = 85;
+      let indicators = [];
+      let categories = [];
+      let summary = "";
+
+      const banks = [
+        { key: 'bca', name: 'Bank BCA', legit: 'bca.co.id' },
+        { key: 'bri', name: 'Bank BRI', legit: 'bri.co.id' },
+        { key: 'mandiri', name: 'Bank Mandiri', legit: 'bankmandiri.co.id' },
+        { key: 'bni', name: 'Bank BNI', legit: 'bni.co.id' },
+        { key: 'dana', name: 'DANA Wallet', legit: 'dana.id' }
+      ];
+
+      const matchedBank = banks.find(b => lower.includes(b.key));
+      const isLegitBank = matchedBank && (lower.includes(matchedBank.legit) || lower.includes('https://' + matchedBank.legit));
+      const isIdwebhost = lower.includes('idwebhost.com');
+
+      if (isIdwebhost || isLegitBank) {
+        contentRisk = 12;
+        confidence = 96;
+        summary = "Konten terverifikasi cocok dengan infrastruktur resmi institusi terdaftar. Tidak ditemukan indikator rekayasa sosial atau pencurian data rahasia.";
+        indicators.push({
+          title: "Infrastruktur Domain Resmi Terverifikasi",
+          level: "LOW",
+          desc: "Tautan cocok dengan domain resmi institusi terdaftar."
+        });
+        categories.push({ name: "Komunikasi Resmi", score: "Sangat Tinggi" });
+      } else {
+        const hasApk = lower.includes('.apk') || lower.includes('undangan') || lower.includes('tilang') || lower.includes('paket');
+        if (hasApk) {
+          contentRisk += 50;
+          indicators.push({
+            title: "Penyebaran Berkas Paket Android Berbahaya (.APK)",
+            level: "CRITICAL",
+            desc: "Pesan membujuk korban untuk mengunduh berkas APK yang berpotensi membajak SMS verifikasi (OTP perbankan)."
+          });
+          categories.push({ name: "Malware APK Forwarder", score: "Tinggi" });
+        }
+
+        if (matchedBank) {
+          contentRisk += 40;
+          indicators.push({
+            title: `Peniruan Identitas Resmi (${matchedBank.name})`,
+            level: "HIGH",
+            desc: `Pesan mengatasnamakan ${matchedBank.name}, namun domain URL tidak mengarah ke website resmi perbankan.`
+          });
+          categories.push({ name: "Credential Harvesting", score: "Tinggi" });
+        }
+
+        const badTlds = ['.xyz', '.top', '.online', '.site', '.club', '.icu', '.click'];
+        const matchedTld = badTlds.find(tld => lower.includes(tld));
+        if (matchedTld) {
+          contentRisk += 25;
+          indicators.push({
+            title: `Penggunaan Domain Berisiko Rendah Reputasi (${matchedTld})`,
+            level: "HIGH",
+            desc: "Penggunaan ekstensi domain murah yang kerap disalahgunakan oleh sindikat penipuan massal."
+          });
+        }
+
+        const urgencyWords = ['segera', 'diblokir', 'tarif', 'kenaikan', '15 menit', 'urgent', 'hadiah', 'undian'];
+        if (urgencyWords.some(w => lower.includes(w))) {
+          contentRisk += 20;
+          indicators.push({
+            title: "Manipulasi Urgensi & Tekanan Psikologis",
+            level: "MEDIUM",
+            desc: "Pesan menekan korban agar segera bertindak tanpa berpikir panjang."
+          });
+          categories.push({ name: "Social Engineering", score: "Sedang" });
+        }
+
+        contentRisk = Math.min(Math.max(contentRisk, 25), 98);
+        confidence = Math.min(80 + indicators.length * 5, 95);
+        summary = `Ditemukan ${indicators.length} indikator ancaman digital pada konten ini. Tingkat bahaya dinilai ${contentRisk}%. Jangan membuka tautan atau memasang berkas apapun.`;
+      }
+
+      return {
+        content_risk: contentRisk,
+        confidence: confidence,
+        summary: summary,
+        indicators: indicators,
+        categories: categories.length > 0 ? categories : [{ name: "Suspicious Activity", score: "Sedang" }]
+      };
+    }
+
+    // Populate UI with Analysis Results
+    function populateResults(data, content, type) {
+      state.contentRisk = data.content_risk;
+      state.confidence = data.confidence;
+      state.caseId = data.case_id || ('KC-2026-' + Math.floor(Math.random() * 8999 + 1000));
+      state.evidenceContent = content;
+      state.evidenceType = type;
+
+      document.getElementById('badge-case-id').innerText = state.caseId;
+      document.getElementById('evidence-type-label').innerText = type.toUpperCase();
+      document.getElementById('evidence-content-display').innerText = maskSensitiveData(content);
+
+      if (type === 'screenshot') {
+        document.getElementById('evidence-icon').innerText = 'image';
+      } else if (type === 'url') {
+        document.getElementById('evidence-icon').innerText = 'link';
+      } else {
+        document.getElementById('evidence-icon').innerText = 'chat';
+      }
+
+      // 1. Content Risk
+      document.getElementById('val-content-risk').innerText = state.contentRisk;
+      const badgeContent = document.getElementById('badge-content-risk');
+      const descContent = document.getElementById('desc-content-risk');
+      descContent.innerText = data.summary;
+
+      if (state.contentRisk >= 75) {
+        badgeContent.innerText = 'VERY HIGH RISK';
+        badgeContent.className = 'inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide bg-status-scam-bg text-status-scam-red border border-red-200';
+        document.getElementById('val-content-risk').className = 'text-[64px] font-extrabold leading-none tracking-tight text-status-scam-red';
+      } else if (state.contentRisk >= 50) {
+        badgeContent.innerText = 'HIGH RISK / WASPADA';
+        badgeContent.className = 'inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide bg-amber-50 text-amber-600 border border-amber-200';
+        document.getElementById('val-content-risk').className = 'text-[64px] font-extrabold leading-none tracking-tight text-amber-600';
+      } else {
+        badgeContent.innerText = 'LOW RISK / AMAN';
+        badgeContent.className = 'inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide bg-status-safe-bg text-status-safe-green border border-green-200';
+        document.getElementById('val-content-risk').className = 'text-[64px] font-extrabold leading-none tracking-tight text-status-safe-green';
+      }
+
+      // 2. Confidence
+      document.getElementById('val-confidence').innerText = state.confidence + '%';
+
+      // 3. Exposure
+      updateExposureUI();
+
+      // 4. Indicators
+      renderIndicators(data.indicators || []);
+
+      // 5. Categories
+      renderCategories(data.categories || []);
+
+      // 6. Reset Interview & Mitigations
+      resetInterview();
+
+      // 7. Save to History
+      saveToHistory(state.caseId, content, state.contentRisk, data.summary);
+
+      // Reveal Results
+      document.getElementById('loading-state').classList.add('hidden');
+      document.getElementById('results-content').classList.remove('hidden');
+
+      // Auto-prompt Senior Telephone Operator Modal if High Risk
+      if (state.contentRisk >= 75) {
+        setTimeout(() => {
+          openOperatorModal();
+        }, 600);
+      }
+    }
+
+    function renderIndicators(list) {
+      const container = document.getElementById('indicator-list');
+      document.getElementById('badge-indicator-count').innerText = `${list.length} Indikator Teridentifikasi`;
+
+      if (!list || list.length === 0) {
+        container.innerHTML = '<p class="text-xs text-on-surface-variant py-3">Tidak ditemukan indikator ancaman langsung.</p>';
+        return;
+      }
+
+      container.innerHTML = list.map(item => {
+        let badgeStyle = 'bg-status-scam-bg text-status-scam-red border-red-200';
+        let dotColor = 'bg-status-scam-red';
+        const lvl = (item.level || item.impact || '').toUpperCase();
+        if (lvl === 'MEDIUM' || lvl === 'ORANGE') {
+          badgeStyle = 'bg-amber-50 text-amber-700 border-amber-200';
+          dotColor = 'bg-amber-500';
+        } else if (lvl === 'LOW' || lvl === 'GREEN') {
+          badgeStyle = 'bg-status-safe-bg text-status-safe-green border-green-200';
+          dotColor = 'bg-status-safe-green';
+        }
+
+        return `
+          <div class="p-3.5 rounded-xl bg-surface-container-low border border-border-subtle flex items-start gap-3">
+            <span class="w-2.5 h-2.5 rounded-full ${dotColor} mt-1 shrink-0"></span>
+            <div class="flex-1">
+              <div class="flex items-center justify-between gap-2">
+                <h4 class="text-xs font-bold text-brand-indigo-hero">${item.title}</h4>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border ${badgeStyle}">${lvl}</span>
+              </div>
+              <p class="text-xs text-on-surface-variant mt-0.5">${item.desc}</p>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderCategories(list) {
+      const container = document.getElementById('category-list');
+      if (!list || list.length === 0) {
+        container.innerHTML = '<span class="text-xs text-on-surface-variant">Umum</span>';
+        return;
+      }
+      container.innerHTML = list.map(c => `
+        <div class="flex items-center justify-between p-2.5 rounded-lg bg-surface-container-low border border-border-subtle text-xs">
+          <span class="text-brand-indigo-hero font-semibold">${c.name}</span>
+          <span class="font-bold text-primary font-mono">${c.score}</span>
+        </div>
+      `).join('');
+    }
+
+    // Adaptive Interview Logic
+    async function answerStep(step, val) {
+      if (step === 1) {
+        state.answers.openedLink = val;
+        const statusEl = document.getElementById('ans-1-status');
+        statusEl.innerText = val ? 'Ya, Dibuka' : 'Tidak Dibuka';
+        statusEl.className = val ? 'text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-amber-700' : 'text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-status-safe-bg border border-green-200 text-status-safe-green';
+
+        if (val) {
+          state.userExposure = 35;
+          unlockStep(2);
+          addTimelineEvent('INTERVIEW_LINK', 'Pengguna mengonfirmasi tautan sempat dibuka.');
+        } else {
+          state.userExposure = 10;
+          lockStep(2);
+          lockStep(3);
+          addTimelineEvent('INTERVIEW_LINK', 'Pengguna mengonfirmasi tautan belum pernah dibuka.');
+        }
+      } else if (step === 2) {
+        state.answers.enteredPassword = val;
+        const statusEl = document.getElementById('ans-2-status');
+        statusEl.innerText = val ? 'Password Dimasukkan' : 'Tidak Ada Data';
+        statusEl.className = val ? 'text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-status-scam-bg border border-red-200 text-status-scam-red' : 'text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-status-safe-bg border border-green-200 text-status-safe-green';
+
+        if (val) {
+          state.userExposure = 70;
+          unlockStep(3);
+          addTimelineEvent('INTERVIEW_CREDENTIAL', 'PERINGATAN: Kredensial akun sempat diisi pada situs palsu.');
+        } else {
+          state.userExposure = 35;
+          lockStep(3);
+          addTimelineEvent('INTERVIEW_CREDENTIAL', 'Pengguna mengonfirmasi tidak ada password yang diserahkan.');
+        }
+      } else if (step === 3) {
+        state.answers.enteredOTP = val;
+        const statusEl = document.getElementById('ans-3-status');
+        statusEl.innerText = val ? 'OTP DIBERIKAN' : 'OTP Aman';
+        statusEl.className = val ? 'text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-red-600 text-white' : 'text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-status-safe-bg border border-green-200 text-status-safe-green';
+
+        if (val) {
+          state.userExposure = 90;
+          addTimelineEvent('INTERVIEW_OTP', 'KRITIS: Kode OTP telah diserahkan! Protokol pengambilalihan akun darurat diaktifkan.');
+        } else {
+          state.userExposure = 70;
+          addTimelineEvent('INTERVIEW_OTP', 'Pengguna menolak memberikan kode OTP kepada pelaku.');
+        }
+      }
+
+      updateExposureUI();
+    }
+
+    function unlockStep(step) {
+      const el = document.getElementById('step-' + step + '-box');
+      if (el) {
+        el.classList.remove('opacity-40', 'pointer-events-none');
+        document.getElementById('ans-' + step + '-status').innerText = 'Menunggu';
+        document.getElementById('ans-' + step + '-status').className = 'text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-surface-container text-primary';
+      }
+    }
+
+    function lockStep(step) {
+      const el = document.getElementById('step-' + step + '-box');
+      if (el) {
+        el.classList.add('opacity-40', 'pointer-events-none');
+        document.getElementById('ans-' + step + '-status').innerText = 'Terkunci';
+        document.getElementById('ans-' + step + '-status').className = 'text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-white border border-border-subtle text-on-surface-variant';
+      }
+      if (step === 2) state.answers.enteredPassword = null;
+      if (step === 3) state.answers.enteredOTP = null;
+    }
+
+    function resetInterview() {
+      state.answers = { openedLink: null, enteredPassword: null, enteredOTP: null };
+      state.userExposure = 10;
+      state.completedMitigations = {};
+      lockStep(2);
+      lockStep(3);
+      document.getElementById('ans-1-status').innerText = 'Menunggu';
+      document.getElementById('ans-1-status').className = 'text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-surface-container text-primary';
+      initTimeline();
+      updateExposureUI();
+    }
+
+    function updateExposureUI() {
+      document.getElementById('val-user-exposure').innerText = state.userExposure;
+      const badgeExposure = document.getElementById('badge-user-exposure');
+      const descExposure = document.getElementById('desc-user-exposure');
+
+      if (state.userExposure >= 85) {
+        badgeExposure.innerText = 'PAPARAN KRITIS (OTP BOCOR)';
+        badgeExposure.className = 'inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide bg-red-600 text-white';
+        descExposure.innerText = 'Kode OTP atau PIN telah diberikan! Pelaku dapat membajak m-Banking Anda. Segera lakukan penyelamatan darurat di bawah.';
+        renderEmergencyChecklist(true, true);
+      } else if (state.userExposure >= 70) {
+        badgeExposure.innerText = 'PAPARAN TINGGI (PASSWORD BOCOR)';
+        badgeExposure.className = 'inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide bg-status-scam-bg text-status-scam-red border border-red-200';
+        descExposure.innerText = 'Password atau data rekening telah diisi pada situs palsu. Kunci akun Anda sekarang.';
+        renderEmergencyChecklist(true, false);
+      } else if (state.userExposure >= 30) {
+        badgeExposure.innerText = 'PAPARAN SEDANG';
+        badgeExposure.className = 'inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide bg-amber-50 text-amber-700 border border-amber-200';
+        descExposure.innerText = 'Tautan sempat dibuka, tetapi password dan kode OTP belum pernah Anda masukkan.';
+        renderEmergencyChecklist(false, false);
+      } else {
+        badgeExposure.innerText = 'PAPARAN MINIMAL';
+        badgeExposure.className = 'inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide bg-status-safe-bg text-status-safe-green border border-green-200';
+        descExposure.innerText = 'Anda baru menerima pesan dan belum mengklik tautan atau mengunduh aplikasi apapun.';
+        renderEmergencyChecklist(false, false);
+      }
+
+      let answered = 0;
+      if (state.answers.openedLink !== null) answered++;
+      if (state.answers.enteredPassword !== null) answered++;
+      if (state.answers.enteredOTP !== null) answered++;
+      document.getElementById('interview-progress-text').innerText = `${answered} / 3 Selesai`;
+    }
+
+    function renderEmergencyChecklist(isEmergency, isCritical) {
+      const badge = document.getElementById('badge-emergency-state');
+      const title = document.getElementById('emergency-title');
+      const subtitle = document.getElementById('emergency-subtitle');
+      const container = document.getElementById('action-checklist');
+
+      let items = [];
+
+      if (isEmergency) {
+        badge.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-status-scam-bg text-status-scam-red border border-red-300';
+        badge.innerText = isCritical ? 'DARURAT: KODE OTP DIBERIKAN' : 'DARURAT: PASSWORD DIMASUKKAN';
+        title.innerText = 'Protokol Penyelamatan Akun & Rekening Perbankan';
+        subtitle.innerText = 'Lakukan langkah pemulihan darurat berikut sekarang juga. Centang tindakan yang sudah Anda selesaikan:';
+
+        items = [
+          { id: 'm1', step: '01', title: 'Tolak & abaikan seluruh kode SMS / OTP berikutnya', desc: 'Pelaku sedang berusaha login ke m-Banking Anda. Jangan serahkan kode apapun.', urgent: true },
+          { id: 'm2', step: '02', title: 'Kunci sementara kartu ATM & akun m-Banking', desc: 'Buka m-Banking dari HP Anda dan aktifkan fitur "Kunci Kartu" sekarang juga.', urgent: true },
+          { id: 'm3', step: '03', title: 'Ganti password akun dari perangkat lain yang aman', desc: 'Lakukan reset PIN dan kata sandi hanya melalui website resmi perbankan.', urgent: true },
+          { id: 'm4', step: '04', title: 'Hubungi call center resmi bank sekarang', desc: 'HaloBCA (1500888), BRI (14017), Mandiri (14000), BNI (1500046).', urgent: false }
+        ];
+      } else {
+        badge.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-status-safe-bg text-status-safe-green border border-green-200';
+        badge.innerText = 'PANDUAN PENCEGAHAN';
+        title.innerText = 'Rekomendasi Tindakan Mandiri';
+        subtitle.innerText = 'Tingkat paparan akun Anda masih aman. Ikuti panduan kewaspadaan digital berikut:';
+
+        items = [
+          { id: 'm1', step: '01', title: 'Jangan membuka atau menyebarkan tautan tersebut', desc: 'Hapus pesan dan tandai nomor pengirim sebagai spam di WhatsApp/SMS.', urgent: false },
+          { id: 'm2', step: '02', title: 'Blokir nomor pengirim pesan palsu', desc: 'Cegah penipuan berulang dengan memblokir kontak nomor tak dikenal.', urgent: false },
+          { id: 'm3', step: '03', title: 'Konfirmasi langsung ke institusi resmi terkait bila ragu', desc: 'Kunjungi website resmi bank atau call center resmi secara mandiri.', urgent: false }
+        ];
+      }
+
+      container.innerHTML = items.map(item => {
+        const isChecked = !!state.completedMitigations[item.id];
+        return `
+          <div class="p-3.5 rounded-xl bg-surface-container-low border ${isChecked ? 'border-green-300 bg-status-safe-bg/40' : 'border-border-subtle'} flex items-start gap-3 transition">
+            <input type="checkbox" id="chk-${item.id}" onchange="toggleMitigation('${item.id}', '${item.title}', this.checked)" ${isChecked ? 'checked' : ''} class="w-4 h-4 mt-0.5 rounded text-primary focus:ring-primary cursor-pointer" />
+            <div class="flex-1 cursor-pointer" onclick="document.getElementById('chk-${item.id}').click()">
+              <div class="flex items-center justify-between gap-2">
+                <h5 class="text-xs font-bold ${isChecked ? 'checklist-done-text' : 'text-brand-indigo-hero'}">${item.step}. ${item.title}</h5>
+                ${item.urgent ? '<span class="text-[9px] font-bold text-status-scam-red uppercase bg-status-scam-bg px-2 py-0.5 rounded-full border border-red-200">Segera</span>' : ''}
+              </div>
+              <p class="text-xs text-on-surface-variant mt-0.5 ${isChecked ? 'checklist-done-text' : ''}">${item.desc}</p>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      const completed = Object.keys(state.completedMitigations).length;
+      document.getElementById('checklist-progress-text').innerText = `${completed} / ${items.length} Dilakukan`;
+    }
+
+    function toggleMitigation(id, title, isChecked) {
+      if (isChecked) {
+        state.completedMitigations[id] = true;
+        addTimelineEvent('MITIGATION', `Mitigasi selesai: ${title}`);
+        showToast('Tindakan mitigasi dicatat.', 'success');
+      } else {
+        delete state.completedMitigations[id];
+      }
+      renderEmergencyChecklist(state.userExposure >= 70, state.userExposure >= 85);
+    }
+
+    // Timeline helpers
+    function initTimeline() {
+      state.timelineEvents = [];
+      const timeStr = new Date().toLocaleTimeString('id-ID') + ' WIB';
+      state.timelineEvents.push({
+        time: timeStr,
+        tag: 'EVIDENCE LOGGED',
+        color: 'bg-primary',
+        text: 'Bukti digital berhasil didaftarkan ke sistem KrosCheck.'
+      });
+      renderTimeline();
+    }
+
+    function addTimelineEvent(type, text) {
+      const timeStr = new Date().toLocaleTimeString('id-ID') + ' WIB';
+      let color = 'bg-primary';
+      if (type.includes('CRITICAL') || type.includes('OTP')) color = 'bg-status-scam-red';
+      else if (type.includes('LINK') || type.includes('CREDENTIAL')) color = 'bg-amber-500';
+      else if (type.includes('MITIGATION')) color = 'bg-status-safe-green';
+
+      state.timelineEvents.push({ time: timeStr, tag: type, color: color, text: text });
+      renderTimeline();
+    }
+
+    function renderTimeline() {
+      const container = document.getElementById('timeline-container');
+      container.innerHTML = state.timelineEvents.map(evt => `
+        <div class="relative">
+          <span class="absolute -left-[29px] top-1 w-2.5 h-2.5 rounded-full ${evt.color} ring-4 ring-white"></span>
+          <div class="flex items-center gap-2 font-mono text-[11px] text-on-surface-variant">
+            <span>${evt.time}</span>
+            <span class="px-1.5 py-0.2 rounded bg-surface-container text-primary font-bold text-[10px]">${evt.tag}</span>
+          </div>
+          <p class="text-brand-indigo-hero font-semibold mt-0.5">${evt.text}</p>
+        </div>
+      `).join('');
+    }
+
+    // =========================================================================
+    // PHONE OPERATOR SESSION (Ramah Lansia 1-per-1)
+    // =========================================================================
+    let operatorStep = 1;
+    const operatorQuestions = [
+      {
+        step: 1,
+        title: "Pertanyaan 1 dari 3",
+        question: "Apakah Bapak/Ibu sempat menekan atau membuka tautan/file yang dikirimkan ini?",
+        sub: "Pilih salah satu tombol besar di bawah sesuai kejadian sebenarnya:",
+        yesText: "Ya, Tautan Sempat Saya Buka",
+        noText: "Tidak, Belum Pernah Dibuka",
+        speakText: "Pertanyaan satu. Apakah Bapak atau Ibu sempat menekan atau membuka tautan atau berkas yang dikirimkan ini?"
+      },
+      {
+        step: 2,
+        title: "Pertanyaan 2 dari 3",
+        question: "Apakah Bapak/Ibu sempat mengetik nomor kartu ATM, PIN, username m-Banking, atau password di situs tersebut?",
+        sub: "Catatan: Jangan pernah memasukkan nomor kartu atau password pada situs tidak resmi.",
+        yesText: "Ya, Data/Password Sempat Dimasukkan",
+        noText: "Tidak, Tidak Ada Data Yang Diisi",
+        speakText: "Pertanyaan dua. Apakah Bapak atau Ibu sempat mengetik nomor kartu ATM, pin, atau kata sandi di situs tersebut?"
+      },
+      {
+        step: 3,
+        title: "Pertanyaan 3 dari 3",
+        question: "Apakah Bapak/Ibu sempat memberitahu kode SMS rahasia (OTP) kepada siapapun atau diisikan ke layar?",
+        sub: "Penting: Kode SMS verifikasi (OTP) bersifat sangat rahasia dan tidak boleh diserahkan.",
+        yesText: "Ya, Kode OTP Diserahkan",
+        noText: "Tidak, Kode OTP Tidak Diberikan",
+        speakText: "Pertanyaan tiga. Apakah Bapak atau Ibu sempat memberitahu kode SMS rahasia atau OTP kepada siapapun?"
+      }
+    ];
+
+    function speakText(text) {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utt = new SpeechSynthesisUtterance(text);
+        utt.lang = 'id-ID';
+        utt.rate = 0.92;
+        const wave = document.getElementById('operator-speech-wave');
+        if (wave) wave.classList.remove('hidden');
+        utt.onend = () => { if (wave) wave.classList.add('hidden'); };
+        utt.onerror = () => { if (wave) wave.classList.add('hidden'); };
+        window.speechSynthesis.speak(utt);
+      }
+    }
+
+    function openOperatorModal() {
+      operatorStep = 1;
+      document.getElementById('operator-view-question').classList.remove('hidden');
+      document.getElementById('operator-view-emergency').classList.add('hidden');
+      document.getElementById('operator-view-safe').classList.add('hidden');
+      renderOperatorQuestion();
+      openModal('modal-phone-operator');
+      setTimeout(() => { speakCurrentOperatorQuestion(); }, 350);
+    }
+
+    function closeOperatorModal() {
+      closeModal('modal-phone-operator');
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    }
+
+    function renderOperatorQuestion() {
+      const q = operatorQuestions[operatorStep - 1];
+      if (!q) return;
+      document.getElementById('operator-step-badge').innerText = q.title;
+      document.getElementById('operator-question-text').innerText = q.question;
+      document.getElementById('operator-question-sub').innerText = q.sub;
+      document.getElementById('operator-text-yes').innerText = q.yesText;
+      document.getElementById('operator-text-no').innerText = q.noText;
+    }
+
+    function speakCurrentOperatorQuestion() {
+      const q = operatorQuestions[operatorStep - 1];
+      if (q) speakText(q.speakText);
+    }
+
+    async function handleOperatorAnswer(val) {
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+      await answerStep(operatorStep, val);
+
+      if (operatorStep === 1) {
+        if (val) {
+          operatorStep = 2;
+          renderOperatorQuestion();
+          setTimeout(() => speakCurrentOperatorQuestion(), 300);
+        } else {
+          showOperatorSafe();
+        }
+      } else if (operatorStep === 2) {
+        operatorStep = 3;
+        renderOperatorQuestion();
+        setTimeout(() => speakCurrentOperatorQuestion(), 300);
+      } else if (operatorStep === 3) {
+        if (val || state.answers.enteredPassword) {
+          showOperatorEmergency();
+        } else {
+          showOperatorSafe();
+        }
+      }
+    }
+
+    function showOperatorEmergency() {
+      document.getElementById('operator-view-question').classList.add('hidden');
+      document.getElementById('operator-view-safe').classList.add('hidden');
+      document.getElementById('operator-view-emergency').classList.remove('hidden');
+      speakText("Peringatan darurat! Rekening bank Anda berisiko dibobol. Segera tekan tombol telepon bank di layar untuk memblokir rekening sekarang sebelum uang Anda hilang!");
+    }
+
+    function showOperatorSafe() {
+      document.getElementById('operator-view-question').classList.add('hidden');
+      document.getElementById('operator-view-emergency').classList.add('hidden');
+      document.getElementById('operator-view-safe').classList.remove('hidden');
+      speakText("Pemeriksaan selesai. Rekening Bapak atau Ibu aman karena tidak ada data penting atau OTP yang diserahkan. Tetap waspada!");
+    }
+
+    // Audio TTS Summary Toggle
+    function toggleAudioNarration() {
+      if ('speechSynthesis' in window) {
+        if (state.isSpeaking) {
+          window.speechSynthesis.cancel();
+          state.isSpeaking = false;
+          document.getElementById('btn-audio-text').innerText = 'Dengarkan Audio';
+        } else {
+          window.speechSynthesis.cancel();
+          let narration = `Laporan hasil audit KrosCheck: Tingkat bahaya konten ${state.contentRisk} dari 100. `;
+          if (state.contentRisk >= 75) {
+            narration += `Peringatan! Konten ini dinilai sangat berbahaya. Jangan berikan kode SMS verifikasi atau PIN transaksi Anda kepada siapapun. `;
+          } else {
+            narration += `Konten ini memiliki indikator aman dan terdaftar pada institusi resmi. `;
+          }
+          if (state.userExposure >= 70) {
+            narration += `Segera lakukan penguncian kartu ATM dan hubungi call center resmi bank Anda. `;
+          }
+
+          const utterance = new SpeechSynthesisUtterance(narration);
+          utterance.lang = 'id-ID';
+          utterance.rate = 0.95;
+          utterance.onend = () => {
+            state.isSpeaking = false;
+            document.getElementById('btn-audio-text').innerText = 'Dengarkan Audio';
+          };
+          window.speechSynthesis.speak(utterance);
+          state.isSpeaking = true;
+          document.getElementById('btn-audio-text').innerText = 'Hentikan Audio';
+        }
+      } else {
+        alert('Fitur suara tidak didukung pada browser ini.');
+      }
+    }
+
+    // Print & Share
+    function printReport() {
+      window.print();
+    }
+
+    function shareToFamilyWhatsApp() {
+      const masked = maskSensitiveData(state.evidenceContent);
+      let msg = `*PERINGATAN KROSCHECK PRO - LAPORAN KELUARGA*\n\n`;
+      msg += `Keluarga tercinta, mohon bantu periksa pesan yang saya terima berikut:\n`;
+      msg += `📌 Bukti: "${masked}"\n`;
+      msg += `⚠️ Tingkat Bahaya: ${state.contentRisk}/100 (${state.contentRisk >= 75 ? 'SANGAT BERBAHAYA' : 'Waspada'})\n`;
+      msg += `🛡️ Paparan Akun: ${state.userExposure}/100\n`;
+      if (state.userExposure >= 70) {
+        msg += `🚨 STATUS DARURAT: Password/OTP sempat diisi! Mohon bantu saya hubungi call center bank untuk kunci rekening!\n`;
+      } else {
+        msg += `💡 Panduan: Jangan pernah mengklik tautan atau memasang berkas APK apapun.\n`;
+      }
+      msg += `\nID Kasus: ${state.caseId}\nDiverifikasi via KrosCheck Cyber Defense Platform.`;
+
+      window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`, '_blank');
+    }
+
+    async function copyEvidenceText() {
+      try {
+        await navigator.clipboard.writeText(state.evidenceContent);
+        showToast('Bukti berhasil disalin!', 'success');
+      } catch(e) {}
+    }
+
+    // LocalStorage History
+    function saveToHistory(caseId, content, risk, summary) {
+      try {
+        const history = JSON.parse(localStorage.getItem('kroscheck_history') || '[]');
+        history.unshift({
+          case_id: caseId,
+          content: content.slice(0, 90),
+          risk: risk,
+          summary: summary,
+          timestamp: new Date().toLocaleTimeString('id-ID') + ' WIB'
+        });
+        if (history.length > 10) history.pop();
+        localStorage.setItem('kroscheck_history', JSON.stringify(history));
+        loadHistoryBadge();
+      } catch(e) {}
+    }
+
+    function loadHistoryBadge() {
+      try {
+        const history = JSON.parse(localStorage.getItem('kroscheck_history') || '[]');
+        const badge = document.getElementById('badge-history-count');
+        if (badge) badge.innerText = history.length;
+      } catch(e) {}
+    }
+
+    function renderHistoryList() {
+      const container = document.getElementById('history-items-container');
+      try {
+        const history = JSON.parse(localStorage.getItem('kroscheck_history') || '[]');
+        if (history.length === 0) {
+          container.innerHTML = '<p class="text-xs text-on-surface-variant text-center py-6">Belum ada riwayat pemeriksaan.</p>';
+          return;
+        }
+
+        container.innerHTML = history.map(item => `
+          <div class="p-3 rounded-xl bg-surface-container-low border border-border-subtle flex items-center justify-between gap-3">
+            <div class="truncate flex-1">
+              <div class="flex items-center gap-2">
+                <strong class="font-mono text-xs text-brand-indigo-hero">${item.case_id}</strong>
+                <span class="text-[10px] font-bold px-1.5 py-0.2 rounded-full ${item.risk >= 75 ? 'bg-status-scam-bg text-status-scam-red' : 'bg-status-safe-bg text-status-safe-green'}">${item.risk}%</span>
+                <span class="text-on-surface-variant/60 text-[10px] font-mono">${item.timestamp}</span>
+              </div>
+              <p class="text-xs text-on-surface-variant truncate mt-0.5">${item.content}</p>
+            </div>
+            <button onclick="reloadFromHistory('${encodeURIComponent(JSON.stringify(item))}')" class="sg-btn-secondary text-[11px] py-1 px-2.5 shrink-0">Buka</button>
+          </div>
+        `).join('');
+      } catch(e) {}
+    }
+
+    function reloadFromHistory(raw) {
+      const item = JSON.parse(decodeURIComponent(raw));
+      closeModal('modal-case-history');
+      executeInvestigation(item.content, item.content.startsWith('http') ? 'url' : 'text');
+    }
+
+    function clearAllHistory() {
+      if (confirm('Hapus seluruh riwayat pemeriksaan dari perangkat ini?')) {
+        localStorage.removeItem('kroscheck_history');
+        loadHistoryBadge();
+        renderHistoryList();
+        showToast('Riwayat berhasil dibersihkan.');
+      }
+    }
+
+    // MAIN ENTRY: Execute Investigation
+    async function executeInvestigation(content, type, imageBase64 = null) {
+      document.getElementById('loading-state').classList.remove('hidden');
+      document.getElementById('results-content').classList.add('hidden');
+
+      let apiSuccess = false;
+      const endpoints = ['/api/analyze', 'http://localhost:8000/api/analyze'];
+
+      for (const ep of endpoints) {
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 3500);
+
+          const res = await fetch(ep, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              type: type,
+              content: content,
+              image_base64: imageBase64
+            }),
+            signal: controller.signal
+          });
+          clearTimeout(timeoutId);
+
+          if (res.ok) {
+            const data = await res.json();
+            populateResults(data, content, type);
+            apiSuccess = true;
+            break;
+          }
+        } catch(e) {}
+      }
+
+      if (!apiSuccess) {
+        // Fallback to dynamic client heuristics
+        const localData = analyzeDynamicHeuristic(content, type);
+        populateResults(localData, content, type);
+      }
+    }
+
+    // INITIALIZATION ON PAGE LOAD
+    document.addEventListener('DOMContentLoaded', () => {
+      loadHistoryBadge();
+      initTimeline();
+
+      // Read query from sessionStorage or URL parameters
+      let queryPayload = null;
+      try {
+        const stored = sessionStorage.getItem('scamguard_query');
+        if (stored) queryPayload = JSON.parse(stored);
+      } catch(e) {}
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const qParam = urlParams.get('q');
+      const typeParam = urlParams.get('type') || (qParam && qParam.startsWith('http') ? 'url' : 'text');
+
+      if (queryPayload && queryPayload.content) {
+        executeInvestigation(queryPayload.content, queryPayload.type || 'url', queryPayload.image_base64);
+      } else if (qParam) {
+        executeInvestigation(qParam, typeParam);
+      } else {
+        // Default sample if opened directly
+        const defaultUrl = 'https://id-bca-verifikasi-keamanan.xyz/login';
+        executeInvestigation(defaultUrl, 'url');
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeModal('modal-phone-operator');
+        closeModal('modal-case-history');
+      }
+    });
+  </script>
+</body>
+</html>
