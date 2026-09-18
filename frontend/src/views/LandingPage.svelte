@@ -13,12 +13,13 @@
   let isUploading = $state<boolean>(false);
   let errorMessage = $state<string>("");
   let fileInputElement = $state<HTMLInputElement | null>(null);
+  let selectedImage = $state<{ name: string; base64: string; previewUrl: string } | null>(null);
 
   // FAQ Accordion state in landing page
   let activeFaqIndex = $state<number | null>(0);
 
   function handleInputChange() {
-    isExpanded = scamInput.trim().length > 0;
+    isExpanded = scamInput.trim().length > 0 || selectedImage !== null;
     if (errorMessage) errorMessage = "";
   }
 
@@ -36,11 +37,15 @@
         const result = event.target?.result as string;
         const base64 = result ? result.split(",")[1] : null;
         isUploading = false;
-        onSubmit({
-          type: "screenshot",
-          content: file.name,
-          image_base64: base64
-        });
+        if (base64) {
+          selectedImage = {
+            name: file.name,
+            base64,
+            previewUrl: result
+          };
+          isExpanded = true;
+          errorMessage = "";
+        }
       };
       reader.onerror = () => {
         isUploading = false;
@@ -50,8 +55,24 @@
     }
   }
 
+  function removeSelectedImage() {
+    selectedImage = null;
+    if (fileInputElement) fileInputElement.value = "";
+    isExpanded = scamInput.trim().length > 0;
+  }
+
   function handleSubmit() {
     const val = scamInput.trim();
+
+    if (selectedImage) {
+      onSubmit({
+        type: "screenshot",
+        content: val || selectedImage.name,
+        image_base64: selectedImage.base64
+      });
+      return;
+    }
+
     if (!val) {
       errorMessage = "Silakan tempel teks atau tautan mencurigakan terlebih dahulu.";
       return;
@@ -142,21 +163,44 @@
 
     <!-- Submission Box -->
     <div class="w-full max-w-xl rounded-2xl bg-surface-container-lowest p-4 sm:p-5 shadow-xl flex flex-col gap-4 border border-border-subtle hover:shadow-2xl transition-shadow duration-300">
-      <!-- Upload File Trigger -->
-      <button
-        type="button"
-        onclick={handleUploadClick}
-        disabled={isUploading}
-        class="w-full py-3 px-6 rounded-full bg-brand-violet-vibrant hover:bg-brand-violet-hover text-on-primary font-semibold text-sm flex items-center justify-center gap-2.5 transition-all shadow-md active:scale-[0.99] cursor-pointer disabled:opacity-60"
-      >
-        {#if isUploading}
-          <span class="material-symbols-outlined text-[20px] animate-spin">progress_activity</span>
-          <span>Memproses berkas...</span>
-        {:else}
-          <span class="material-symbols-outlined text-[20px]">add_photo_alternate</span>
-          <span>Unggah gambar atau tangkapan layar</span>
-        {/if}
-      </button>
+      <!-- Upload File Trigger or Selected Preview -->
+      {#if selectedImage}
+        <div class="flex items-center justify-between p-3 rounded-xl bg-surface-container-high/60 border border-brand-violet-vibrant/40 shadow-sm">
+          <div class="flex items-center gap-3 overflow-hidden">
+            <img src={selectedImage.previewUrl} alt="Pratinjau berkas" class="w-12 h-12 rounded-lg object-cover border border-border-subtle shrink-0 shadow-sm" />
+            <div class="flex flex-col text-left overflow-hidden">
+              <span class="text-xs font-bold text-on-surface truncate">{selectedImage.name}</span>
+              <span class="text-[11px] text-brand-violet-vibrant font-semibold flex items-center gap-1">
+                <span class="material-symbols-outlined text-[14px]">check_circle</span>
+                Tangkapan layar siap dianalisis
+              </span>
+            </div>
+          </div>
+          <button
+            type="button"
+            onclick={removeSelectedImage}
+            class="px-2.5 py-1.5 rounded-lg hover:bg-surface-container text-xs font-semibold text-status-scam-red flex items-center gap-1 transition-colors cursor-pointer"
+          >
+            <span class="material-symbols-outlined text-[16px]">close</span>
+            <span>Ganti</span>
+          </button>
+        </div>
+      {:else}
+        <button
+          type="button"
+          onclick={handleUploadClick}
+          disabled={isUploading}
+          class="w-full py-3 px-6 rounded-full bg-brand-violet-vibrant hover:bg-brand-violet-hover text-on-primary font-semibold text-sm flex items-center justify-center gap-2.5 transition-all shadow-md active:scale-[0.99] cursor-pointer disabled:opacity-60"
+        >
+          {#if isUploading}
+            <span class="material-symbols-outlined text-[20px] animate-spin">progress_activity</span>
+            <span>Memproses berkas...</span>
+          {:else}
+            <span class="material-symbols-outlined text-[20px]">add_photo_alternate</span>
+            <span>Unggah gambar atau tangkapan layar</span>
+          {/if}
+        </button>
+      {/if}
 
       <input
         bind:this={fileInputElement}
@@ -168,7 +212,9 @@
 
       <div class="flex items-center gap-3">
         <div class="h-[1px] flex-1 bg-surface-container-high"></div>
-        <span class="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider">ATAU JELASKAN DI BAWAH</span>
+        <span class="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider">
+          {selectedImage ? "CATATAN TAMBAHAN (OPSIONAL)" : "ATAU JELASKAN DI BAWAH"}
+        </span>
         <div class="h-[1px] flex-1 bg-surface-container-high"></div>
       </div>
 
@@ -182,7 +228,7 @@
           bind:value={scamInput}
           oninput={handleInputChange}
           onkeydown={handleKeyDown}
-          placeholder="Tempel teks/tautan atau ceritakan apa yang terjadi..."
+          placeholder={selectedImage ? "Ketik keterangan atau isi pesan di dalam gambar (opsional)..." : "Tempel teks/tautan atau ceritakan apa yang terjadi..."}
           rows={isExpanded ? 3 : 1}
           class="w-full bg-transparent resize-none p-1 text-on-surface placeholder:text-on-surface-variant/70 text-sm focus:outline-none transition-all duration-300 ease-out leading-relaxed"
         ></textarea>
@@ -203,7 +249,7 @@
             onclick={handleSubmit}
             class="inline-flex items-center gap-1.5 px-5 py-2 rounded-full bg-brand-indigo-hero text-on-primary text-xs font-bold hover:bg-brand-violet-vibrant transition-all shadow-sm active:scale-95 cursor-pointer"
           >
-            <span>Periksa sekarang</span>
+            <span>{selectedImage ? "Periksa Gambar Sekarang" : "Periksa sekarang"}</span>
             <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
           </button>
         </div>

@@ -275,19 +275,34 @@ export function analyzeHeuristic(req: AnalyzeRequest): AnalyzeResponse {
     }
 
     if (indicators.length === 0) {
-      indicators.push({
-        title: "Pola Teks Umum",
-        impact: "INFO",
-        level: "blue",
-        desc: "Pesan tidak memuat pola bahaya umum yang signifikan, namun tetap waspada jika ada permintaan transfer uang."
-      });
-      content_risk = 20;
-      confidence = 75;
-      summary = "Pesan menunjukkan tingkat risiko rendah. Tidak ditemukan pemicu bahaya yang mendesak.";
-      categories = [
-        { name: "Komunikasi Biasa", score: "88%" },
-        { name: "Spam Komersial", score: "30%" }
-      ];
+      if (req.type === "screenshot") {
+        indicators.push({
+          title: "Tangkapan Layar Diterima (Mode Heuristik Offline)",
+          impact: "INFO",
+          level: "blue",
+          desc: "Berkas gambar berhasil diunggah. Karena Google Gemini Vision API belum terkonfigurasi di server, mesin lokal tidak dapat membaca teks di dalam gambar secara otomatis. Pastikan menyalin teks atau menghubungkan GEMINI_API_KEY."
+        });
+        content_risk = 0;
+        confidence = 50;
+        summary = "Berkas gambar telah diterima. Karena AI Multimodal Vision belum aktif di server, teks di dalam gambar tidak dapat di-OCR otomatis. Salin teks pesan ke kolom input untuk analisis akurat.";
+        categories = [
+          { name: "Tangkapan Layar (Menunggu AI Vision)", score: "100%" }
+        ];
+      } else {
+        indicators.push({
+          title: "Pola Teks Umum",
+          impact: "INFO",
+          level: "blue",
+          desc: "Pesan tidak memuat pola bahaya umum yang signifikan, namun tetap waspada jika ada permintaan transfer uang."
+        });
+        content_risk = 20;
+        confidence = 75;
+        summary = "Pesan menunjukkan tingkat risiko rendah. Tidak ditemukan pemicu bahaya yang mendesak.";
+        categories = [
+          { name: "Komunikasi Biasa", score: "88%" },
+          { name: "Spam Komersial", score: "30%" }
+        ];
+      }
     } else {
       content_risk = Math.min(98, Math.max(30, 20 + scoreIncrement));
       confidence = 88;
