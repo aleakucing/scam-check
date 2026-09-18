@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { config } from "./config";
-import { rateLimiter } from "./services/rateLimiter";
+import { rateLimiter, uploadRateLimiter } from "./services/rateLimiter";
 import { maskSensitiveData } from "./services/privacy";
 import { analyzeWithAi } from "./services/aiAgent";
 import { analyzeHeuristic } from "./services/heuristicAnalyzer";
@@ -45,13 +45,63 @@ if (existsSync(distPath)) {
   app.use("/assets/*", serveStatic({ root: distPath }));
 }
 
-// Helper to get client IP for rate limiting
+// Helper to get client IP for rate limiting (spoofing-resistant)
 function getClientIp(c: any): string {
-  return (
-    c.req.header("x-forwarded-for")?.split(",")[0].trim() ||
-    c.req.header("x-real-ip") ||
-    "127.0.0.1"
-  );
+  // Prefer X-Real-IP set by trusted upstream reverse proxy (Nginx)
+  const realIp = c.req.header("x-real-ip");
+  if (realIp) return realIp.trim();
+
+  // If X-Forwarded-For is provided, take the last IP (closest to trusted proxy)
+  const forwarded = c.req.header("x-forwarded-for");
+  if (forwarded) {
+    const parts = forwarded.split(",").map((s: string) => s.trim());
+    return parts[parts.length - 1] || parts[0];
+  }
+
+  return "127.0.0.1";
+}
+
+// Magic bytes validator for uploaded base64 images (JPEG, PNG, WebP only)
+function validateImagePayload(base64Str: string): { valid: boolean; mime?: string; error?: string } {
+  const pureBase64 = base64Str.replace(/^data:image\/[a-zA-Z0-9+.-]+;base64,/, "").trim();
+  if (!pureBase64) {
+    return { valid: false, error: "Data berkas gambar kosong." };
+  }
+
+  if (pureBase64.length > 10 * 1024 * 1024) {
+    return { valid: false, error: "Ukuran berkas gambar melebihi batas 10MB." };
+  }
+
+  try {
+    const buffer = Buffer.from(pureBase64.slice(0, 64), "base64");
+    if (buffer.length < 4) {
+      return { valid: false, error: "Format berkas gambar tidak valid atau data rusak." };
+    }
+
+    // JPEG magic bytes: FF D8 FF
+    if (buffer[0] === 0xFF && buffer[1] === 0xD8 && buffer[2] === 0xFF) {
+      return { valid: true, mime: "image/jpeg" };
+    }
+    // PNG magic bytes: 89 50 4E 47
+    if (buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47) {
+      return { valid: true, mime: "image/png" };
+    }
+    // WebP magic bytes: RIFF .... WEBP
+    if (
+      buffer[0] === 0x52 && buffer[1] === 0x49 && buffer[2] === 0x46 && buffer[3] === 0x46 &&
+      buffer.length >= 12 &&
+      buffer[8] === 0x57 && buffer[9] === 0x45 && buffer[10] === 0x42 && buffer[11] === 0x50
+    ) {
+      return { valid: true, mime: "image/webp" };
+    }
+
+    return {
+      valid: false,
+      error: "Format gambar tidak didukung. Hanya gambar JPEG, PNG, dan WebP yang diizinkan. Berkas SVG, HTML, dan script executable dilarang demi keamanan siber."
+    };
+  } catch {
+    return { valid: false, error: "Gagal memproses berkas gambar base64." };
+  }
 }
 
 // Root Status / SPA entry
@@ -133,6 +183,8 @@ app.get("/api/cases/:id", (c) => {
   if (!caseData) {
     return c.json({ detail: "Kasus tidak ditemukan dalam evidence vault." }, 404);
   }
+  // Defense-in-depth: Ensure evidence_content is masked when retrieved
+  caseData.evidence_content = maskSensitiveData(caseData.evidence_content || "");
   return c.json(caseData);
 });
 
@@ -157,9 +209,24 @@ app.post("/api/analyze", async (c) => {
     return c.json({ detail: "Konten bukti tidak boleh kosong." }, 400);
   }
 
-  // Size limit check (10MB base64)
-  if (body.image_base64 && body.image_base64.length > 10 * 1024 * 1024) {
-    return c.json({ detail: "Ukuran berkas gambar melebihi batas 10MB." }, 413);
+  // Max content length check (50KB limit to prevent prompt flooding / resource exhaustion)
+  if (body.content.length > 50000) {
+    return c.json({ detail: "Panjang konten melebihi batas maksimal 50.000 karakter." }, 413);
+  }
+
+  // Image Upload Security: Dedicated Rate Limit (15 req/min) & Magic Bytes Validation
+  if (body.image_base64) {
+    if (!uploadRateLimiter.isAllowed(clientIp)) {
+      return c.json(
+        { detail: "Batas unggah gambar terlampaui (Maksimal 15 berkas per menit). Coba beberapa saat lagi." },
+        429
+      );
+    }
+
+    const imgCheck = validateImagePayload(body.image_base64);
+    if (!imgCheck.valid) {
+      return c.json({ detail: imgCheck.error }, 400);
+    }
   }
 
   let response: AnalyzeResponse;
@@ -170,13 +237,14 @@ app.post("/api/analyze", async (c) => {
     response = analyzeHeuristic(body);
   }
 
-  // Persist to Evidence Vault
+  // Persist to Evidence Vault with Server-Side PII Masking BEFORE SQLite write
+  const safeContent = maskSensitiveData(body.content);
   try {
     saveCase({
       case_id: response.case_id,
       timestamp: response.timestamp,
       evidence_type: response.evidence_type,
-      evidence_content: body.content,
+      evidence_content: safeContent,
       content_risk: response.content_risk,
       confidence: response.confidence,
       user_exposure: response.initial_exposure,
@@ -330,7 +398,7 @@ app.post("/api/webhook/telegram", async (c) => {
       case_id: analysis.case_id,
       timestamp: analysis.timestamp,
       evidence_type: analysis.evidence_type,
-      evidence_content: text,
+      evidence_content: maskSensitiveData(text),
       content_risk: analysis.content_risk,
       confidence: analysis.confidence,
       user_exposure: analysis.initial_exposure,

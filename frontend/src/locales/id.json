@@ -1,0 +1,70 @@
+{
+  "operator": {
+    "title": "Panduan Khusus Orang Tua & Keluarga",
+    "subtitle": "Bantuan langkah demi langkah dengan teks besar dan suara.",
+    "speaking_badge": "Sedang Membaca",
+    "repeat_audio": "Ulangi Suara",
+    "back_button": "Kembali ke Pertanyaan Sebelumnya",
+    "caption_title": "Teks Suara:",
+    "questions": [
+      {
+        "step": 1,
+        "badge": "Langkah 1 dari 3",
+        "question": "Apakah Anda sempat memencet atau membuka tautan/file yang dikirim orang ini?",
+        "sub": "Pilih salah satu tombol di bawah sesuai kejadian sebenarnya:",
+        "yes_text": "Ya, Sempat Saya Buka",
+        "no_text": "Tidak, Tidak Pernah Dibuka",
+        "unsure_text": "Ragu-ragu / Lupa",
+        "speak_text": "Langkah satu. Apakah Bapak atau Ibu sempat memencet atau membuka tautan atau berkas yang dikirimkan ini?"
+      },
+      {
+        "step": 2,
+        "badge": "Langkah 2 dari 3",
+        "question": "Apakah Anda sempat mengetik nomor kartu ATM, nomor rekening, PIN, atau kata sandi di layar tersebut?",
+        "sub": "Catatan: Pihak bank resmi tidak pernah meminta kata sandi atau PIN melalui pesan/tautan.",
+        "yes_text": "Ya, Sempat Saya Ketik",
+        "no_text": "Tidak, Tidak Ada Yang Diketik",
+        "unsure_text": "Ragu-ragu / Tidak Yakin",
+        "speak_text": "Langkah dua. Apakah Bapak atau Ibu sempat mengetik nomor kartu ATM, nomor rekening, PIN, atau kata sandi di layar tersebut?"
+      },
+      {
+        "step": 3,
+        "badge": "Langkah 3 dari 3",
+        "question": "Apakah Anda sempat memberikan kode rahasia SMS (angka verifikasi OTP) kepada orang lain atau mengisinya ke layar?",
+        "sub": "Penting: Kode SMS 6 angka dari bank bersifat sangat rahasia dan dilarang diserahkan kepada siapa pun.",
+        "yes_text": "Ya, Kode Rahasia Sempat Diberikan",
+        "no_text": "Tidak, Kode Rahasia Tidak Diberikan",
+        "unsure_text": "Ragu-ragu / Lupa Mengisi",
+        "speak_text": "Langkah tiga. Apakah Bapak atau Ibu sempat memberikan kode rahasia SMS atau angka verifikasi kepada orang lain?"
+      }
+    ],
+    "safe_verdict": {
+      "title": "Kabar Baik: Rekening Anda Aman",
+      "desc": "Karena Anda belum membuka tautan atau tidak menyerahkan data rahasia, rekening bank Anda saat ini dalam kondisi terlindungi.",
+      "speak_text": "Pemeriksaan selesai. Kabar baik, rekening Bapak atau Ibu aman karena tautan belum pernah dibuka atau data rahasia tidak diserahkan. Tetap waspada dan jangan buka pesan serupa!",
+      "tips": [
+        "Segera hapus pesan atau nomor pengirim tersebut dari HP Anda.",
+        "Jangan teruskan pesan tersebut ke grup percakapan keluarga.",
+        "Beri tahu anak atau kerabat jika ada pesan lain yang mencurigakan."
+      ]
+    },
+    "emergency_verdict": {
+      "title": "Tindakan Darurat: Amankan Rekening Sekarang",
+      "desc": "PERINGATAN: Ada kemungkinan kata sandi atau kode rahasia Anda disalahgunakan. Hubungi bank Anda detik ini juga untuk memblokir transaksi keluar!",
+      "speak_text": "Peringatan darurat! Ada kemungkinan data rahasia atau kode SMS Anda disalahgunakan. Segera tekan tombol telepon bank di layar untuk mengamankan rekening Anda sekarang!",
+      "call_action": "Tekan untuk Menelepon Bank Sekarang:"
+    }
+  },
+  "common": {
+    "close": "Tutup",
+    "back": "Kembali",
+    "check_now": "Periksa Sekarang",
+    "loading": "Sedang Memeriksa Bukti...",
+    "error_empty": "Silakan tempel teks atau tautan mencurigakan terlebih dahulu.",
+    "error_upload": "Gagal membaca berkas gambar. Pastikan format JPEG, PNG, atau WEBP di bawah 5MB.",
+    "emergency_mode": "MODE DARURAT AKTIF",
+    "risk_level_high": "BAHAYA TINGGI",
+    "risk_level_med": "PERLU WASPADA",
+    "risk_level_safe": "TERVERIFIKASI AMAN"
+  }
+}

@@ -14,8 +14,10 @@ RUN bun install --frozen-lockfile || bun install
 # Copy source code
 COPY . .
 
-# Ensure data directory exists for SQLite database vault
-RUN mkdir -p /app/data
+# Ensure data directory exists for SQLite database vault with correct ownership
+RUN mkdir -p /app/data && chown -R bun:bun /app
+
+USER bun
 
 EXPOSE 8000
 ENV PORT=8000

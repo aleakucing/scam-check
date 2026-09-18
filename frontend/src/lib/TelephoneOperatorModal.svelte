@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { t } from "../services/i18n";
+
   interface Props {
     isOpen: boolean;
     onClose: () => void;
@@ -10,44 +12,19 @@
   let step = $state<number>(1);
   let view = $state<"question" | "emergency" | "safe">("question");
   let isSpeaking = $state<boolean>(false);
+  let isSubmitting = $state<boolean>(false);
+  let activeCaption = $state<string>("");
 
-  const questions = [
-    {
-      step: 1,
-      badge: "Pertanyaan 1 dari 3",
-      question: "Apakah Bapak/Ibu sempat menekan atau membuka tautan/file yang dikirimkan ini?",
-      sub: "Pilih salah satu tombol besar di bawah sesuai kejadian sebenarnya:",
-      yesText: "Ya, Tautan Sempat Saya Buka",
-      noText: "Tidak, Belum Pernah Dibuka",
-      speakText: "Pertanyaan satu. Apakah Bapak atau Ibu sempat menekan atau membuka tautan atau berkas yang dikirimkan ini?"
-    },
-    {
-      step: 2,
-      badge: "Pertanyaan 2 dari 3",
-      question: "Apakah Bapak/Ibu sempat mengetik nomor kartu ATM, PIN, username m-Banking, atau password di situs tersebut?",
-      sub: "Catatan: Jangan pernah memasukkan nomor kartu atau password pada situs tidak resmi.",
-      yesText: "Ya, Data/Password Sempat Dimasukkan",
-      noText: "Tidak, Tidak Ada Data Yang Diisi",
-      speakText: "Pertanyaan dua. Apakah Bapak atau Ibu sempat mengetik nomor kartu ATM, PIN, atau kata sandi di situs tersebut?"
-    },
-    {
-      step: 3,
-      badge: "Pertanyaan 3 dari 3",
-      question: "Apakah Bapak/Ibu sempat memberitahu kode SMS rahasia (OTP) kepada siapapun atau diisikan ke layar?",
-      sub: "Penting: Kode SMS verifikasi (OTP) bersifat sangat rahasia dan tidak boleh diserahkan.",
-      yesText: "Ya, Kode OTP Diserahkan",
-      noText: "Tidak, Kode OTP Tidak Diberikan",
-      speakText: "Pertanyaan tiga. Apakah Bapak atau Ibu sempat memberitahu kode SMS rahasia atau OTP kepada siapapun?"
-    }
-  ];
+  const questions = t("operator.questions");
 
   $effect(() => {
     if (isOpen) {
       step = 1;
       view = "question";
+      isSubmitting = false;
       setTimeout(() => {
         speakCurrentQuestion();
-      }, 350);
+      }, 300);
     } else {
       stopSpeech();
     }
@@ -61,11 +38,12 @@
   }
 
   function speakText(text: string) {
+    activeCaption = text;
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
       window.speechSynthesis.cancel();
       const utt = new SpeechSynthesisUtterance(text);
       utt.lang = "id-ID";
-      utt.rate = 0.92;
+      utt.rate = 0.90; // Slightly slower pace for seniors
       isSpeaking = true;
       utt.onend = () => { isSpeaking = false; };
       utt.onerror = () => { isSpeaking = false; };
@@ -75,60 +53,100 @@
 
   function speakCurrentQuestion() {
     const q = questions[step - 1];
-    if (q) speakText(q.speakText);
+    if (q) speakText(q.speak_text);
+  }
+
+  function handleBack() {
+    stopSpeech();
+    if (view !== "question") {
+      view = "question";
+      speakCurrentQuestion();
+      return;
+    }
+    if (step > 1) {
+      step -= 1;
+      speakCurrentQuestion();
+    }
   }
 
   async function handleAnswer(val: boolean) {
     stopSpeech();
-    await onAnswerStep(step, val);
+    isSubmitting = true;
 
-    if (step === 1) {
-      if (val) {
-        step = 2;
-        speakCurrentQuestion();
-      } else {
-        view = "safe";
-        speakText("Pemeriksaan selesai. Rekening Bapak atau Ibu aman karena tautan belum pernah dibuka. Tetap waspada!");
-      }
-    } else if (step === 2) {
-      if (val) {
-        step = 3;
-        speakCurrentQuestion();
-      } else {
-        view = "safe";
-        speakText("Pemeriksaan selesai. Tautan sempat dibuka namun data dan password tidak diserahkan. Akun Anda masih aman.");
-      }
-    } else if (step === 3) {
-      if (val) {
+    try {
+      await onAnswerStep(step, val);
+
+      if (step === 1) {
+        if (val) {
+          step = 2;
+          speakCurrentQuestion();
+        } else {
+          view = "safe";
+          speakText(t("operator.safe_verdict.speak_text"));
+        }
+      } else if (step === 2) {
+        if (val) {
+          step = 3;
+          speakCurrentQuestion();
+        } else {
+          view = "safe";
+          speakText("Pemeriksaan selesai. Tautan sempat dibuka namun kata sandi dan PIN tidak diserahkan. Akun Anda masih aman.");
+        }
+      } else if (step === 3) {
         view = "emergency";
-        speakText("Peringatan darurat! Rekening bank Anda berisiko dibobol karena kode OTP telah diserahkan. Segera tekan tombol telepon bank di layar untuk memblokir rekening sekarang!");
-      } else {
-        view = "emergency";
-        speakText("Perhatian! Password Anda sempat diserahkan. Segera ganti kata sandi atau kunci rekening melalui tombol telepon bank berikut.");
+        if (val) {
+          speakText(t("operator.emergency_verdict.speak_text"));
+        } else {
+          speakText("Perhatian! Kata sandi Anda sempat diserahkan. Segera ubah password atau hubungi bank melalui tombol telepon berikut.");
+        }
       }
+    } finally {
+      isSubmitting = false;
+    }
+  }
+
+  function handleKeyDown(e: KeyboardEvent) {
+    if (e.key === "Escape") {
+      stopSpeech();
+      onClose();
     }
   }
 </script>
 
+<svelte:window onkeydown={handleKeyDown} />
+
 {#if isOpen}
-  <div class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-brand-indigo-hero/70 backdrop-blur-md animate-fade-in">
-    <div class="w-full max-w-2xl rounded-3xl bg-white shadow-2xl border-2 border-primary/20 overflow-hidden flex flex-col max-h-[92vh]">
-      <!-- Operator Top Banner -->
-      <div class="p-6 bg-gradient-to-r from-brand-indigo-hero to-primary text-white flex items-center justify-between">
+  <!-- Backdrop with accessible dialog attributes -->
+  <div
+    class="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-brand-indigo-hero/80 backdrop-blur-md"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="operator-modal-title"
+    aria-describedby="operator-modal-desc"
+  >
+    <div class="w-full max-w-2xl rounded-3xl bg-white shadow-2xl border-2 border-primary/30 overflow-hidden flex flex-col max-h-[94vh] animate-in fade-in zoom-in-95 duration-200">
+      
+      <!-- Operator Top Header with WCAG compliant contrast -->
+      <div class="p-4 sm:p-6 bg-brand-indigo-hero text-white flex items-center justify-between border-b border-white/10">
         <div class="flex items-center gap-3">
-          <div class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm">
+          <div class="w-12 h-12 rounded-full bg-white/15 flex items-center justify-center shrink-0" aria-hidden="true">
             <span class="material-symbols-outlined text-white text-[28px]">support_agent</span>
           </div>
           <div>
             <div class="flex items-center gap-2">
-              <h2 class="text-xl font-extrabold text-white">Panduan Operator Ramah Lansia</h2>
+              <h2 id="operator-modal-title" class="text-lg sm:text-xl font-extrabold text-white">
+                {t("operator.title")}
+              </h2>
               {#if isSpeaking}
-                <span class="flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/20 text-xs font-semibold animate-pulse">
-                  <span class="material-symbols-outlined text-[14px]">volume_up</span> Bersuara
+                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-700 text-white text-[11px] font-bold animate-pulse" aria-live="polite">
+                  <span class="material-symbols-outlined text-[14px]">volume_up</span>
+                  {t("operator.speaking_badge")}
                 </span>
               {/if}
             </div>
-            <p class="text-xs text-white/80">Panduan suara langkah demi langkah dengan teks ukuran besar.</p>
+            <p id="operator-modal-desc" class="text-xs text-white/90 font-medium">
+              {t("operator.subtitle")}
+            </p>
           </div>
         </div>
 
@@ -138,152 +156,287 @@
             stopSpeech();
             onClose();
           }}
-          class="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors"
+          class="min-w-[44px] min-h-[44px] w-11 h-11 rounded-full bg-white/15 hover:bg-white/25 flex items-center justify-center text-white transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white"
+          aria-label={t("common.close")}
         >
           <span class="material-symbols-outlined text-[24px]">close</span>
         </button>
       </div>
 
-      <!-- Content Area -->
-      <div class="p-6 sm:p-8 overflow-y-auto flex-1">
+      <!-- Content Body -->
+      <div class="p-5 sm:p-8 overflow-y-auto flex-1 flex flex-col gap-6">
+        
+        <!-- Live Visual Subtitle Banner (TTS Caption Fallback for Hearing Impaired) -->
+        {#if activeCaption}
+          <div
+            class="p-3.5 rounded-xl bg-purple-50/90 border border-purple-200 text-brand-indigo-hero text-xs sm:text-sm flex items-start gap-2.5"
+            aria-live="polite"
+          >
+            <span class="material-symbols-outlined text-primary text-[20px] shrink-0 mt-0.5" aria-hidden="true">subtitles</span>
+            <div>
+              <span class="font-bold block text-primary text-[11px] uppercase tracking-wide">
+                {t("operator.caption_title")}
+              </span>
+              <p class="leading-relaxed font-medium">"{activeCaption}"</p>
+            </div>
+          </div>
+        {/if}
+
         {#if view === "question"}
           {@const q = questions[step - 1]}
-          <div class="flex flex-col gap-6 text-center sm:text-left">
-            <!-- Step Badge -->
-            <div class="flex items-center justify-between">
-              <span class="px-3 py-1 rounded-full bg-surface-container text-primary font-bold text-xs">
-                {q.badge}
-              </span>
+          <div class="flex flex-col gap-5 text-left">
+            
+            <!-- Navigation Action Row: Step & Repeat Audio & Back Button -->
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div class="flex items-center gap-2">
+                <span class="px-3 py-1.5 rounded-full bg-surface-container text-primary font-bold text-xs">
+                  {q.badge}
+                </span>
+
+                {#if step > 1}
+                  <button
+                    type="button"
+                    onclick={handleBack}
+                    class="min-h-[44px] px-3 py-1 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold flex items-center gap-1 cursor-pointer focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary"
+                    aria-label={t("operator.back_button")}
+                  >
+                    <span class="material-symbols-outlined text-[16px]">arrow_back</span>
+                    <span>Kembali</span>
+                  </button>
+                {/if}
+              </div>
+
               <button
                 type="button"
                 onclick={speakCurrentQuestion}
-                class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container-low hover:bg-surface-container text-primary text-xs font-semibold cursor-pointer"
+                class="min-h-[44px] inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-purple-100 hover:bg-purple-200 text-purple-900 text-xs font-bold cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary"
+                aria-label={t("operator.repeat_audio")}
               >
                 <span class="material-symbols-outlined text-[18px]">volume_up</span>
-                Ulangi Suara
+                <span>{t("operator.repeat_audio")}</span>
               </button>
             </div>
 
-            <!-- Big Question Text -->
-            <h3 class="text-2xl sm:text-3xl font-extrabold text-brand-indigo-hero leading-snug">
-              {q.question}
-            </h3>
-            <p class="text-sm sm:text-base text-on-surface-variant font-medium">
-              {q.sub}
-            </p>
+            <!-- Big Question Text with High Contrast -->
+            <div>
+              <h3 class="text-xl sm:text-2xl font-extrabold text-slate-900 leading-snug">
+                {q.question}
+              </h3>
+              <p class="text-xs sm:text-sm text-slate-700 font-medium mt-1.5">
+                {q.sub}
+              </p>
+            </div>
 
-            <!-- Giant Action Buttons -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
+            <!-- Giant Accessible Action Buttons (Touch Target > 44x44px, Keyboard Navigable, High Contrast) -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5 pt-2">
+              
+              <!-- Button 1: YA (High Danger State) -->
               <button
                 type="button"
+                disabled={isSubmitting}
                 onclick={() => handleAnswer(true)}
-                class="p-5 rounded-2xl bg-status-scam-bg border-2 border-status-scam-red/40 hover:border-status-scam-red hover:bg-status-scam-bg/80 text-left flex flex-col gap-2 transition-all hover:scale-[1.02] shadow-sm cursor-pointer"
+                class="min-h-[72px] p-4 rounded-2xl bg-red-50 border-2 border-red-600 hover:bg-red-100 text-left flex flex-col justify-center gap-1 transition-all active:scale-[0.98] shadow-sm cursor-pointer focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-offset-2 focus-visible:ring-red-600 disabled:opacity-50"
+                aria-label="Pilihan: Ya. {q.yes_text}"
               >
                 <div class="flex items-center justify-between">
-                  <span class="font-extrabold text-lg text-status-scam-red">YA</span>
-                  <span class="material-symbols-outlined text-status-scam-red text-[28px]">check_circle</span>
+                  <span class="font-extrabold text-base sm:text-lg text-red-900">YA</span>
+                  <span class="material-symbols-outlined text-red-700 text-[26px]">check_circle</span>
                 </div>
-                <span class="text-sm font-bold text-brand-indigo-hero">{q.yesText}</span>
+                <span class="text-xs sm:text-sm font-bold text-slate-900 leading-tight">{q.yes_text}</span>
+              </button>
+
+              <!-- Button 2: TIDAK (Safe State) -->
+              <button
+                type="button"
+                disabled={isSubmitting}
+                onclick={() => handleAnswer(false)}
+                class="min-h-[72px] p-4 rounded-2xl bg-emerald-50 border-2 border-emerald-700 hover:bg-emerald-100 text-left flex flex-col justify-center gap-1 transition-all active:scale-[0.98] shadow-sm cursor-pointer focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-offset-2 focus-visible:ring-emerald-700 disabled:opacity-50"
+                aria-label="Pilihan: Tidak. {q.no_text}"
+              >
+                <div class="flex items-center justify-between">
+                  <span class="font-extrabold text-base sm:text-lg text-emerald-900">TIDAK</span>
+                  <span class="material-symbols-outlined text-emerald-700 text-[26px]">cancel</span>
+                </div>
+                <span class="text-xs sm:text-sm font-bold text-slate-900 leading-tight">{q.no_text}</span>
+              </button>
+
+              <!-- Button 3: RAGU-RAGU / TIDAK YAKIN (Senior Accessibility Fallback) -->
+              <button
+                type="button"
+                disabled={isSubmitting}
+                onclick={() => handleAnswer(true)}
+                class="min-h-[72px] p-4 rounded-2xl bg-amber-50 border-2 border-amber-600 hover:bg-amber-100 text-left flex flex-col justify-center gap-1 transition-all active:scale-[0.98] shadow-sm cursor-pointer focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-offset-2 focus-visible:ring-amber-600 disabled:opacity-50"
+                aria-label="Pilihan: Ragu-ragu atau Lupa. {q.unsure_text}"
+              >
+                <div class="flex items-center justify-between">
+                  <span class="font-extrabold text-base sm:text-lg text-amber-900">RAGU-RAGU</span>
+                  <span class="material-symbols-outlined text-amber-700 text-[26px]">help</span>
+                </div>
+                <span class="text-xs sm:text-sm font-bold text-slate-900 leading-tight">{q.unsure_text}</span>
+              </button>
+
+            </div>
+
+            <!-- Instant Status Feedback -->
+            {#if isSubmitting}
+              <div class="p-2 rounded-lg bg-purple-50 text-purple-900 text-xs font-bold flex items-center gap-2" aria-live="assertive">
+                <span class="material-symbols-outlined text-[16px] animate-spin">progress_activity</span>
+                <span>Menyimpan jawaban Anda...</span>
+              </div>
+            {/if}
+          </div>
+
+        {:else if view === "safe"}
+          <!-- Safe Verdict Screen with Clear Advice -->
+          <div class="flex flex-col gap-6 text-center sm:text-left">
+            <div class="flex items-center gap-3">
+              <div class="w-14 h-14 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-[36px]">verified</span>
+              </div>
+              <div>
+                <h3 class="text-xl sm:text-2xl font-extrabold text-slate-900">
+                  {t("operator.safe_verdict.title")}
+                </h3>
+                <p class="text-xs sm:text-sm text-slate-700 font-medium">
+                  {t("operator.safe_verdict.desc")}
+                </p>
+              </div>
+            </div>
+
+            <div class="p-5 rounded-2xl bg-emerald-50/70 border border-emerald-300 flex flex-col gap-3">
+              <span class="font-bold text-xs sm:text-sm text-emerald-950 uppercase tracking-wide">
+                Langkah Aman Selanjutnya:
+              </span>
+              <ul class="text-xs sm:text-sm text-slate-800 space-y-2 font-medium">
+                {#each t("operator.safe_verdict.tips") as tip}
+                  <li class="flex items-start gap-2">
+                    <span class="material-symbols-outlined text-emerald-700 text-[18px] shrink-0 mt-0.5">check_circle</span>
+                    <span>{tip}</span>
+                  </li>
+                {/each}
+              </ul>
+            </div>
+
+            <div class="flex items-center justify-between gap-3 pt-2">
+              <button
+                type="button"
+                onclick={handleBack}
+                class="min-h-[44px] px-5 py-2.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-900 text-xs font-bold flex items-center gap-1.5 cursor-pointer focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary"
+              >
+                <span class="material-symbols-outlined text-[16px]">arrow_back</span>
+                <span>Ubah Jawaban</span>
               </button>
 
               <button
                 type="button"
-                onclick={() => handleAnswer(false)}
-                class="p-5 rounded-2xl bg-status-safe-bg border-2 border-status-safe-green/40 hover:border-status-safe-green hover:bg-status-safe-bg/80 text-left flex flex-col gap-2 transition-all hover:scale-[1.02] shadow-sm cursor-pointer"
+                onclick={() => {
+                  stopSpeech();
+                  onClose();
+                }}
+                class="min-h-[44px] px-6 py-2.5 rounded-full bg-emerald-700 hover:bg-emerald-800 text-white text-xs sm:text-sm font-bold transition-all shadow-md cursor-pointer focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-offset-2 focus-visible:ring-emerald-700"
               >
-                <div class="flex items-center justify-between">
-                  <span class="font-extrabold text-lg text-status-safe-green">TIDAK</span>
-                  <span class="material-symbols-outlined text-status-safe-green text-[28px]">cancel</span>
-                </div>
-                <span class="text-sm font-bold text-brand-indigo-hero">{q.noText}</span>
+                Selesai &amp; Tutup
               </button>
             </div>
           </div>
+
         {:else if view === "emergency"}
-          <div class="flex flex-col items-center text-center gap-4 py-4">
-            <div class="w-16 h-16 rounded-full bg-status-scam-bg text-status-scam-red flex items-center justify-center animate-bounce">
-              <span class="material-symbols-outlined text-[36px]">crisis_alert</span>
-            </div>
-            <h3 class="text-2xl font-black text-status-scam-red">
-              PERINGATAN DARURAT: AMANKAN REKENING SEKARANG!
-            </h3>
-            <p class="text-sm text-on-surface-variant max-w-lg leading-relaxed">
-              Data otentikasi penting telah diserahkan ke pelaku. Hubungi Call Center resmi bank Anda sekarang juga untuk meminta pemblokiran kartu dan rekening:
-            </p>
-
-            <!-- Bank Hotlines -->
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full pt-4">
-              <a
-                href="tel:1500888"
-                class="p-3.5 rounded-2xl bg-blue-50 border border-blue-200 text-blue-900 flex flex-col items-center gap-1 hover:bg-blue-100 transition-all font-bold"
-              >
-                <span class="text-xs text-blue-700">HaloBCA</span>
-                <span class="text-base font-extrabold font-mono">1500888</span>
-                <span class="text-[10px] text-blue-600">Tekan Hubungi</span>
-              </a>
-
-              <a
-                href="tel:14017"
-                class="p-3.5 rounded-2xl bg-blue-50 border border-blue-200 text-blue-900 flex flex-col items-center gap-1 hover:bg-blue-100 transition-all font-bold"
-              >
-                <span class="text-xs text-blue-700">Kontak BRI</span>
-                <span class="text-base font-extrabold font-mono">14017</span>
-                <span class="text-[10px] text-blue-600">Tekan Hubungi</span>
-              </a>
-
-              <a
-                href="tel:14000"
-                class="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 flex flex-col items-center gap-1 hover:bg-amber-100 transition-all font-bold"
-              >
-                <span class="text-xs text-amber-700">Mandiri Call</span>
-                <span class="text-base font-extrabold font-mono">14000</span>
-                <span class="text-[10px] text-amber-600">Tekan Hubungi</span>
-              </a>
-
-              <a
-                href="tel:1500046"
-                class="p-3.5 rounded-2xl bg-orange-50 border border-orange-200 text-orange-900 flex flex-col items-center gap-1 hover:bg-orange-100 transition-all font-bold"
-              >
-                <span class="text-xs text-orange-700">BNI Call</span>
-                <span class="text-base font-extrabold font-mono">1500046</span>
-                <span class="text-[10px] text-orange-600">Tekan Hubungi</span>
-              </a>
+          <!-- Emergency Verdict Screen with Call Buttons -->
+          <div class="flex flex-col gap-6 text-center sm:text-left">
+            <div class="flex items-center gap-3">
+              <div class="w-14 h-14 rounded-full bg-red-100 text-red-800 flex items-center justify-center shrink-0 animate-pulse">
+                <span class="material-symbols-outlined text-[36px]">emergency</span>
+              </div>
+              <div>
+                <h3 class="text-xl sm:text-2xl font-extrabold text-red-950">
+                  {t("operator.emergency_verdict.title")}
+                </h3>
+                <p class="text-xs sm:text-sm text-slate-800 font-bold">
+                  {t("operator.emergency_verdict.desc")}
+                </p>
+              </div>
             </div>
 
-            <button
-              type="button"
-              onclick={() => {
-                stopSpeech();
-                onClose();
-              }}
-              class="mt-6 px-8 py-3 rounded-full bg-brand-indigo-hero text-white font-bold text-sm hover:bg-primary transition-colors cursor-pointer"
-            >
-              Saya Mengerti, Kembali ke Hasil Audit
-            </button>
-          </div>
-        {:else if view === "safe"}
-          <div class="flex flex-col items-center text-center gap-4 py-6">
-            <div class="w-16 h-16 rounded-full bg-status-safe-bg text-status-safe-green flex items-center justify-center">
-              <span class="material-symbols-outlined text-[36px]">verified</span>
+            <!-- Direct Dial Bank Buttons with 44x44px minimum target -->
+            <div class="flex flex-col gap-3">
+              <span class="font-bold text-xs text-slate-800 uppercase tracking-wide">
+                {t("operator.emergency_verdict.call_action")}
+              </span>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <a
+                  href="tel:1500888"
+                  class="min-h-[64px] p-3.5 rounded-xl bg-white border-2 border-blue-600 hover:bg-blue-50 flex items-center justify-between transition-all shadow-sm focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-600"
+                  aria-label="Telepon Halo BCA 1500888 untuk blokir rekening"
+                >
+                  <div class="flex flex-col text-left">
+                    <span class="text-xs font-bold text-slate-700">Bank BCA</span>
+                    <span class="font-mono text-base font-extrabold text-blue-800">1500888</span>
+                  </div>
+                  <span class="px-3 py-1 rounded-full bg-blue-700 text-white text-xs font-bold">Panggil</span>
+                </a>
+
+                <a
+                  href="tel:14017"
+                  class="min-h-[64px] p-3.5 rounded-xl bg-white border-2 border-blue-600 hover:bg-blue-50 flex items-center justify-between transition-all shadow-sm focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-600"
+                  aria-label="Telepon Kontak BRI 14017 untuk kunci kartu"
+                >
+                  <div class="flex flex-col text-left">
+                    <span class="text-xs font-bold text-slate-700">Bank BRI</span>
+                    <span class="font-mono text-base font-extrabold text-blue-800">14017</span>
+                  </div>
+                  <span class="px-3 py-1 rounded-full bg-blue-700 text-white text-xs font-bold">Panggil</span>
+                </a>
+
+                <a
+                  href="tel:14000"
+                  class="min-h-[64px] p-3.5 rounded-xl bg-white border-2 border-amber-600 hover:bg-amber-50 flex items-center justify-between transition-all shadow-sm focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-amber-600"
+                  aria-label="Telepon Mandiri Call 14000 untuk stop transaksi"
+                >
+                  <div class="flex flex-col text-left">
+                    <span class="text-xs font-bold text-slate-700">Bank Mandiri</span>
+                    <span class="font-mono text-base font-extrabold text-amber-800">14000</span>
+                  </div>
+                  <span class="px-3 py-1 rounded-full bg-amber-700 text-white text-xs font-bold">Panggil</span>
+                </a>
+
+                <a
+                  href="tel:1500046"
+                  class="min-h-[64px] p-3.5 rounded-xl bg-white border-2 border-orange-600 hover:bg-orange-50 flex items-center justify-between transition-all shadow-sm focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-600"
+                  aria-label="Telepon BNI Call 1500046 untuk bantuan darurat"
+                >
+                  <div class="flex flex-col text-left">
+                    <span class="text-xs font-bold text-slate-700">Bank BNI</span>
+                    <span class="font-mono text-base font-extrabold text-orange-800">1500046</span>
+                  </div>
+                  <span class="px-3 py-1 rounded-full bg-orange-700 text-white text-xs font-bold">Panggil</span>
+                </a>
+              </div>
             </div>
-            <h3 class="text-2xl font-black text-brand-indigo-hero">
-              Pemeriksaan Selesai: Akun Anda Aman
-            </h3>
-            <p class="text-sm text-on-surface-variant max-w-lg leading-relaxed">
-              Karena tidak ada data kredensial atau kode OTP yang diserahkan, risiko pengambilalihan akun berada pada tingkat minimal. Tetap berhati-hati dan jangan pernah membagikan kode rahasia.
-            </p>
-            <button
-              type="button"
-              onclick={() => {
-                stopSpeech();
-                onClose();
-              }}
-              class="mt-4 px-8 py-3 rounded-full bg-brand-indigo-hero text-white font-bold text-sm hover:bg-primary transition-colors cursor-pointer"
-            >
-              Tutup &amp; Lihat Ringkasan Kasus
-            </button>
+
+            <div class="flex items-center justify-between gap-3 pt-2 border-t border-slate-100">
+              <button
+                type="button"
+                onclick={handleBack}
+                class="min-h-[44px] px-5 py-2.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-900 text-xs font-bold flex items-center gap-1.5 cursor-pointer focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary"
+              >
+                <span class="material-symbols-outlined text-[16px]">arrow_back</span>
+                <span>Ubah Jawaban</span>
+              </button>
+
+              <button
+                type="button"
+                onclick={() => {
+                  stopSpeech();
+                  onClose();
+                }}
+                class="min-h-[44px] px-6 py-2.5 rounded-full bg-red-700 hover:bg-red-800 text-white text-xs sm:text-sm font-bold transition-all shadow-md cursor-pointer focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-offset-2 focus-visible:ring-red-700"
+              >
+                Tutup &amp; Amankan Akun
+              </button>
+            </div>
           </div>
         {/if}
+
       </div>
     </div>
   </div>

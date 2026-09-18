@@ -32,9 +32,29 @@ export class SlidingWindowRateLimiter {
     return Math.max(0, this.requestsPerMinute - history.length);
   }
 
+  cleanup() {
+    const now = Date.now() / 1000;
+    const windowStart = now - this.windowSeconds;
+    for (const [ip, history] of this.ipHistory.entries()) {
+      const valid = history.filter((t) => t > windowStart);
+      if (valid.length === 0) {
+        this.ipHistory.delete(ip);
+      } else {
+        this.ipHistory.set(ip, valid);
+      }
+    }
+  }
+
   reset() {
     this.ipHistory.clear();
   }
 }
 
 export const rateLimiter = new SlidingWindowRateLimiter(60, 60);
+export const uploadRateLimiter = new SlidingWindowRateLimiter(15, 60);
+
+// Prune stale rate-limiter entries every 5 minutes to prevent memory leaks
+setInterval(() => {
+  rateLimiter.cleanup();
+  uploadRateLimiter.cleanup();
+}, 5 * 60 * 1000).unref();

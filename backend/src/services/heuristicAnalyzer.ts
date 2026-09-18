@@ -46,7 +46,8 @@ function computeHash(str: string): number {
 export function analyzeHeuristic(req: AnalyzeRequest): AnalyzeResponse {
   const content = req.content.trim().toLowerCase();
   const { dateStr, timestamp } = getWibTimestamp();
-  const case_id = `SC-${dateStr}-${(computeHash(content) % 9000) + 1000}`;
+  const randSuffix = crypto.randomUUID().slice(0, 8).toUpperCase();
+  const case_id = `SC-${dateStr}-${randSuffix}`;
   
   const indicators: Indicator[] = [];
   let categories: CategoryScore[] = [];

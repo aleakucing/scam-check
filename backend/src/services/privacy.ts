@@ -46,13 +46,21 @@ export function maskSensitiveData(text: string): string {
     }
   );
 
-  // 4. Mask 10-12 digit Bank Account Numbers (standalone numbers)
-  masked = masked.replace(/\b\d{10,12}\b/g, (match) => {
-    if (match.length >= 10 && match.length <= 12) {
+  // 4. Mask 10-16 digit Bank Account Numbers & NIK (standalone numbers)
+  masked = masked.replace(/\b\d{10,16}\b/g, (match) => {
+    if (match.length >= 10 && match.length <= 16) {
       return `${match.slice(0, 4)}${"*".repeat(match.length - 6)}${match.slice(-2)}`;
     }
     return match;
   });
+
+  // 5. Mask Email Addresses (e.g. user@example.com -> u***@example.com)
+  masked = masked.replace(
+    /\b([a-zA-Z0-9_.+-])([a-zA-Z0-9_.+-]*)([a-zA-Z0-9_.+-])@([a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)\b/g,
+    (_match, first, middle, last, domain) => {
+      return `${first}${"*".repeat(Math.min(5, Math.max(3, middle.length)))}${last}@${domain}`;
+    }
+  );
 
   return masked;
 }

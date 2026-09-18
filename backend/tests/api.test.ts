@@ -213,4 +213,80 @@ describe("ScamGuard Bun API & Security Suite", () => {
     const htmlFaq = await resFaq.text();
     expect(htmlFaq).toContain("KrosCheck");
   });
+
+  it("Security Audit: Rejects invalid or malicious image uploads (magic bytes check)", async () => {
+    // Malicious SVG upload payload
+    const fakeSvg = Buffer.from("<svg onload='alert(1)'></svg>").toString("base64");
+    const res = await app.request("/api/analyze", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        type: "screenshot",
+        content: "Cek gambar mencurigakan",
+        image_base64: `data:image/svg+xml;base64,${fakeSvg}`
+      })
+    });
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.detail).toContain("Format gambar tidak didukung");
+  });
+
+  it("Security Audit: Accepts valid PNG image upload", async () => {
+    // 1x1 valid PNG base64
+    const validPng = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=";
+    const res = await app.request("/api/analyze", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        type: "screenshot",
+        content: "Tangkapan layar bukti transfer",
+        image_base64: `data:image/png;base64,${validPng}`
+      })
+    });
+    expect(res.status).toBe(200);
+  });
+
+  it("Security Audit: Server-side PII masking occurs BEFORE data is saved to SQLite Vault", async () => {
+    const rawSensitive = "Transfer ke BCA 1234567890 atas nama Budi kode OTP 654321 email korban@gmail.com";
+    const res = await app.request("/api/analyze", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        type: "text",
+        content: rawSensitive
+      })
+    });
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    const caseId = body.case_id;
+
+    // Check retrieved case from SQLite
+    const caseRes = await app.request(`/api/cases/${caseId}`);
+    expect(caseRes.status).toBe(200);
+    const caseRecord = await caseRes.json();
+    expect(caseRecord.evidence_content).not.toContain("1234567890");
+    expect(caseRecord.evidence_content).not.toContain("654321");
+    expect(caseRecord.evidence_content).not.toContain("korban@gmail.com");
+    expect(caseRecord.evidence_content).toContain("OTP ******");
+  });
+
+  it("Security Audit: Case IDs have high-entropy hex suffix to prevent enumeration", async () => {
+    const res1 = await app.request("/api/analyze", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: "text", content: "Kasus uji 1" })
+    });
+    const b1 = await res1.json();
+    const res2 = await app.request("/api/analyze", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: "text", content: "Kasus uji 2" })
+    });
+    const b2 = await res2.json();
+
+    // High entropy: SC-YYYYMMDD-XXXXXXXX (8 hex characters)
+    expect(b1.case_id).toMatch(/^SC-\d{8}-[A-F0-9]{8}$/);
+    expect(b2.case_id).toMatch(/^SC-\d{8}-[A-F0-9]{8}$/);
+    expect(b1.case_id).not.toBe(b2.case_id);
+  });
 });
