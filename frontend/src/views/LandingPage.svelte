@@ -3,15 +3,19 @@
 
   interface Props {
     onSubmit: (payload: { content: string; type: EvidenceType; image_base64?: string | null }) => void;
+    onNavigate?: (route: string, hash?: string) => void;
   }
 
-  let { onSubmit }: Props = $props();
+  let { onSubmit, onNavigate }: Props = $props();
 
   let scamInput = $state<string>("");
   let isExpanded = $state<boolean>(false);
   let isUploading = $state<boolean>(false);
   let errorMessage = $state<string>("");
   let fileInputElement = $state<HTMLInputElement | null>(null);
+
+  // FAQ Accordion state in landing page
+  let activeFaqIndex = $state<number | null>(0);
 
   function handleInputChange() {
     isExpanded = scamInput.trim().length > 0;
@@ -67,13 +71,45 @@
       handleSubmit();
     }
   }
+
+  function triggerPreset(presetType: "bca" | "tilang" | "apk" | "idweb") {
+    if (presetType === "bca") {
+      onSubmit({
+        type: "url",
+        content: "https://id-bca-verifikasi-keamanan.xyz/login",
+        image_base64: null
+      });
+    } else if (presetType === "tilang") {
+      onSubmit({
+        type: "url",
+        content: "Pemberitahuan ETLE: Kendaraan Anda tertangkap kamera melanggar marka jalan. Silakan unduh bukti tilang pada berkas Surat_Tilang_ETLE.apk berikut: https://tilang-etle-polri.top/download",
+        image_base64: null
+      });
+    } else if (presetType === "apk") {
+      onSubmit({
+        type: "url",
+        content: "https://bit.ly/Surat-Undangan-Pernikahan-Digital.apk",
+        image_base64: null
+      });
+    } else if (presetType === "idweb") {
+      onSubmit({
+        type: "url",
+        content: "https://member.idwebhost.com/clientarea.php",
+        image_base64: null
+      });
+    }
+  }
+
+  function toggleFaq(index: number) {
+    activeFaqIndex = activeFaqIndex === index ? null : index;
+  }
 </script>
 
 <div class="flex flex-col w-full">
-  <!-- Hero Scan & Submission Section (Height padded so input is prominent) -->
+  <!-- Hero Scan & Submission Section -->
   <section
     id="top-input-hero"
-    class="w-full max-w-[1200px] mx-auto px-gutter pt-12 pb-24 md:pt-16 md:pb-36 flex flex-col items-center text-center min-h-[78vh] justify-center"
+    class="w-full max-w-[1200px] mx-auto px-gutter pt-12 pb-16 md:pt-16 md:pb-24 flex flex-col items-center text-center justify-center"
   >
     <!-- Stylized Emblem -->
     <div class="relative mb-6 flex items-center justify-center">
@@ -175,6 +211,43 @@
         </div>
       {/if}
 
+      <!-- Quick Presets -->
+      <div class="flex flex-col gap-2 pt-2 border-t border-border-subtle/70">
+        <span class="text-[11px] font-bold text-on-surface-variant/80 uppercase tracking-wider text-center">
+          Uji Cepat Contoh Kasus Nyata:
+        </span>
+        <div class="flex flex-wrap items-center justify-center gap-1.5">
+          <button
+            type="button"
+            onclick={() => triggerPreset("bca")}
+            class="px-2.5 py-1 rounded-full bg-surface-container text-[11px] font-bold text-brand-indigo-hero hover:bg-brand-violet-vibrant hover:text-white transition-colors cursor-pointer"
+          >
+            Phishing BCA
+          </button>
+          <button
+            type="button"
+            onclick={() => triggerPreset("tilang")}
+            class="px-2.5 py-1 rounded-full bg-surface-container text-[11px] font-bold text-brand-indigo-hero hover:bg-brand-violet-vibrant hover:text-white transition-colors cursor-pointer"
+          >
+            Tilang ETLE APK
+          </button>
+          <button
+            type="button"
+            onclick={() => triggerPreset("apk")}
+            class="px-2.5 py-1 rounded-full bg-surface-container text-[11px] font-bold text-brand-indigo-hero hover:bg-brand-violet-vibrant hover:text-white transition-colors cursor-pointer"
+          >
+            Undangan Resepsi APK
+          </button>
+          <button
+            type="button"
+            onclick={() => triggerPreset("idweb")}
+            class="px-2.5 py-1 rounded-full bg-emerald-50 text-[11px] font-bold text-status-safe-green border border-emerald-200 hover:bg-emerald-600 hover:text-white transition-colors cursor-pointer"
+          >
+            Domain Resmi IDwebhost
+          </button>
+        </div>
+      </div>
+
       <!-- Bottom Hint -->
       <div class="flex items-center justify-center pt-1 text-xs text-on-surface-variant/70">
         <span>Didukung AI Multimodal &amp; Basis Data Intelijen Siber Indonesia</span>
@@ -195,7 +268,6 @@
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <!-- Feature 1 -->
         <div class="p-6 rounded-2xl bg-white border border-border-subtle shadow-sm flex flex-col gap-3">
           <div class="w-12 h-12 rounded-xl bg-purple-50 text-brand-violet-vibrant flex items-center justify-center">
             <span class="material-symbols-outlined text-[26px]">network_check</span>
@@ -206,7 +278,6 @@
           </p>
         </div>
 
-        <!-- Feature 2 -->
         <div class="p-6 rounded-2xl bg-white border border-border-subtle shadow-sm flex flex-col gap-3">
           <div class="w-12 h-12 rounded-xl bg-red-50 text-status-scam-red flex items-center justify-center">
             <span class="material-symbols-outlined text-[26px]">apk_install</span>
@@ -217,7 +288,6 @@
           </p>
         </div>
 
-        <!-- Feature 3 -->
         <div class="p-6 rounded-2xl bg-white border border-border-subtle shadow-sm flex flex-col gap-3">
           <div class="w-12 h-12 rounded-xl bg-blue-50 text-primary flex items-center justify-center">
             <span class="material-symbols-outlined text-[26px]">support_agent</span>
@@ -228,6 +298,355 @@
           </p>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS Section (Deep Indigo Navy Zone) -->
+  <section id="how-it-works" class="w-full bg-brand-indigo-hero text-on-primary py-20 px-gutter scroll-mt-20">
+    <div class="max-w-[1200px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+      <!-- Left Column: Steps -->
+      <div class="lg:col-span-6 flex flex-col gap-8">
+        <div>
+          <span class="text-xs tracking-widest text-secondary-container uppercase block mb-2 font-bold">
+            CARA KERJA
+          </span>
+          <h2 class="text-2xl md:text-4xl font-extrabold text-on-primary tracking-tight">
+            Pemeriksaan penipuan gratis, kapan pun Anda butuh pendapat kedua
+          </h2>
+        </div>
+        <div class="flex flex-col gap-6">
+          <div class="flex items-start gap-4">
+            <div class="w-10 h-10 shrink-0 rounded-full bg-surface-container/10 flex items-center justify-center text-primary-fixed-dim font-bold">
+              1
+            </div>
+            <div class="flex flex-col gap-1">
+              <h3 class="text-base font-bold text-on-primary">Kirim pesan atau tautan yang mencurigakan</h3>
+              <p class="text-xs text-surface-variant/80">
+                Tempel teks SMS/WA, unggah foto bukti, atau ceritakan situasi yang membuat Anda ragu.
+              </p>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-4">
+            <div class="w-10 h-10 shrink-0 rounded-full bg-surface-container/10 flex items-center justify-center text-primary-fixed-dim font-bold">
+              2
+            </div>
+            <div class="flex flex-col gap-1">
+              <h3 class="text-base font-bold text-on-primary">KrosCheck memeriksa sinyal penipuan</h3>
+              <p class="text-xs text-surface-variant/80">
+                Mesin deteksi kami menganalisis pola rekayasa sosial, reputasi domain, dan struktur file APK.
+              </p>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-4">
+            <div class="w-10 h-10 shrink-0 rounded-full bg-surface-container/10 flex items-center justify-center text-primary-fixed-dim font-bold">
+              3
+            </div>
+            <div class="flex flex-col gap-1">
+              <h3 class="text-base font-bold text-on-primary">Dapatkan skor 3D dan langkah penyelamatan</h3>
+              <p class="text-xs text-surface-variant/80">
+                KrosCheck menyajikan vonis tegas, wawancara adaptif keterpaparan akun, dan hotline resmi bank.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <button
+            type="button"
+            onclick={() => onNavigate && onNavigate("/how-it-works")}
+            class="inline-flex items-center gap-2 text-xs font-bold text-primary-fixed-dim hover:text-white transition-colors cursor-pointer"
+          >
+            <span>Pelajari arsitektur sistem selengkapnya</span>
+            <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Right Column: Sample Verdict Card -->
+      <div class="lg:col-span-6 flex justify-center">
+        <div class="w-full max-w-md bg-white rounded-2xl text-on-surface p-6 sm:p-7 shadow-2xl flex flex-col gap-4 border border-border-subtle">
+          <div class="flex flex-col items-center text-center gap-2">
+            <div class="w-12 h-12 rounded-full bg-status-scam-bg flex items-center justify-center">
+              <span class="material-symbols-outlined text-status-scam-red text-[28px]">error</span>
+            </div>
+            <h3 class="text-xl font-bold text-brand-indigo-hero">Pasti Penipuan (95%)</h3>
+            <p class="text-xs text-on-surface-variant">
+              Tautan mengarah ke domain tiruan perbankan yang dirancang mencuri kredensial login dan kode OTP Anda.
+            </p>
+          </div>
+          <div class="w-full h-[1px] bg-surface-container-high"></div>
+          <div class="flex flex-col gap-2">
+            <span class="text-xs font-bold text-brand-indigo-hero">Tindakan Darurat Rekomendasi:</span>
+            <div class="p-2.5 rounded-lg bg-status-scam-bg text-[11px] font-semibold text-status-scam-red flex items-center gap-2">
+              <span class="material-symbols-outlined text-[16px]">phone_in_talk</span>
+              <span>Hubungi Call Center HaloBCA di 1500888 untuk blokir rekening</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TRENDS Section -->
+  <section id="trends" class="w-full py-20 px-gutter bg-surface scroll-mt-20">
+    <div class="max-w-[1200px] mx-auto flex flex-col gap-10">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <span class="text-xs font-bold text-status-scam-red uppercase tracking-wider">Intelijen Siber Terkini</span>
+          <h2 class="text-2xl md:text-3xl font-extrabold text-brand-indigo-hero mt-1">
+            Tren Penipuan Siber di Indonesia
+          </h2>
+          <p class="text-xs sm:text-sm text-on-surface-variant mt-1 max-w-xl">
+            Modus kejahatan yang paling sering dilaporkan masyarakat dan beredar di grup percakapan keluarga.
+          </p>
+        </div>
+        <button
+          type="button"
+          onclick={() => onNavigate && onNavigate("/trends")}
+          class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-surface-container text-xs font-bold text-brand-indigo-hero hover:bg-surface-container-high transition-colors cursor-pointer self-start md:self-auto"
+        >
+          <span>Buka Papan Tren Lengkap</span>
+          <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Trend 1 -->
+        <div class="p-5 rounded-2xl bg-white border border-border-subtle shadow-sm flex flex-col gap-3">
+          <div class="flex items-center justify-between">
+            <span class="px-2 py-0.5 rounded-full bg-status-scam-bg text-status-scam-red text-[10px] font-extrabold">KRITIS</span>
+            <span class="text-[11px] text-on-surface-variant">Phishing Bank</span>
+          </div>
+          <h4 class="text-sm font-bold text-brand-indigo-hero">Kenaikan Tarif Transfer BCA Rp150.000</h4>
+          <p class="text-xs text-on-surface-variant leading-relaxed">
+            Surat edaran palsu yang meminta korban mengisi data di situs phishing untuk membatalkan tarif bulanan.
+          </p>
+          <button
+            type="button"
+            onclick={() => triggerPreset("bca")}
+            class="mt-auto py-2 rounded-full bg-surface-container hover:bg-brand-violet-vibrant hover:text-white text-xs font-bold transition-all cursor-pointer"
+          >
+            Uji Kasus Ini
+          </button>
+        </div>
+
+        <!-- Trend 2 -->
+        <div class="p-5 rounded-2xl bg-white border border-border-subtle shadow-sm flex flex-col gap-3">
+          <div class="flex items-center justify-between">
+            <span class="px-2 py-0.5 rounded-full bg-status-scam-bg text-status-scam-red text-[10px] font-extrabold">KRITIS</span>
+            <span class="text-[11px] text-on-surface-variant">Malware APK</span>
+          </div>
+          <h4 class="text-sm font-bold text-brand-indigo-hero">Surat Tilang ETLE Berkas .APK</h4>
+          <p class="text-xs text-on-surface-variant leading-relaxed">
+            Mencatut kepolisian mengabarkan pelanggaran lalu lintas dan melampirkan spyware pembobol SMS OTP.
+          </p>
+          <button
+            type="button"
+            onclick={() => triggerPreset("tilang")}
+            class="mt-auto py-2 rounded-full bg-surface-container hover:bg-brand-violet-vibrant hover:text-white text-xs font-bold transition-all cursor-pointer"
+          >
+            Uji Kasus Ini
+          </button>
+        </div>
+
+        <!-- Trend 3 -->
+        <div class="p-5 rounded-2xl bg-white border border-border-subtle shadow-sm flex flex-col gap-3">
+          <div class="flex items-center justify-between">
+            <span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-extrabold">TINGGI</span>
+            <span class="text-[11px] text-on-surface-variant">Social Engineering</span>
+          </div>
+          <h4 class="text-sm font-bold text-brand-indigo-hero">Undangan Pernikahan Digital .APK</h4>
+          <p class="text-xs text-on-surface-variant leading-relaxed">
+            Mengaku kenalan yang mengirim surat undangan resepsi untuk memancing korban memasang aplikasi berbahaya.
+          </p>
+          <button
+            type="button"
+            onclick={() => triggerPreset("apk")}
+            class="mt-auto py-2 rounded-full bg-surface-container hover:bg-brand-violet-vibrant hover:text-white text-xs font-bold transition-all cursor-pointer"
+          >
+            Uji Kasus Ini
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DOWNLOAD / MULTI-CHANNEL Section -->
+  <section id="download" class="w-full bg-surface-ice-blue/60 py-20 px-gutter scroll-mt-20">
+    <div class="max-w-[1200px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+      <div class="lg:col-span-6 flex flex-col gap-6">
+        <span class="text-xs font-bold text-primary uppercase tracking-wider">Akses Fleksibel</span>
+        <h2 class="text-2xl md:text-4xl font-extrabold text-brand-indigo-hero">
+          Gunakan KrosCheck di Mana Saja
+        </h2>
+        <p class="text-sm text-on-surface-variant leading-relaxed">
+          Pemeriksaan penipuan instan dapat diakses tanpa hambatan melalui Web browser, Bot Telegram, maupun Bot WhatsApp resmi.
+        </p>
+
+        <div class="flex flex-wrap items-center gap-3">
+          <a
+            href="https://wa.me"
+            target="_blank"
+            rel="noreferrer"
+            class="px-5 py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-2 shadow-md transition-all"
+          >
+            <span class="material-symbols-outlined text-[18px]">chat</span>
+            <span>WhatsApp Bot</span>
+          </a>
+          <a
+            href="https://t.me"
+            target="_blank"
+            rel="noreferrer"
+            class="px-5 py-2.5 rounded-full bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold flex items-center gap-2 shadow-md transition-all"
+          >
+            <span class="material-symbols-outlined text-[18px]">send</span>
+            <span>Telegram Bot</span>
+          </a>
+          <button
+            type="button"
+            onclick={() => onNavigate && onNavigate("/download")}
+            class="px-5 py-2.5 rounded-full bg-brand-indigo-hero hover:bg-brand-violet-vibrant text-white text-xs font-bold flex items-center gap-2 shadow-md transition-all cursor-pointer"
+          >
+            <span class="material-symbols-outlined text-[18px]">qr_code</span>
+            <span>Pindai QR Ponsel</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="lg:col-span-6 flex justify-center">
+        <div class="p-6 rounded-3xl bg-white shadow-xl border border-border-subtle flex flex-col sm:flex-row items-center gap-6 max-w-md">
+          <div class="w-32 h-32 rounded-xl bg-surface-container-lowest p-2 shadow-sm flex items-center justify-center shrink-0 border">
+            <svg class="w-full h-full text-brand-indigo-hero" fill="currentColor" viewBox="0 0 100 100">
+              <rect x="10" y="10" width="25" height="25" rx="4"></rect>
+              <rect x="15" y="15" width="15" height="15" fill="#FFFFFF"></rect>
+              <rect x="19" y="19" width="7" height="7"></rect>
+              <rect x="65" y="10" width="25" height="25" rx="4"></rect>
+              <rect x="70" y="15" width="15" height="15" fill="#FFFFFF"></rect>
+              <rect x="74" y="19" width="7" height="7"></rect>
+              <rect x="10" y="65" width="25" height="25" rx="4"></rect>
+              <rect x="15" y="70" width="15" height="15" fill="#FFFFFF"></rect>
+              <rect x="19" y="74" width="7" height="7"></rect>
+              <circle cx="45" cy="22" r="4"></circle>
+              <circle cx="55" cy="35" r="4"></circle>
+              <circle cx="45" cy="50" r="4"></circle>
+              <circle cx="68" cy="65" r="4"></circle>
+              <circle cx="85" cy="75" r="4"></circle>
+              <circle cx="55" cy="85" r="4"></circle>
+            </svg>
+          </div>
+          <div class="flex flex-col gap-1 text-center sm:text-left">
+            <h4 class="text-sm font-bold text-brand-indigo-hero">Pindai dari Smartphone</h4>
+            <p class="text-xs text-on-surface-variant">
+              Buka kamera HP Anda untuk menggunakan KrosCheck secara cepat di ponsel keluarga Anda.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Section -->
+  <section id="faq" class="w-full max-w-[900px] mx-auto px-gutter py-20 scroll-mt-20">
+    <div class="text-center mb-10">
+      <span class="text-xs font-bold text-primary uppercase tracking-wider">Tanya Jawab</span>
+      <h2 class="text-2xl md:text-3xl font-extrabold text-brand-indigo-hero mt-1">
+        Pertanyaan yang Sering Diajukan
+      </h2>
+    </div>
+
+    <div class="flex flex-col gap-3">
+      <!-- Item 1 -->
+      <div class="rounded-xl bg-surface-container-lowest p-5 shadow-sm border border-border-subtle transition-all">
+        <button
+          type="button"
+          onclick={() => toggleFaq(0)}
+          class="w-full flex items-center justify-between text-left gap-4 font-bold text-sm sm:text-base text-brand-indigo-hero hover:text-primary transition-colors cursor-pointer"
+        >
+          <span>Apa itu KrosCheck, dan bagaimana cara kerjanya?</span>
+          <span class="material-symbols-outlined text-on-surface-variant transition-transform duration-200 {activeFaqIndex === 0 ? 'rotate-180' : ''}">
+            expand_more
+          </span>
+        </button>
+        {#if activeFaqIndex === 0}
+          <div class="pt-3 text-xs sm:text-sm text-on-surface-variant leading-relaxed border-t border-border-subtle/50 mt-3">
+            KrosCheck adalah situs web pemeriksaan penipuan gratis dan tepercaya yang dirancang untuk membantu Anda mengevaluasi setiap komunikasi mencurigakan (SMS, WhatsApp, tautan, atau APK) dengan analisis cerdas 3-dimensi.
+          </div>
+        {/if}
+      </div>
+
+      <!-- Item 2 -->
+      <div class="rounded-xl bg-surface-container-lowest p-5 shadow-sm border border-border-subtle transition-all">
+        <button
+          type="button"
+          onclick={() => toggleFaq(1)}
+          class="w-full flex items-center justify-between text-left gap-4 font-bold text-sm sm:text-base text-brand-indigo-hero hover:text-primary transition-colors cursor-pointer"
+        >
+          <span>Apakah KrosCheck benar-benar gratis dan privat?</span>
+          <span class="material-symbols-outlined text-on-surface-variant transition-transform duration-200 {activeFaqIndex === 1 ? 'rotate-180' : ''}">
+            expand_more
+          </span>
+        </button>
+        {#if activeFaqIndex === 1}
+          <div class="pt-3 text-xs sm:text-sm text-on-surface-variant leading-relaxed border-t border-border-subtle/50 mt-3">
+            Ya! 100% gratis tanpa perlu registrasi akun. Kami menerapkan prinsip Zero-Log dan PII Masking otomatis sehingga nomor rekening, kartu bank, nomor HP, dan kode OTP Anda terlindungi aman.
+          </div>
+        {/if}
+      </div>
+
+      <!-- Item 3 -->
+      <div class="rounded-xl bg-surface-container-lowest p-5 shadow-sm border border-border-subtle transition-all">
+        <button
+          type="button"
+          onclick={() => toggleFaq(2)}
+          class="w-full flex items-center justify-between text-left gap-4 font-bold text-sm sm:text-base text-brand-indigo-hero hover:text-primary transition-colors cursor-pointer"
+        >
+          <span>Bagaimana jika saya sudah terlanjur mengklik tautan atau mengisi data?</span>
+          <span class="material-symbols-outlined text-on-surface-variant transition-transform duration-200 {activeFaqIndex === 2 ? 'rotate-180' : ''}">
+            expand_more
+          </span>
+        </button>
+        {#if activeFaqIndex === 2}
+          <div class="pt-3 text-xs sm:text-sm text-on-surface-variant leading-relaxed border-t border-border-subtle/50 mt-3">
+            Gunakan fitur Wawancara Adaptif kami. Sistem akan langsung mengaktifkan Mode Darurat dan menampilkan tombol telepon langsung ke Call Center resmi bank Anda (HaloBCA 1500888, BRI 14017, Mandiri 14000) untuk memblokir transaksi.
+          </div>
+        {/if}
+      </div>
+    </div>
+
+    <div class="text-center pt-8">
+      <button
+        type="button"
+        onclick={() => onNavigate && onNavigate("/faq")}
+        class="inline-flex items-center gap-2 text-xs font-bold text-primary hover:text-brand-violet-hover transition-colors cursor-pointer"
+      >
+        <span>Buka semua 8 pertanyaan yang sering diajukan</span>
+        <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- ABOUT Section -->
+  <section id="about" class="w-full py-20 px-gutter bg-surface-bright border-t border-border-subtle scroll-mt-20">
+    <div class="max-w-[800px] mx-auto flex flex-col items-center text-center gap-6">
+      <div class="w-14 h-14 rounded-full bg-surface-container-high flex items-center justify-center shadow-inner text-primary">
+        <span class="material-symbols-outlined text-[28px]">shield_with_heart</span>
+      </div>
+      <h2 class="text-2xl md:text-4xl font-extrabold text-brand-indigo-hero">
+        Penipuan terus berkembang. Perlindungan keluarga Anda pun harus demikian.
+      </h2>
+      <p class="text-sm sm:text-base text-on-surface-variant leading-relaxed">
+        KrosCheck PRO dibangun oleh tim ITK Industries dalam ajang <strong>IDwebhost AI HackFest 2026</strong> untuk menghadirkan perlindungan siber inklusif, ramah lansia, dan cepat tanggap bagi seluruh masyarakat Indonesia.
+      </p>
+      <button
+        type="button"
+        onclick={() => onNavigate && onNavigate("/about")}
+        class="inline-flex items-center gap-2 text-xs font-bold text-primary hover:text-brand-violet-hover transition-colors cursor-pointer"
+      >
+        <span>Baca kisah dan misi kami selengkapnya</span>
+        <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+      </button>
     </div>
   </section>
 </div>

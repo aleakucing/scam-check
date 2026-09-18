@@ -207,5 +207,10 @@ describe("ScamGuard Bun API & Security Suite", () => {
     expect(resResult.status).toBe(200);
     const htmlResult = await resResult.text();
     expect(htmlResult).toContain("KrosCheck");
+
+    const resFaq = await app.request("/faq");
+    expect(resFaq.status).toBe(200);
+    const htmlFaq = await resFaq.text();
+    expect(htmlFaq).toContain("KrosCheck");
   });
 });

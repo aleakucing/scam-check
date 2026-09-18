@@ -68,12 +68,25 @@ app.get("/", async (c) => {
   });
 });
 
-app.get("/result", async (c) => {
-  if (existsSync(distIndexHtml)) {
-    return c.html(await Bun.file(distIndexHtml).text());
-  }
-  return c.json({ status: "result page" });
-});
+const spaRoutes = [
+  "/result",
+  "/how-it-works",
+  "/faq",
+  "/download",
+  "/trends",
+  "/about",
+  "/privacy",
+  "/terms"
+];
+
+for (const route of spaRoutes) {
+  app.get(route, async (c) => {
+    if (existsSync(distIndexHtml)) {
+      return c.html(await Bun.file(distIndexHtml).text());
+    }
+    return c.json({ status: `${route} page` });
+  });
+}
 
 // Swagger/OpenAPI compatibility endpoints
 app.get("/docs", (c) => c.redirect("/api/health"));

@@ -1,11 +1,24 @@
 <script lang="ts">
   interface Props {
     historyCount?: number;
+    currentRoute?: string;
     onOpenHistory?: () => void;
     onNavigateHome?: () => void;
+    onNavigate?: (route: string, hash?: string) => void;
   }
 
-  let { historyCount = 0, onOpenHistory, onNavigateHome }: Props = $props();
+  let { historyCount = 0, currentRoute = "/", onOpenHistory, onNavigateHome, onNavigate }: Props = $props();
+
+  let isMobileMenuOpen = $state<boolean>(false);
+
+  function handleNavClick(route: string, hash: string) {
+    isMobileMenuOpen = false;
+    if (onNavigate) {
+      onNavigate(route, hash);
+    } else if (onNavigateHome) {
+      onNavigateHome();
+    }
+  }
 </script>
 
 <header class="fixed top-0 left-0 right-0 w-full z-50 bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(28,0,79,0.04)]">
@@ -30,15 +43,49 @@
 
     <!-- Desktop Navigation -->
     <nav class="hidden lg:flex items-center gap-space-lg text-sm font-semibold">
-      <button type="button" onclick={onNavigateHome} class="text-primary font-bold hover:text-brand-violet-hover transition-colors">Cara kerja</button>
-      <a href="#faq" class="text-on-surface-variant hover:text-primary transition-colors">Tanya Jawab</a>
-      <a href="#download" class="text-on-surface-variant hover:text-primary transition-colors">Unduh aplikasi</a>
-      <a href="#trends" class="text-on-surface-variant hover:text-primary transition-colors">Tren Penipuan</a>
-      <a href="#about" class="text-on-surface-variant hover:text-primary transition-colors">Tentang Kami</a>
+      <button
+        type="button"
+        onclick={() => handleNavClick("/how-it-works", "how-it-works")}
+        class="transition-colors cursor-pointer {currentRoute === '/how-it-works' ? 'text-primary font-bold' : 'text-on-surface-variant hover:text-primary'}"
+      >
+        Cara kerja
+      </button>
+
+      <button
+        type="button"
+        onclick={() => handleNavClick("/faq", "faq")}
+        class="transition-colors cursor-pointer {currentRoute === '/faq' ? 'text-primary font-bold' : 'text-on-surface-variant hover:text-primary'}"
+      >
+        Tanya Jawab
+      </button>
+
+      <button
+        type="button"
+        onclick={() => handleNavClick("/download", "download")}
+        class="transition-colors cursor-pointer {currentRoute === '/download' ? 'text-primary font-bold' : 'text-on-surface-variant hover:text-primary'}"
+      >
+        Unduh aplikasi
+      </button>
+
+      <button
+        type="button"
+        onclick={() => handleNavClick("/trends", "trends")}
+        class="transition-colors cursor-pointer {currentRoute === '/trends' ? 'text-primary font-bold' : 'text-on-surface-variant hover:text-primary'}"
+      >
+        Tren Penipuan
+      </button>
+
+      <button
+        type="button"
+        onclick={() => handleNavClick("/about", "about")}
+        class="transition-colors cursor-pointer {currentRoute === '/about' ? 'text-primary font-bold' : 'text-on-surface-variant hover:text-primary'}"
+      >
+        Tentang Kami
+      </button>
     </nav>
 
     <!-- Header Actions -->
-    <div class="flex items-center gap-space-sm">
+    <div class="flex items-center gap-2 sm:gap-space-sm">
       <!-- History Vault Trigger -->
       <button
         type="button"
@@ -60,7 +107,7 @@
         href="https://t.me"
         target="_blank"
         rel="noreferrer"
-        class="hidden sm:inline-flex items-center justify-center px-4 py-2 rounded-full bg-brand-violet-vibrant text-on-primary text-xs font-bold hover:bg-brand-violet-hover transition-colors shadow-sm"
+        class="hidden sm:inline-flex items-center justify-center px-3.5 py-2 rounded-full bg-sky-600 text-white text-xs font-bold hover:bg-sky-700 transition-colors shadow-sm"
       >
         Telegram
       </a>
@@ -70,10 +117,82 @@
         href="https://wa.me"
         target="_blank"
         rel="noreferrer"
-        class="hidden sm:inline-flex items-center justify-center px-4 py-2 rounded-full bg-brand-violet-vibrant text-on-primary text-xs font-bold hover:bg-brand-violet-hover transition-colors shadow-sm"
+        class="hidden sm:inline-flex items-center justify-center px-3.5 py-2 rounded-full bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-700 transition-colors shadow-sm"
       >
-        WhatsApp Bot
+        WhatsApp
       </a>
+
+      <!-- Mobile Hamburger Toggle -->
+      <button
+        type="button"
+        onclick={() => { isMobileMenuOpen = !isMobileMenuOpen; }}
+        class="lg:hidden p-2 rounded-xl text-brand-indigo-hero hover:bg-surface-container transition-colors cursor-pointer"
+        aria-label="Menu Navigasi"
+      >
+        <span class="material-symbols-outlined text-[24px]">
+          {isMobileMenuOpen ? 'close' : 'menu'}
+        </span>
+      </button>
     </div>
   </div>
+
+  <!-- Mobile Dropdown Menu -->
+  {#if isMobileMenuOpen}
+    <div class="lg:hidden w-full bg-surface-container-lowest border-b border-border-subtle px-gutter py-4 flex flex-col gap-3 shadow-lg animate-in fade-in duration-200">
+      <button
+        type="button"
+        onclick={() => handleNavClick("/how-it-works", "how-it-works")}
+        class="text-left py-2 px-3 rounded-lg text-sm font-bold text-brand-indigo-hero hover:bg-surface-container transition-colors"
+      >
+        Cara kerja
+      </button>
+      <button
+        type="button"
+        onclick={() => handleNavClick("/faq", "faq")}
+        class="text-left py-2 px-3 rounded-lg text-sm font-bold text-brand-indigo-hero hover:bg-surface-container transition-colors"
+      >
+        Tanya Jawab
+      </button>
+      <button
+        type="button"
+        onclick={() => handleNavClick("/download", "download")}
+        class="text-left py-2 px-3 rounded-lg text-sm font-bold text-brand-indigo-hero hover:bg-surface-container transition-colors"
+      >
+        Unduh aplikasi
+      </button>
+      <button
+        type="button"
+        onclick={() => handleNavClick("/trends", "trends")}
+        class="text-left py-2 px-3 rounded-lg text-sm font-bold text-brand-indigo-hero hover:bg-surface-container transition-colors"
+      >
+        Tren Penipuan
+      </button>
+      <button
+        type="button"
+        onclick={() => handleNavClick("/about", "about")}
+        class="text-left py-2 px-3 rounded-lg text-sm font-bold text-brand-indigo-hero hover:bg-surface-container transition-colors"
+      >
+        Tentang Kami
+      </button>
+      
+      <div class="pt-2 border-t border-border-subtle flex items-center gap-2">
+        <a
+          href="https://t.me"
+          target="_blank"
+          rel="noreferrer"
+          class="flex-1 py-2 rounded-full bg-sky-600 text-white text-xs font-bold text-center"
+        >
+          Telegram Bot
+        </a>
+        <a
+          href="https://wa.me"
+          target="_blank"
+          rel="noreferrer"
+          class="flex-1 py-2 rounded-full bg-emerald-600 text-white text-xs font-bold text-center"
+        >
+          WhatsApp Bot
+        </a>
+      </div>
+    </div>
+  {/if}
 </header>

@@ -55,4 +55,8 @@ backend/data/
 *.sqlite
 *.sqlite3
 
+# Local notes / personal scratch
+p.md
+
+
 

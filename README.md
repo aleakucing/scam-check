@@ -107,28 +107,38 @@ Aplikasi siap diakses publik melalui browser di:
 
 ## 5. Menjalankan di Lingkungan Pengembangan Lokal
 
-### Menjalankan Backend:
+### Menjalankan Backend (Bun + Hono + TypeScript):
 ```bash
 cd backend
-python -m venv venv
 
-# Mengaktifkan virtual environment:
-# Windows (PowerShell):
-.\venv\Scripts\Activate.ps1
-# Linux / macOS:
-source venv/bin/activate
+# Instal dependensi:
+bun install
 
-pip install -r requirements.txt
-python -m uvicorn app.main:app --reload --port 8000
+# Jalankan dalam mode pengembangan (live reload):
+bun run dev
+
+# Jalankan seluruh test suite otomatis:
+bun test
 ```
+Layanan backend akan aktif di `http://localhost:8000`.
 
-### Menjalankan Frontend:
-Buka file `frontend/index.html` langsung di browser, atau sajikan melalui live server lokal:
+### Menjalankan Frontend (Svelte 5 + Vite + Tailwind CSS):
 ```bash
 cd frontend
-python -m http.server 3000
+
+# Instal dependensi:
+bun install
+
+# Jalankan Vite dev server:
+bun run dev
+
+# Memeriksa diagnosa Svelte & TypeScript:
+bun run check
+
+# Membangun berkas produksi:
+bun run build
 ```
-Buka `http://localhost:3000` di peramban Anda.
+Buka `http://localhost:5173` di peramban Anda.
 
 ---
 
@@ -136,10 +146,14 @@ Buka `http://localhost:3000` di peramban Anda.
 
 | Method | Endpoint | Deskripsi |
 |---|---|---|
-| `GET` | `/api/health` | Pemeriksaan kesehatan sistem, status engine AI, dan versi aplikasi. |
+| `GET` | `/api/health` | Pemeriksaan kesehatan sistem, status engine AI, rate limiter, dan versi aplikasi. |
 | `POST` | `/api/analyze` | Melakukan analisis risiko bukti digital (URL, pesan teks, transkrip, screenshot). |
 | `POST` | `/api/interview` | Mengevaluasi skor keterpaparan (*User Exposure*) dan tindakan kedaruratan. |
 | `POST` | `/api/report` | Menghasilkan salinan laporan audit insiden digital resmi. |
+| `GET` | `/api/cases` | Mengambil daftar kasus investigasi terbaru dari *Evidence Vault* SQLite. |
+| `GET` | `/api/cases/:id` | Mengambil detail riwayat kasus audit digital berdasarkan ID kasus. |
+| `POST` | `/api/webhook/telegram` | Endpoint integrasi webhook bot Telegram untuk analisis instan. |
+| `POST` | `/api/webhook/whatsapp` | Endpoint integrasi webhook bot WhatsApp untuk pelaporan warga. |
 
 ---
 

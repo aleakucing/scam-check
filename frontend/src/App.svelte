@@ -5,6 +5,12 @@
   import TelephoneOperatorModal from "./lib/TelephoneOperatorModal.svelte";
   import LandingPage from "./views/LandingPage.svelte";
   import ResultPage from "./views/ResultPage.svelte";
+  import HowItWorksPage from "./views/HowItWorksPage.svelte";
+  import FaqPage from "./views/FaqPage.svelte";
+  import DownloadPage from "./views/DownloadPage.svelte";
+  import TrendsPage from "./views/TrendsPage.svelte";
+  import AboutPage from "./views/AboutPage.svelte";
+  import LegalPage from "./views/LegalPage.svelte";
 
   import type {
     AnalyzeRequest,
@@ -14,8 +20,10 @@
   } from "./types";
   import { analyzeEvidence, submitInterview } from "./services/api";
 
+  type AppRoute = "/" | "/result" | "/how-it-works" | "/faq" | "/download" | "/trends" | "/about" | "/privacy" | "/terms";
+
   // State
-  let currentRoute = $state<"/" | "/result">("/");
+  let currentRoute = $state<AppRoute>("/");
   let isLoading = $state<boolean>(false);
   let currentAnalysis = $state<AnalyzeResponse | null>(null);
   let currentEvidence = $state<string>("");
@@ -28,7 +36,52 @@
   $effect(() => {
     updateHistoryCount();
     checkInitialUrl();
+
+    // Listen to browser popstate (back/forward)
+    const handlePopState = () => {
+      const path = window.location.pathname as AppRoute;
+      const hash = window.location.hash;
+      if (path && ["/", "/how-it-works", "/faq", "/download", "/trends", "/about", "/privacy", "/terms"].includes(path)) {
+        currentRoute = path;
+      }
+      if (hash) {
+        scrollToHash(hash.replace("#", ""));
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
   });
+
+  function scrollToHash(hash: string) {
+    setTimeout(() => {
+      const el = document.getElementById(hash);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth" });
+      }
+    }, 100);
+  }
+
+  function navigateTo(route: string, hash?: string) {
+    if (typeof window === "undefined") return;
+
+    if (hash && (currentRoute === "/" || route === "/")) {
+      currentRoute = "/";
+      window.history.pushState(null, "", `#${hash}`);
+      scrollToHash(hash);
+      return;
+    }
+
+    currentRoute = (route as AppRoute) || "/";
+    window.history.pushState(null, "", route);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+
+    if (hash) {
+      scrollToHash(hash);
+    }
+  }
 
   function updateHistoryCount() {
     if (typeof window === "undefined") return;
@@ -67,6 +120,18 @@
   async function checkInitialUrl() {
     if (typeof window === "undefined") return;
     
+    // Check pathname
+    const path = window.location.pathname as AppRoute;
+    if (["/how-it-works", "/faq", "/download", "/trends", "/about", "/privacy", "/terms"].includes(path)) {
+      currentRoute = path;
+      return;
+    }
+
+    // Check hash on root
+    if (window.location.hash) {
+      scrollToHash(window.location.hash.replace("#", ""));
+    }
+
     // Check sessionStorage
     try {
       const stored = sessionStorage.getItem("scamguard_query");
@@ -102,6 +167,7 @@
       currentAnalysis = resp;
       saveToLocalHistory(resp, payload.content);
       currentRoute = "/result";
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err) {
       console.error("Analysis execution failed:", err);
     } finally {
@@ -134,8 +200,10 @@
 <div class="min-h-screen flex flex-col bg-surface text-on-surface antialiased font-sans">
   <Header
     {historyCount}
+    {currentRoute}
     onOpenHistory={() => { isHistoryOpen = true; }}
-    onNavigateHome={() => { currentRoute = "/"; }}
+    onNavigateHome={() => navigateTo("/")}
+    onNavigate={navigateTo}
   />
 
   <main class="flex-1 pt-20 flex flex-col">
@@ -160,17 +228,52 @@
         bind:this={resultPageRef}
         analysis={currentAnalysis}
         evidenceContent={currentEvidence}
-        onBack={() => { currentRoute = "/"; }}
+        onBack={() => navigateTo("/")}
         onOpenOperator={() => { isOperatorOpen = true; }}
+      />
+    {:else if currentRoute === "/how-it-works"}
+      <HowItWorksPage
+        onNavigateHome={() => navigateTo("/")}
+      />
+    {:else if currentRoute === "/faq"}
+      <FaqPage
+        onNavigateHome={() => navigateTo("/")}
+      />
+    {:else if currentRoute === "/download"}
+      <DownloadPage
+        onNavigateHome={() => navigateTo("/")}
+      />
+    {:else if currentRoute === "/trends"}
+      <TrendsPage
+        onNavigateHome={() => navigateTo("/")}
+        onTestScenario={(content, type) => executeAnalysis({ content, type })}
+      />
+    {:else if currentRoute === "/about"}
+      <AboutPage
+        onNavigateHome={() => navigateTo("/")}
+      />
+    {:else if currentRoute === "/privacy"}
+      <LegalPage
+        initialTab="privacy"
+        onNavigateHome={() => navigateTo("/")}
+      />
+    {:else if currentRoute === "/terms"}
+      <LegalPage
+        initialTab="terms"
+        onNavigateHome={() => navigateTo("/")}
       />
     {:else}
       <LandingPage
         onSubmit={(payload) => executeAnalysis(payload)}
+        onNavigate={navigateTo}
       />
     {/if}
   </main>
 
-  <Footer />
+  <Footer
+    onNavigate={navigateTo}
+    onTestScenario={(content, type) => executeAnalysis({ content, type })}
+  />
 
   <!-- Global Modals -->
   <CaseHistoryModal

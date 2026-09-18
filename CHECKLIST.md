@@ -50,8 +50,17 @@
   - [x] Salin ke Clipboard format laporan terstruktur.
   - [x] Unduh laporan format text (`.txt`).
 
+- [x] **Subpage Lengkap & Routing SPA Mandiri**
+  - [x] Halaman `/how-it-works` (Penjelasan 4 langkah audit, arsitektur AI, dan pertahanan siber).
+  - [x] Halaman `/faq` (Pusat tanya jawab interaktif dengan pencarian dan filter kategori).
+  - [x] Halaman `/download` (Akses multi-kanal: Web PWA, Bot Telegram, dan Bot WhatsApp).
+  - [x] Halaman `/trends` (Papan intelijen tren scam Indonesia dengan pemicu uji coba langsung).
+  - [x] Halaman `/about` (Latar belakang misi IDwebhost HackFest & nilai-nilai dasar).
+  - [x] Halaman `/privacy` & `/terms` (Dokumentasi hukum komitmen Zero-Log & PII Protection).
+
 - [x] **Kualitas Kode & Pengujian**
-  - [x] 29 Unit Tests otomatis (`backend/run_tests.py`) dengan status 100% PASS.
+  - [x] 11 Test Suites Bun API otomatis (`bun test`) dengan 54 assertions status 100% PASS.
+  - [x] Svelte Check (`bun run check`) dan Vite build status 100% PASS (0 error, 0 warning).
   - [x] Dockerfile & Docker Compose dengan Nginx reverse proxy siap pakai.
 
 ---
@@ -96,24 +105,29 @@
 
 ## 🟣 4. Kebutuhan Berkas Lomba (Submission Deliverables)
 
-- [ ] **Video Demonstrasi Produk (Durasi 3–5 Menit)**
-  - [ ] Skenario 1: Input URL phising perbankan atau drag-drop screenshot surat tilang APK.
-  - [ ] Skenario 2: Penjelasan skor risiko 3 dimensi (Content Risk, Confidence, Exposure).
-  - [ ] Skenario 3: Simulasi korban panik melalui Adaptive Interview (pilihan *"Sudah masukkan OTP"*).
-  - [ ] Skenario 4: Tampilan Emergency Mode, checklist pengamanan dana, dan kontak darurat bank.
-  - [ ] Skenario 5: Fitur ramah lansia (perbesar font, narasi suara, tombol kirim WA keluarga).
-  - [ ] Skenario 6: Ekspor dokumen laporan insiden resmi.
+- [x] **Naskah & Storyboard Video Demonstrasi Produk (Durasi 3–5 Menit)**
+  - [x] Panduan lengkap & script rekaman: [`docs/VIDEO_DEMO_SCRIPT.md`](docs/VIDEO_DEMO_SCRIPT.md).
+  - [x] Skenario 1: Input URL phising perbankan atau drag-drop screenshot surat tilang APK.
+  - [x] Skenario 2: Penjelasan skor risiko 3 dimensi (Content Risk, Confidence, Exposure).
+  - [x] Skenario 3: Simulasi korban panik melalui Adaptive Interview (pilihan *"Sudah masukkan OTP"*).
+  - [x] Skenario 4: Tampilan Emergency Mode, checklist pengamanan dana, dan kontak darurat bank.
+  - [x] Skenario 5: Fitur ramah lansia (perbesar font, narasi suara, tombol kirim WA keluarga).
+  - [x] Skenario 6: Ekspor dokumen laporan insiden resmi.
+  - [ ] *Perekaman video fisik (MP4) oleh tim peserta.*
 
-- [ ] **Slide Presentasi / Pitch Deck (PDF 5–10 Halaman)**
-  - [ ] Halaman 1: Judul Proyek, Kategori, Tim, dan Tagline.
-  - [ ] Halaman 2: Latar Belakang Masalah (Tingginya korban scam lansia & kelemahan detektor biner biasa).
-  - [ ] Halaman 3: Solusi Unik ScamGuard AI (Risk Score 3D & Wawancara Adaptif).
-  - [ ] Halaman 4: Arsitektur Sistem & Privasi Data (Zero-log, PII Masking, SSRF Shield).
-  - [ ] Halaman 5: Fitur Aksesibilitas Publik (Senior accessibility & pendampingan keluarga).
-  - [ ] Halaman 6: Rencana Monetisasi / Dampak Sosial (B2B API perbankan & Public Good).
-  - [ ] Halaman 7: Link Demo Live di VPS & Repositori GitHub.
+- [x] **Draft Naskah & Kerangka Pitch Deck (PDF 5–10 Halaman)**
+  - [x] Dokumen slide presentasi: [`docs/PITCH_DECK.md`](docs/PITCH_DECK.md).
+  - [x] Halaman 1: Judul Proyek, Kategori, Tim, dan Tagline.
+  - [x] Halaman 2: Latar Belakang Masalah (Tingginya korban scam lansia & kelemahan detektor biner biasa).
+  - [x] Halaman 3: Solusi Unik ScamGuard AI (Risk Score 3D & Wawancara Adaptif).
+  - [x] Halaman 4: Arsitektur Sistem & Privasi Data (Zero-log, PII Masking, SSRF Shield).
+  - [x] Halaman 5: Fitur Aksesibilitas Publik (Senior accessibility & pendampingan keluarga).
+  - [x] Halaman 6: Rencana Monetisasi / Dampak Sosial (B2B API perbankan & Public Good).
+  - [x] Halaman 7: Link Demo Live di VPS & Repositori GitHub.
+  - [ ] *Desain grafis slide (Canva/PPT/Marp) dan ekspor ke PDF oleh tim peserta.*
 
-- [ ] **Finalisasi Repositori GitHub**
-  - [ ] Perbarui bagian *About* repositori dengan deskripsi menarik.
-  - [ ] Tambahkan tautan live demo VPS di header repositori.
-  - [ ] Beri topik (*topics*): `hackfest-idwebhost`, `ai-agent`, `cyber-security`, `anti-scam`, `fastapi`, `tailwind-css`, `gemini-api`.
+- [x] **Finalisasi Dokumentasi Repositori GitHub**
+  - [x] Perbarui bagian *About* repositori dengan deskripsi menarik dan tautan live demo VPS.
+  - [x] Tambahkan panduan deployment Bun, Hono, dan Svelte 5 di `README.md`.
+  - [x] Rekomendasi topik (*topics*): `hackfest-idwebhost`, `ai-agent`, `cyber-security`, `anti-scam`, `bun`, `hono`, `svelte5`, `tailwind-css`, `gemini-api`.
+
