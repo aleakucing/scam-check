@@ -10,6 +10,7 @@
     generateIncidentReport,
     maskSensitiveData
   } from "../services/api";
+  import { speakIndonesian, stopSpeaking } from "../services/tts";
 
   interface Props {
     analysis: AnalyzeResponse;
@@ -228,10 +229,9 @@
   function toggleAudioNarration() {
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
       if (isSpeaking) {
-        window.speechSynthesis.cancel();
+        stopSpeaking();
         isSpeaking = false;
       } else {
-        window.speechSynthesis.cancel();
         let narration = `Laporan hasil audit KrosCheck. Tingkat risiko konten ${analysis.content_risk} dari 100. `;
         if (analysis.content_risk >= 75) {
           narration += `Peringatan! Konten ini dinilai sangat berbahaya. Jangan berikan kode SMS verifikasi atau PIN Anda kepada siapapun. `;
@@ -242,13 +242,16 @@
           narration += `Segera lakukan penguncian kartu ATM dan hubungi call center resmi bank Anda. `;
         }
 
-        const utt = new SpeechSynthesisUtterance(narration);
-        utt.lang = "id-ID";
-        utt.rate = 0.95;
-        utt.onend = () => { isSpeaking = false; };
-        utt.onerror = () => { isSpeaking = false; };
-        window.speechSynthesis.speak(utt);
         isSpeaking = true;
+        speakIndonesian(narration, {
+          rate: 0.92,
+          onEnd: () => {
+            isSpeaking = false;
+          },
+          onError: () => {
+            isSpeaking = false;
+          }
+        });
       }
     } else {
       alert("Fitur suara tidak didukung pada peramban ini.");

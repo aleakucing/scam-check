@@ -1,5 +1,6 @@
 <script lang="ts">
   import { t } from "../services/i18n";
+  import { speakIndonesian, stopSpeaking } from "../services/tts";
 
   interface Props {
     isOpen: boolean;
@@ -21,34 +22,31 @@
     if (isOpen) {
       step = 1;
       view = "question";
+      isSpeaking = false;
       isSubmitting = false;
-      setTimeout(() => {
-        speakCurrentQuestion();
-      }, 300);
+      speakCurrentQuestion();
     } else {
       stopSpeech();
     }
   });
 
   function stopSpeech() {
-    if (typeof window !== "undefined" && "speechSynthesis" in window) {
-      window.speechSynthesis.cancel();
-      isSpeaking = false;
-    }
+    stopSpeaking();
+    isSpeaking = false;
   }
 
   function speakText(text: string) {
     activeCaption = text;
-    if (typeof window !== "undefined" && "speechSynthesis" in window) {
-      window.speechSynthesis.cancel();
-      const utt = new SpeechSynthesisUtterance(text);
-      utt.lang = "id-ID";
-      utt.rate = 0.90; // Slightly slower pace for seniors
-      isSpeaking = true;
-      utt.onend = () => { isSpeaking = false; };
-      utt.onerror = () => { isSpeaking = false; };
-      window.speechSynthesis.speak(utt);
-    }
+    isSpeaking = true;
+    speakIndonesian(text, {
+      rate: 0.90,
+      onEnd: () => {
+        isSpeaking = false;
+      },
+      onError: () => {
+        isSpeaking = false;
+      }
+    });
   }
 
   function speakCurrentQuestion() {
