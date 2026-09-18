@@ -64,44 +64,31 @@ flowchart TD
   - *Autonomous Fallback*: Built-in Indonesian Cybersecurity Heuristic Rules Engine yang tetap bekerja 100% offline tanpa ketergantungan API eksternal.
 - **Web Server & Reverse Proxy**: Nginx Alpine dengan kompresi Gzip, CORS headers, rate limiting, dan isolasi jaringan.
 - **Containerization**: Multi-stage Docker Compose untuk deployment otomatis sekali jalan.
-- **Target Infrastruktur**: IDwebhost Cloud VPS (Ubuntu 24.04 LTS, IP: `103.30.146.185`).
+- **Target Infrastruktur**: Linux / Cloud VPS (Ubuntu 24.04 LTS), Docker & Docker Compose ready.
 - **Legacy Archive**: Implementasi awal (Python FastAPI & Vanilla HTML) tersimpan rapi di direktori `legacy/`.
 
 ---
 
-## 4. Panduan Deployment Cepat di VPS IDwebhost
+## 4. Panduan Deployment dengan Docker Compose
 
-### Langkah 1: Akses Server VPS via SSH
-```bash
-ssh -p 4422 root@103.30.146.185
-```
+Aplikasi telah dilengkapi konfigurasi Docker multi-stage yang siap dijalankan di server produksi maupun mesin lokal:
 
-### Langkah 2: Unduh Repositori
 ```bash
-git clone https://github.com/aleakucing/scam-check.git ~/scamguard
-cd ~/scamguard
-```
+# 1. Unduh repositori
+git clone https://github.com/aleakucing/scam-check.git
+cd scam-check
 
-### Langkah 3: Siapkan File Konfigurasi (Opsional)
-```bash
+# 2. Siapkan file konfigurasi environment
 cp .env.example .env
-```
-*Catatan: Jika `GEMINI_API_KEY` dikosongkan, ScamGuard AI otomatis beroperasi penuh menggunakan mesin analisis heuristik keamanan siber bawaan.*
 
-### Langkah 4: Jalankan Service via Docker Compose
-```bash
+# 3. Bangun dan jalankan seluruh container
 docker compose up -d --build
-```
 
-Setelah kontainer aktif, verifikasi status layanan:
-```bash
+# 4. Verifikasi status container
 docker compose ps
-curl http://localhost/api/health
 ```
 
-Aplikasi siap diakses publik melalui browser di:
-- **Aplikasi Web**: `http://103.30.146.185`
-- **Dokumentasi Interaktif API (Swagger UI)**: `http://103.30.146.185/docs`
+*Catatan: Jika `GEMINI_API_KEY` dikosongkan pada `.env`, ScamGuard AI otomatis beroperasi penuh secara mandiri menggunakan mesin analisis heuristik keamanan siber lokal.*
 
 ---
 
