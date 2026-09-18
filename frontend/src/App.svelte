@@ -11,6 +11,7 @@
   import TrendsPage from "./views/TrendsPage.svelte";
   import AboutPage from "./views/AboutPage.svelte";
   import LegalPage from "./views/LegalPage.svelte";
+  import { fade, fly } from "svelte/transition";
 
   import type {
     AnalyzeRequest,
@@ -208,65 +209,106 @@
 
   <main class="flex-1 pt-20 flex flex-col">
     {#if isLoading}
-      <!-- Sleek Loading State with Progress Pulse -->
-      <div class="flex-1 flex flex-col items-center justify-center min-h-[60vh] gap-6 text-center px-4">
-        <div class="relative flex items-center justify-center">
-          <div class="w-20 h-20 rounded-full border-4 border-surface-container-high border-t-brand-violet-vibrant animate-spin"></div>
-          <span class="material-symbols-outlined text-brand-violet-vibrant text-3xl absolute">security</span>
+      <!-- High-Tech Cyber Radar Threat Scanner Animation -->
+      <div in:fade={{ duration: 200 }} class="flex-1 flex flex-col items-center justify-center min-h-[65vh] gap-8 text-center px-4">
+        <div class="relative w-36 h-36 flex items-center justify-center">
+          <!-- Outer pulsating wave -->
+          <div class="absolute inset-0 rounded-full bg-brand-violet-vibrant/10 animate-ping"></div>
+          
+          <!-- Concentric radar circles -->
+          <div class="absolute inset-2 rounded-full border-2 border-dashed border-purple-300 animate-spin" style="animation-duration: 12s;"></div>
+          <div class="absolute inset-6 rounded-full border border-purple-200"></div>
+          <div class="absolute inset-10 rounded-full border border-purple-100"></div>
+          
+          <!-- Radar sweep beam -->
+          <div class="absolute inset-0 rounded-full bg-gradient-to-tr from-brand-violet-vibrant/30 via-transparent to-transparent animate-radar pointer-events-none"></div>
+
+          <!-- Central Shield Badge -->
+          <div class="relative z-10 w-16 h-16 rounded-2xl bg-white shadow-xl border border-purple-100 flex items-center justify-center animate-bounce-subtle">
+            <span class="material-symbols-outlined text-brand-violet-vibrant text-3xl animate-pulse">radar</span>
+          </div>
         </div>
-        <div class="flex flex-col gap-1.5 max-w-md">
-          <h2 class="text-xl font-bold text-brand-indigo-hero">
+
+        <div class="flex flex-col gap-2 max-w-md">
+          <div class="inline-flex items-center justify-center gap-2 px-3 py-1 rounded-full bg-purple-50 text-brand-violet-vibrant text-xs font-bold border border-purple-200 mx-auto">
+            <span class="w-2 h-2 rounded-full bg-brand-violet-vibrant animate-ping"></span>
+            <span>PEMINDAIAN INTELIJEN AKTIF</span>
+          </div>
+          <h2 class="text-xl md:text-2xl font-extrabold text-brand-indigo-hero">
             Menganalisis Bukti Digital...
           </h2>
-          <p class="text-xs text-on-surface-variant leading-relaxed">
-            Menghubungkan target ke intelijen ancaman siber, memeriksa potensi pemalsuan domain, dan mengevaluasi indikator manipulasi.
+          <p class="text-xs sm:text-sm text-on-surface-variant leading-relaxed">
+            Menghubungkan target ke intelijen ancaman siber, mendeteksi phishing typosquatting, serta mengevaluasi indikator manipulasi.
           </p>
+          
+          <!-- Animated scanning beam bar -->
+          <div class="w-64 h-1.5 rounded-full bg-surface-container mx-auto mt-4 overflow-hidden relative">
+            <div class="h-full w-24 rounded-full bg-gradient-to-r from-brand-violet-vibrant via-sky-400 to-brand-violet-vibrant absolute" style="animation: shimmer-slide 1.5s infinite linear;"></div>
+          </div>
         </div>
       </div>
     {:else if currentRoute === "/result" && currentAnalysis}
-      <ResultPage
-        bind:this={resultPageRef}
-        analysis={currentAnalysis}
-        evidenceContent={currentEvidence}
-        onBack={() => navigateTo("/")}
-        onOpenOperator={() => { isOperatorOpen = true; }}
-      />
+      <div in:fade={{ duration: 250 }} class="flex-1 flex flex-col">
+        <ResultPage
+          bind:this={resultPageRef}
+          analysis={currentAnalysis}
+          evidenceContent={currentEvidence}
+          onBack={() => navigateTo("/")}
+          onOpenOperator={() => { isOperatorOpen = true; }}
+        />
+      </div>
     {:else if currentRoute === "/how-it-works"}
-      <HowItWorksPage
-        onNavigateHome={() => navigateTo("/")}
-      />
+      <div in:fade={{ duration: 200 }} class="flex-1 flex flex-col">
+        <HowItWorksPage
+          onNavigateHome={() => navigateTo("/")}
+        />
+      </div>
     {:else if currentRoute === "/faq"}
-      <FaqPage
-        onNavigateHome={() => navigateTo("/")}
-      />
+      <div in:fade={{ duration: 200 }} class="flex-1 flex flex-col">
+        <FaqPage
+          onNavigateHome={() => navigateTo("/")}
+        />
+      </div>
     {:else if currentRoute === "/download"}
-      <DownloadPage
-        onNavigateHome={() => navigateTo("/")}
-      />
+      <div in:fade={{ duration: 200 }} class="flex-1 flex flex-col">
+        <DownloadPage
+          onNavigateHome={() => navigateTo("/")}
+        />
+      </div>
     {:else if currentRoute === "/trends"}
-      <TrendsPage
-        onNavigateHome={() => navigateTo("/")}
-        onTestScenario={(content, type) => executeAnalysis({ content, type })}
-      />
+      <div in:fade={{ duration: 200 }} class="flex-1 flex flex-col">
+        <TrendsPage
+          onNavigateHome={() => navigateTo("/")}
+          onTestScenario={(content, type) => executeAnalysis({ content, type })}
+        />
+      </div>
     {:else if currentRoute === "/about"}
-      <AboutPage
-        onNavigateHome={() => navigateTo("/")}
-      />
+      <div in:fade={{ duration: 200 }} class="flex-1 flex flex-col">
+        <AboutPage
+          onNavigateHome={() => navigateTo("/")}
+        />
+      </div>
     {:else if currentRoute === "/privacy"}
-      <LegalPage
-        initialTab="privacy"
-        onNavigateHome={() => navigateTo("/")}
-      />
+      <div in:fade={{ duration: 200 }} class="flex-1 flex flex-col">
+        <LegalPage
+          initialTab="privacy"
+          onNavigateHome={() => navigateTo("/")}
+        />
+      </div>
     {:else if currentRoute === "/terms"}
-      <LegalPage
-        initialTab="terms"
-        onNavigateHome={() => navigateTo("/")}
-      />
+      <div in:fade={{ duration: 200 }} class="flex-1 flex flex-col">
+        <LegalPage
+          initialTab="terms"
+          onNavigateHome={() => navigateTo("/")}
+        />
+      </div>
     {:else}
-      <LandingPage
-        onSubmit={(payload) => executeAnalysis(payload)}
-        onNavigate={navigateTo}
-      />
+      <div in:fade={{ duration: 200 }} class="flex-1 flex flex-col">
+        <LandingPage
+          onSubmit={(payload) => executeAnalysis(payload)}
+          onNavigate={navigateTo}
+        />
+      </div>
     {/if}
   </main>
 

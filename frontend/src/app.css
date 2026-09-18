@@ -7,17 +7,145 @@
     margin: 0;
     padding: 0;
     font-family: 'Plus Jakarta Sans', sans-serif;
+    scroll-behavior: smooth;
   }
   body {
-    overscroll-behavior: none;
+    overscroll-behavior-y: none;
   }
 }
 
+/* Custom Animation Keyframes */
+@keyframes float-gentle {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(1deg);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(229, 37, 52, 0.2), 0 0 30px rgba(229, 37, 52, 0.1);
+    border-color: rgba(229, 37, 52, 0.8);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(229, 37, 52, 0.4), 0 0 50px rgba(229, 37, 52, 0.2);
+    border-color: rgba(229, 37, 52, 1);
+  }
+}
+
+@keyframes pulse-purple {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(104, 27, 255, 0.35);
+  }
+  70% {
+    box-shadow: 0 0 0 14px rgba(104, 27, 255, 0);
+  }
+}
+
+@keyframes scan-beam {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(300%);
+    opacity: 0.2;
+  }
+}
+
+@keyframes radar-sweep {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes ripple-wave {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+}
+
+@keyframes shimmer-slide {
+  0% { left: -40%; }
+  100% { left: 100%; }
+}
+
+@keyframes bounce-subtle {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+/* Animation Utility Classes */
+.animate-float {
+  animation: float-gentle 4.5s ease-in-out infinite;
+}
+
+.animate-bounce-subtle {
+  animation: bounce-subtle 2s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-pulse-purple {
+  animation: pulse-purple 2.2s infinite;
+}
+
+.animate-radar {
+  animation: radar-sweep 2.5s linear infinite;
+}
+
+.animate-scan-beam {
+  animation: scan-beam 2.8s ease-in-out infinite;
+}
+
+.shimmer-text {
+  background: linear-gradient(90deg, #1C004F 0%, #681BFF 50%, #1C004F 100%);
+  background-size: 200% auto;
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: shimmer 4s linear infinite;
+}
+
+/* Card & Interactive UI Utilities */
 .sg-card {
   background-color: #FFFFFF;
   border-radius: 1.25rem;
   box-shadow: 0 4px 20px -2px rgba(28, 0, 79, 0.05);
-  transition: all 0.2s ease-in-out;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease;
+}
+
+.sg-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px -4px rgba(28, 0, 79, 0.1);
 }
 
 .sg-btn-secondary {
@@ -32,7 +160,7 @@
   color: #1C004F;
   font-weight: 600;
   font-size: 0.8125rem;
-  transition: all 0.15s ease;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
 }
 
@@ -40,13 +168,35 @@
   background-color: #F1EAFF;
   border-color: #C5AFFF;
   color: #4E00CD;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(104, 27, 255, 0.12);
+}
+
+.sg-btn-secondary:active {
+  transform: scale(0.97);
+}
+
+/* Interactive Pill Button Hover */
+.interactive-pill {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.interactive-pill:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 6px 16px -2px rgba(104, 27, 255, 0.18);
+}
+
+.interactive-pill:active {
+  transform: scale(0.96);
 }
 
 .checklist-done-text {
   text-decoration: line-through;
   color: #94A3B8;
+  transition: color 0.2s ease;
 }
 
+/* Print CSS */
 @media print {
   body * {
     visibility: hidden;

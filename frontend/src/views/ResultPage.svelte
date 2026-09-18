@@ -26,8 +26,61 @@
   let isEmergency = $state<boolean>(false);
   let statusDesc = $state<string>("Anda baru menerima pesan dan belum berinteraksi lanjut.");
 
+  // Animated Dynamic Counters
+  let displayContentRisk = $state<number>(0);
+  let displayConfidence = $state<number>(0);
+  let displayExposure = $state<number>(0);
+
   $effect(() => {
     userExposure = analysis.initial_exposure || 10;
+  });
+
+  // Animate Content Risk and Confidence on mount or analysis update
+  $effect(() => {
+    const targetRisk = analysis.content_risk;
+    const targetConf = analysis.confidence;
+    const duration = 1200;
+    const startTime = performance.now();
+
+    function step(now: number) {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const ease = 1 - Math.pow(1 - progress, 3);
+
+      displayContentRisk = Math.round(targetRisk * ease);
+      displayConfidence = Math.round(targetConf * ease);
+
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      } else {
+        displayContentRisk = targetRisk;
+        displayConfidence = targetConf;
+      }
+    }
+    requestAnimationFrame(step);
+  });
+
+  // Animate Exposure whenever userExposure changes
+  $effect(() => {
+    const targetExp = userExposure;
+    const startExp = displayExposure;
+    const duration = 600;
+    const startTime = performance.now();
+
+    function step(now: number) {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const ease = 1 - Math.pow(1 - progress, 3);
+
+      displayExposure = Math.round(startExp + (targetExp - startExp) * ease);
+
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      } else {
+        displayExposure = targetExp;
+      }
+    }
+    requestAnimationFrame(step);
   });
 
   let openedLink = $state<boolean | null>(null);
@@ -371,15 +424,15 @@
         </div>
         <div class="mt-4 flex items-baseline gap-2">
           <span class="text-4xl font-extrabold {riskColor.text}">
-            {analysis.content_risk}%
+            {displayContentRisk}%
           </span>
           <span class="text-xs text-on-surface-variant font-medium">/ 100% Bahaya</span>
         </div>
         <!-- Risk Bar -->
         <div class="w-full h-2.5 rounded-full bg-surface-container mt-3 overflow-hidden">
           <div
-            class="h-full rounded-full transition-all duration-700 {riskColor.bg.replace('-bg', '-red')}"
-            style="width: {analysis.content_risk}%;"
+            class="h-full rounded-full {riskColor.bg.replace('-bg', '-red')}"
+            style="width: {displayContentRisk}%; transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);"
           ></div>
         </div>
       </div>
@@ -389,7 +442,7 @@
     </div>
 
     <!-- Matrix 2: AI Confidence -->
-    <div class="sg-card p-6 border border-border-subtle flex flex-col justify-between gap-4">
+    <div class="sg-card p-6 border border-border-subtle flex flex-col justify-between gap-4 hover:-translate-y-1 hover:shadow-xl transition-all duration-300">
       <div>
         <div class="flex items-center justify-between">
           <span class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">
@@ -401,15 +454,15 @@
         </div>
         <div class="mt-4 flex items-baseline gap-2">
           <span class="text-4xl font-extrabold text-brand-indigo-hero">
-            {analysis.confidence}%
+            {displayConfidence}%
           </span>
           <span class="text-xs text-on-surface-variant font-medium">Korelasi Bukti</span>
         </div>
         <!-- Confidence Bar -->
         <div class="w-full h-2.5 rounded-full bg-surface-container mt-3 overflow-hidden">
           <div
-            class="h-full rounded-full bg-brand-violet-vibrant transition-all duration-700"
-            style="width: {analysis.confidence}%;"
+            class="h-full rounded-full bg-brand-violet-vibrant"
+            style="width: {displayConfidence}%; transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);"
           ></div>
         </div>
       </div>
@@ -420,8 +473,8 @@
 
     <!-- Matrix 3: User Exposure Level -->
     <div
-      class="sg-card p-6 border-2 flex flex-col justify-between gap-4 {userExposure >= 70
-        ? 'border-status-scam-red bg-red-50/20'
+      class="sg-card p-6 border-2 flex flex-col justify-between gap-4 transition-all duration-300 {userExposure >= 70
+        ? 'border-status-scam-red bg-red-50/20 animate-pulse-glow'
         : userExposure >= 35
           ? 'border-amber-400 bg-amber-50/20'
           : 'border-status-safe-green bg-green-50/20'}"
@@ -433,7 +486,7 @@
           </span>
           <span
             class="px-2 py-0.5 rounded-full text-[10px] font-extrabold {userExposure >= 70
-              ? 'bg-status-scam-bg text-status-scam-red'
+              ? 'bg-status-scam-bg text-status-scam-red animate-pulse'
               : userExposure >= 35
                 ? 'bg-amber-100 text-amber-800'
                 : 'bg-status-safe-bg text-status-safe-green'}"
@@ -449,19 +502,19 @@
                 ? 'text-amber-600'
                 : 'text-status-safe-green'}"
           >
-            {userExposure}%
+            {displayExposure}%
           </span>
           <span class="text-xs text-on-surface-variant font-medium">Tingkat Penetrasi</span>
         </div>
         <!-- Exposure Bar -->
         <div class="w-full h-2.5 rounded-full bg-surface-container mt-3 overflow-hidden">
           <div
-            class="h-full rounded-full transition-all duration-700 {userExposure >= 70
+            class="h-full rounded-full {userExposure >= 70
               ? 'bg-status-scam-red'
               : userExposure >= 35
                 ? 'bg-amber-500'
                 : 'bg-status-safe-green'}"
-            style="width: {userExposure}%;"
+            style="width: {displayExposure}%; transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);"
           ></div>
         </div>
       </div>
@@ -589,9 +642,9 @@
 
   <!-- Emergency Mitigation Checklist & Hotlines -->
   {#if userExposure >= 35 || isEmergency || analysis.content_risk >= 75}
-    <div class="sg-card p-6 border-2 border-status-scam-red/50 bg-red-50/10 flex flex-col gap-5">
+    <div class="sg-card p-6 border-2 border-status-scam-red/50 bg-red-50/10 flex flex-col gap-5 transition-all duration-300 {isEmergency || userExposure >= 70 ? 'animate-pulse-glow' : ''}">
       <div class="flex items-center gap-2 text-status-scam-red pb-2 border-b border-red-100">
-        <span class="material-symbols-outlined text-[24px]">emergency</span>
+        <span class="material-symbols-outlined text-[24px] animate-pulse">emergency</span>
         <h3 class="font-extrabold text-base">
           Prosedur Tanggap Darurat &amp; Kontak Resmi Perbankan
         </h3>
@@ -605,7 +658,7 @@
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <a
             href="tel:1500888"
-            class="p-3 rounded-xl bg-white border border-border-subtle flex flex-col items-center hover:border-blue-500 hover:shadow-sm transition-all"
+            class="p-3 rounded-xl bg-white border border-border-subtle flex flex-col items-center hover:border-blue-500 hover:shadow-md hover:-translate-y-1 active:scale-95 transition-all duration-200"
           >
             <span class="text-[11px] text-on-surface-variant font-bold">HaloBCA</span>
             <span class="font-mono text-base font-extrabold text-blue-700">1500888</span>
@@ -614,7 +667,7 @@
 
           <a
             href="tel:14017"
-            class="p-3 rounded-xl bg-white border border-border-subtle flex flex-col items-center hover:border-blue-500 hover:shadow-sm transition-all"
+            class="p-3 rounded-xl bg-white border border-border-subtle flex flex-col items-center hover:border-blue-500 hover:shadow-md hover:-translate-y-1 active:scale-95 transition-all duration-200"
           >
             <span class="text-[11px] text-on-surface-variant font-bold">Kontak BRI</span>
             <span class="font-mono text-base font-extrabold text-blue-700">14017</span>
@@ -623,7 +676,7 @@
 
           <a
             href="tel:14000"
-            class="p-3 rounded-xl bg-white border border-border-subtle flex flex-col items-center hover:border-amber-500 hover:shadow-sm transition-all"
+            class="p-3 rounded-xl bg-white border border-border-subtle flex flex-col items-center hover:border-amber-500 hover:shadow-md hover:-translate-y-1 active:scale-95 transition-all duration-200"
           >
             <span class="text-[11px] text-on-surface-variant font-bold">Mandiri Call</span>
             <span class="font-mono text-base font-extrabold text-amber-700">14000</span>
@@ -632,7 +685,7 @@
 
           <a
             href="tel:1500046"
-            class="p-3 rounded-xl bg-white border border-border-subtle flex flex-col items-center hover:border-orange-500 hover:shadow-sm transition-all"
+            class="p-3 rounded-xl bg-white border border-border-subtle flex flex-col items-center hover:border-orange-500 hover:shadow-md hover:-translate-y-1 active:scale-95 transition-all duration-200"
           >
             <span class="text-[11px] text-on-surface-variant font-bold">BNI Call</span>
             <span class="font-mono text-base font-extrabold text-orange-700">1500046</span>

@@ -125,9 +125,9 @@ export function listRecentCases(limit: number = 15): any[] {
   const stmt = db.prepare(`
     SELECT case_id, timestamp, evidence_type, content_risk, 
            confidence, user_exposure, risk_level, summary, 
-           is_emergency, created_at
+           is_emergency, created_at, updated_at
     FROM cases 
-    ORDER BY created_at DESC 
+    ORDER BY updated_at DESC, rowid DESC 
     LIMIT ?
   `);
   return stmt.all(limit);

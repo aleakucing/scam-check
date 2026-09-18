@@ -109,20 +109,25 @@
   <!-- Hero Scan & Submission Section -->
   <section
     id="top-input-hero"
-    class="w-full max-w-[1200px] mx-auto px-gutter pt-12 pb-16 md:pt-16 md:pb-24 flex flex-col items-center text-center justify-center"
+    class="relative w-full max-w-[1200px] mx-auto px-gutter pt-12 pb-16 md:pt-16 md:pb-24 flex flex-col items-center text-center justify-center overflow-hidden"
   >
-    <!-- Stylized Emblem -->
+    <!-- Ambient Glowing Background Auras -->
+    <div class="absolute top-6 left-1/2 -translate-x-1/2 w-[600px] h-[320px] bg-gradient-to-tr from-brand-violet-vibrant/15 via-purple-300/20 to-sky-300/25 rounded-full blur-3xl pointer-events-none -z-10 animate-float"></div>
+    <div class="absolute top-36 left-1/3 -translate-x-1/2 w-[320px] h-[220px] bg-gradient-to-br from-sky-400/15 to-transparent rounded-full blur-2xl pointer-events-none -z-10 animate-pulse-glow" style="animation-duration: 6s;"></div>
+
+    <!-- Stylized Animated Emblem with Pulsing Ripple -->
     <div class="relative mb-6 flex items-center justify-center">
-      <div class="w-20 h-20 rounded-full bg-surface-container-high flex items-center justify-center shadow-inner">
+      <div class="absolute -inset-3 rounded-full bg-brand-violet-vibrant/20 animate-pulse-purple"></div>
+      <div class="w-20 h-20 rounded-full bg-surface-container-high flex items-center justify-center shadow-inner relative z-10 animate-float">
         <span class="material-symbols-outlined text-brand-violet-vibrant text-[44px]">search_check</span>
       </div>
-      <div class="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-brand-violet-vibrant text-on-primary flex items-center justify-center shadow-md">
+      <div class="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-brand-violet-vibrant text-on-primary flex items-center justify-center shadow-md z-20 hover:scale-110 transition-transform">
         <span class="material-symbols-outlined text-[18px]">verified_user</span>
       </div>
     </div>
 
-    <!-- Hero Title & Subtitle -->
-    <h1 class="text-3xl md:text-5xl font-extrabold text-brand-indigo-hero max-w-2xl tracking-tight leading-tight mb-4">
+    <!-- Hero Title & Subtitle with Shimmer Effect -->
+    <h1 class="text-3xl md:text-5xl font-extrabold shimmer-text max-w-2xl tracking-tight leading-tight mb-4">
       Apakah ini penipuan?<br />Cek dengan cepat.
     </h1>
 
@@ -136,7 +141,7 @@
     </div>
 
     <!-- Submission Box -->
-    <div class="w-full max-w-xl rounded-2xl bg-surface-container-lowest p-4 sm:p-5 shadow-xl flex flex-col gap-4 border border-border-subtle">
+    <div class="w-full max-w-xl rounded-2xl bg-surface-container-lowest p-4 sm:p-5 shadow-xl flex flex-col gap-4 border border-border-subtle hover:shadow-2xl transition-shadow duration-300">
       <!-- Upload File Trigger -->
       <button
         type="button"
@@ -220,28 +225,28 @@
           <button
             type="button"
             onclick={() => triggerPreset("bca")}
-            class="px-2.5 py-1 rounded-full bg-surface-container text-[11px] font-bold text-brand-indigo-hero hover:bg-brand-violet-vibrant hover:text-white transition-colors cursor-pointer"
+            class="interactive-pill px-3 py-1.5 rounded-full bg-surface-container text-[11px] font-bold text-brand-indigo-hero hover:bg-brand-violet-vibrant hover:text-white transition-all cursor-pointer shadow-sm"
           >
             Phishing BCA
           </button>
           <button
             type="button"
             onclick={() => triggerPreset("tilang")}
-            class="px-2.5 py-1 rounded-full bg-surface-container text-[11px] font-bold text-brand-indigo-hero hover:bg-brand-violet-vibrant hover:text-white transition-colors cursor-pointer"
+            class="interactive-pill px-3 py-1.5 rounded-full bg-surface-container text-[11px] font-bold text-brand-indigo-hero hover:bg-brand-violet-vibrant hover:text-white transition-all cursor-pointer shadow-sm"
           >
             Tilang ETLE APK
           </button>
           <button
             type="button"
             onclick={() => triggerPreset("apk")}
-            class="px-2.5 py-1 rounded-full bg-surface-container text-[11px] font-bold text-brand-indigo-hero hover:bg-brand-violet-vibrant hover:text-white transition-colors cursor-pointer"
+            class="interactive-pill px-3 py-1.5 rounded-full bg-surface-container text-[11px] font-bold text-brand-indigo-hero hover:bg-brand-violet-vibrant hover:text-white transition-all cursor-pointer shadow-sm"
           >
             Undangan Resepsi APK
           </button>
           <button
             type="button"
             onclick={() => triggerPreset("idweb")}
-            class="px-2.5 py-1 rounded-full bg-emerald-50 text-[11px] font-bold text-status-safe-green border border-emerald-200 hover:bg-emerald-600 hover:text-white transition-colors cursor-pointer"
+            class="interactive-pill px-3 py-1.5 rounded-full bg-emerald-50 text-[11px] font-bold text-status-safe-green border border-emerald-200 hover:bg-emerald-600 hover:text-white transition-all cursor-pointer shadow-sm"
           >
             Domain Resmi IDwebhost
           </button>
@@ -268,8 +273,8 @@
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="p-6 rounded-2xl bg-white border border-border-subtle shadow-sm flex flex-col gap-3">
-          <div class="w-12 h-12 rounded-xl bg-purple-50 text-brand-violet-vibrant flex items-center justify-center">
+        <div class="p-6 rounded-2xl bg-white border border-border-subtle shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 group flex flex-col gap-3">
+          <div class="w-12 h-12 rounded-xl bg-purple-50 text-brand-violet-vibrant flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
             <span class="material-symbols-outlined text-[26px]">network_check</span>
           </div>
           <h3 class="text-base font-bold text-brand-indigo-hero">Deteksi Tautan Phishing &amp; SSRF</h3>
@@ -278,8 +283,8 @@
           </p>
         </div>
 
-        <div class="p-6 rounded-2xl bg-white border border-border-subtle shadow-sm flex flex-col gap-3">
-          <div class="w-12 h-12 rounded-xl bg-red-50 text-status-scam-red flex items-center justify-center">
+        <div class="p-6 rounded-2xl bg-white border border-border-subtle shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 group flex flex-col gap-3">
+          <div class="w-12 h-12 rounded-xl bg-red-50 text-status-scam-red flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
             <span class="material-symbols-outlined text-[26px]">apk_install</span>
           </div>
           <h3 class="text-base font-bold text-brand-indigo-hero">Pemeriksaan Berkas Malware APK</h3>
@@ -288,8 +293,8 @@
           </p>
         </div>
 
-        <div class="p-6 rounded-2xl bg-white border border-border-subtle shadow-sm flex flex-col gap-3">
-          <div class="w-12 h-12 rounded-xl bg-blue-50 text-primary flex items-center justify-center">
+        <div class="p-6 rounded-2xl bg-white border border-border-subtle shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 group flex flex-col gap-3">
+          <div class="w-12 h-12 rounded-xl bg-blue-50 text-primary flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
             <span class="material-symbols-outlined text-[26px]">support_agent</span>
           </div>
           <h3 class="text-base font-bold text-brand-indigo-hero">Operator Telepon Ramah Lansia</h3>
@@ -414,10 +419,10 @@
 
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         <!-- Trend 1 -->
-        <div class="p-5 rounded-2xl bg-white border border-border-subtle shadow-sm flex flex-col gap-3">
+        <div class="p-5 rounded-2xl bg-white border border-border-subtle shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col gap-3">
           <div class="flex items-center justify-between">
-            <span class="px-2 py-0.5 rounded-full bg-status-scam-bg text-status-scam-red text-[10px] font-extrabold">KRITIS</span>
-            <span class="text-[11px] text-on-surface-variant">Phishing Bank</span>
+            <span class="px-2 py-0.5 rounded-full bg-status-scam-bg text-status-scam-red text-[10px] font-extrabold animate-pulse">KRITIS</span>
+            <span class="text-[11px] text-on-surface-variant font-medium">Phishing Bank</span>
           </div>
           <h4 class="text-sm font-bold text-brand-indigo-hero">Kenaikan Tarif Transfer BCA Rp150.000</h4>
           <p class="text-xs text-on-surface-variant leading-relaxed">
@@ -426,17 +431,17 @@
           <button
             type="button"
             onclick={() => triggerPreset("bca")}
-            class="mt-auto py-2 rounded-full bg-surface-container hover:bg-brand-violet-vibrant hover:text-white text-xs font-bold transition-all cursor-pointer"
+            class="interactive-pill mt-auto py-2 rounded-full bg-surface-container hover:bg-brand-violet-vibrant hover:text-white text-xs font-bold transition-all cursor-pointer text-center"
           >
             Uji Kasus Ini
           </button>
         </div>
 
         <!-- Trend 2 -->
-        <div class="p-5 rounded-2xl bg-white border border-border-subtle shadow-sm flex flex-col gap-3">
+        <div class="p-5 rounded-2xl bg-white border border-border-subtle shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col gap-3">
           <div class="flex items-center justify-between">
-            <span class="px-2 py-0.5 rounded-full bg-status-scam-bg text-status-scam-red text-[10px] font-extrabold">KRITIS</span>
-            <span class="text-[11px] text-on-surface-variant">Malware APK</span>
+            <span class="px-2 py-0.5 rounded-full bg-status-scam-bg text-status-scam-red text-[10px] font-extrabold animate-pulse">KRITIS</span>
+            <span class="text-[11px] text-on-surface-variant font-medium">Malware APK</span>
           </div>
           <h4 class="text-sm font-bold text-brand-indigo-hero">Surat Tilang ETLE Berkas .APK</h4>
           <p class="text-xs text-on-surface-variant leading-relaxed">
@@ -445,17 +450,17 @@
           <button
             type="button"
             onclick={() => triggerPreset("tilang")}
-            class="mt-auto py-2 rounded-full bg-surface-container hover:bg-brand-violet-vibrant hover:text-white text-xs font-bold transition-all cursor-pointer"
+            class="interactive-pill mt-auto py-2 rounded-full bg-surface-container hover:bg-brand-violet-vibrant hover:text-white text-xs font-bold transition-all cursor-pointer text-center"
           >
             Uji Kasus Ini
           </button>
         </div>
 
         <!-- Trend 3 -->
-        <div class="p-5 rounded-2xl bg-white border border-border-subtle shadow-sm flex flex-col gap-3">
+        <div class="p-5 rounded-2xl bg-white border border-border-subtle shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col gap-3">
           <div class="flex items-center justify-between">
             <span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-extrabold">TINGGI</span>
-            <span class="text-[11px] text-on-surface-variant">Social Engineering</span>
+            <span class="text-[11px] text-on-surface-variant font-medium">Social Engineering</span>
           </div>
           <h4 class="text-sm font-bold text-brand-indigo-hero">Undangan Pernikahan Digital .APK</h4>
           <p class="text-xs text-on-surface-variant leading-relaxed">
@@ -464,7 +469,7 @@
           <button
             type="button"
             onclick={() => triggerPreset("apk")}
-            class="mt-auto py-2 rounded-full bg-surface-container hover:bg-brand-violet-vibrant hover:text-white text-xs font-bold transition-all cursor-pointer"
+            class="interactive-pill mt-auto py-2 rounded-full bg-surface-container hover:bg-brand-violet-vibrant hover:text-white text-xs font-bold transition-all cursor-pointer text-center"
           >
             Uji Kasus Ini
           </button>
