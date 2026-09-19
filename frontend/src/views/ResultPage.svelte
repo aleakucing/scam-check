@@ -27,6 +27,35 @@
   let isEmergency = $state<boolean>(false);
   let statusDesc = $state<string>("Anda baru menerima pesan dan belum berinteraksi lanjut.");
 
+  // Assistance Prompt Popup (5 seconds after result/ratio loads)
+  let showAssistPrompt = $state<boolean>(false);
+  let assistDismissed = $state<boolean>(false);
+
+  $effect(() => {
+    if (analysis && !assistDismissed) {
+      const timer = setTimeout(() => {
+        if (!assistDismissed) {
+          showAssistPrompt = true;
+        }
+      }, 5000);
+
+      return () => {
+        clearTimeout(timer);
+      };
+    }
+  });
+
+  function acceptAssistance() {
+    showAssistPrompt = false;
+    assistDismissed = true;
+    onOpenOperator();
+  }
+
+  function dismissAssistance() {
+    showAssistPrompt = false;
+    assistDismissed = true;
+  }
+
   // Animated Dynamic Counters
   let displayContentRisk = $state<number>(0);
   let displayConfidence = $state<number>(0);
@@ -346,30 +375,6 @@
     </button>
 
     <div class="flex flex-wrap items-center gap-2">
-      <!-- Audio Toggle -->
-      <button
-        type="button"
-        onclick={toggleAudioNarration}
-        class="sg-btn-secondary {isSpeaking ? 'border-primary text-primary bg-blue-50' : ''}"
-      >
-        <span class="material-symbols-outlined text-[18px]">
-          {isSpeaking ? "volume_off" : "volume_up"}
-        </span>
-        <span>{isSpeaking ? "Hentikan Audio" : "Dengarkan Audio"}</span>
-      </button>
-
-      <!-- Print PDF -->
-      <button type="button" onclick={handlePrint} class="sg-btn-secondary">
-        <span class="material-symbols-outlined text-[18px]">print</span>
-        <span>Cetak PDF</span>
-      </button>
-
-      <!-- Download TXT -->
-      <button type="button" onclick={downloadReportTxt} class="sg-btn-secondary">
-        <span class="material-symbols-outlined text-[18px]">description</span>
-        <span>Unduh Dokumen</span>
-      </button>
-
       <!-- Share WhatsApp -->
       <button
         type="button"
@@ -391,13 +396,6 @@
         </span>
         <span class="text-xs text-on-surface-variant font-medium">
           Diverifikasi pada {analysis.timestamp}
-        </span>
-      </div>
-
-      <div class="flex items-center gap-2">
-        <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-surface-container text-primary flex items-center gap-1">
-          <span class="material-symbols-outlined text-[14px]">smart_toy</span>
-          {analysis.source_model}
         </span>
       </div>
     </div>
@@ -826,3 +824,54 @@
     </div>
   </div>
 </div>
+
+{#if showAssistPrompt}
+  <div
+    class="fixed inset-0 z-[90] flex items-center justify-center p-4 bg-brand-indigo-hero/60 backdrop-blur-sm animate-fade-in"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="help-prompt-title"
+  >
+    <div class="w-full max-w-md bg-white rounded-2xl p-6 sm:p-8 shadow-2xl border border-border-subtle flex flex-col items-center text-center gap-4 relative animate-scale-in">
+      <button
+        type="button"
+        onclick={dismissAssistance}
+        class="absolute top-4 right-4 text-on-surface-variant hover:text-brand-indigo-hero w-8 h-8 rounded-full flex items-center justify-center hover:bg-surface-container transition-colors cursor-pointer"
+        aria-label="Tutup"
+      >
+        <span class="material-symbols-outlined text-[20px]">close</span>
+      </button>
+
+      <div class="w-14 h-14 rounded-2xl bg-blue-50 border border-blue-200 text-primary flex items-center justify-center">
+        <span class="material-symbols-outlined text-3xl">support_agent</span>
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <h3 id="help-prompt-title" class="text-lg sm:text-xl font-extrabold text-brand-indigo-hero">
+          Apakah Anda ingin dibantu?
+        </h3>
+        <p class="text-xs sm:text-sm text-on-surface-variant leading-relaxed">
+          Hasil evaluasi rasio risiko telah selesai dihitung. Operator Tanggap Darurat KrosCheck siap memandu Anda melalui beberapa pertanyaan klarifikasi untuk mengamankan akun dan dana Anda.
+        </p>
+      </div>
+
+      <div class="flex flex-col sm:flex-row items-center gap-2.5 w-full mt-2">
+        <button
+          type="button"
+          onclick={acceptAssistance}
+          class="w-full sm:flex-1 py-2.5 px-4 rounded-full bg-primary hover:bg-primary-hover text-white text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm"
+        >
+          <span class="material-symbols-outlined text-[18px]">support_agent</span>
+          <span>Ya, Pandu Saya</span>
+        </button>
+        <button
+          type="button"
+          onclick={dismissAssistance}
+          class="w-full sm:flex-1 py-2.5 px-4 rounded-full bg-surface-container hover:bg-surface-container-high text-brand-indigo-hero text-xs sm:text-sm font-semibold transition-colors cursor-pointer"
+        >
+          <span>Tidak, Terima Kasih</span>
+        </button>
+      </div>
+    </div>
+  </div>
+{/if}

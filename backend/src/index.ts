@@ -135,6 +135,8 @@ app.get("/", async (c) => {
 
 const spaRoutes = [
   "/result",
+  "/riwayat",
+  "/history",
   "/how-it-works",
   "/faq",
   "/download",

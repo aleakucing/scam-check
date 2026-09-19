@@ -143,13 +143,13 @@
       <button
         type="button"
         onclick={onOpenHistory}
-        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container text-brand-indigo-hero text-xs font-semibold hover:bg-surface-container-high transition-colors relative cursor-pointer"
+        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors relative cursor-pointer {currentRoute === '/riwayat' || currentRoute === '/history' ? 'bg-primary text-white shadow-sm' : 'bg-surface-container text-brand-indigo-hero hover:bg-surface-container-high'}"
         title="Riwayat Pemeriksaan Kasus"
       >
         <span class="material-symbols-outlined text-[16px]">history</span>
         <span class="hidden sm:inline">Riwayat</span>
         {#if historyCount > 0}
-          <span class="px-1.5 py-0.2 rounded-full bg-brand-violet-vibrant text-white text-[10px] font-bold leading-tight">
+          <span class="px-1.5 py-0.2 rounded-full {currentRoute === '/riwayat' || currentRoute === '/history' ? 'bg-white text-primary' : 'bg-primary text-white'} text-[10px] font-bold leading-tight">
             {historyCount}
           </span>
         {/if}
@@ -228,6 +228,18 @@
         class="text-left py-2 px-3 rounded-lg text-sm font-bold text-brand-indigo-hero hover:bg-surface-container transition-colors"
       >
         Tentang Kami
+      </button>
+      <button
+        type="button"
+        onclick={() => handleNavClick("/riwayat")}
+        class="text-left py-2 px-3 rounded-lg text-sm font-bold text-brand-indigo-hero hover:bg-surface-container transition-colors flex items-center justify-between"
+      >
+        <span>Riwayat Kasus</span>
+        {#if historyCount > 0}
+          <span class="px-2 py-0.5 rounded-full bg-primary text-white text-[10px] font-bold">
+            {historyCount}
+          </span>
+        {/if}
       </button>
       
       <div class="py-2 px-3 flex items-center justify-between border-t border-border-subtle text-xs">

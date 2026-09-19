@@ -11,6 +11,7 @@
   import TrendsPage from "./views/TrendsPage.svelte";
   import AboutPage from "./views/AboutPage.svelte";
   import LegalPage from "./views/LegalPage.svelte";
+  import HistoryPage from "./views/HistoryPage.svelte";
   import { fade, fly } from "svelte/transition";
 
   import type {
@@ -21,7 +22,7 @@
   } from "./types";
   import { analyzeEvidence, submitInterview } from "./services/api";
 
-  type AppRoute = "/" | "/result" | "/how-it-works" | "/faq" | "/download" | "/trends" | "/about" | "/privacy" | "/terms";
+  type AppRoute = "/" | "/result" | "/riwayat" | "/history" | "/how-it-works" | "/faq" | "/download" | "/trends" | "/about" | "/privacy" | "/terms";
 
   // State
   let currentRoute = $state<AppRoute>("/");
@@ -54,7 +55,7 @@
     const handlePopState = () => {
       const path = window.location.pathname as AppRoute;
       const hash = window.location.hash;
-      if (path && ["/", "/how-it-works", "/faq", "/download", "/trends", "/about", "/privacy", "/terms"].includes(path)) {
+      if (path && ["/", "/riwayat", "/history", "/how-it-works", "/faq", "/download", "/trends", "/about", "/privacy", "/terms"].includes(path)) {
         currentRoute = path;
       }
       if (hash) {
@@ -131,7 +132,7 @@
     
     // Check pathname
     const path = window.location.pathname as AppRoute;
-    if (["/how-it-works", "/faq", "/download", "/trends", "/about", "/privacy", "/terms"].includes(path)) {
+    if (["/riwayat", "/history", "/how-it-works", "/faq", "/download", "/trends", "/about", "/privacy", "/terms"].includes(path)) {
       currentRoute = path;
       return;
     }
@@ -216,7 +217,7 @@
   <Header
     {historyCount}
     {currentRoute}
-    onOpenHistory={() => { isHistoryOpen = true; }}
+    onOpenHistory={() => navigateTo("/riwayat")}
     onNavigateHome={() => navigateTo("/")}
     onNavigate={navigateTo}
   />
@@ -269,6 +270,14 @@
           evidenceContent={currentEvidence}
           onBack={() => navigateTo("/")}
           onOpenOperator={() => { isOperatorOpen = true; }}
+        />
+      </div>
+    {:else if currentRoute === "/riwayat" || currentRoute === "/history"}
+      <div in:fade={{ duration: 200 }} class="flex-1 flex flex-col">
+        <HistoryPage
+          onNavigateHome={() => navigateTo("/")}
+          onSelectCase={handleSelectHistoryItem}
+          onNavigate={navigateTo}
         />
       </div>
     {:else if currentRoute === "/how-it-works"}
