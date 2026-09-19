@@ -155,8 +155,11 @@
     }
   }
 
+  let apiErrorMessage = $state<string>("");
+
   async function executeAnalysis(payload: { content: string; type: EvidenceType; image_base64?: string | null }) {
     isLoading = true;
+    apiErrorMessage = "";
     currentEvidence = payload.content;
 
     try {
@@ -169,8 +172,10 @@
       saveToLocalHistory(resp, payload.content);
       currentRoute = "/result";
       window.scrollTo({ top: 0, behavior: "smooth" });
-    } catch (err) {
+    } catch (err: any) {
       console.error("Analysis execution failed:", err);
+      apiErrorMessage = err.message || "Gagal menganalisis bukti digital.";
+      currentRoute = "/";
     } finally {
       isLoading = false;
     }
@@ -307,6 +312,7 @@
         <LandingPage
           onSubmit={(payload) => executeAnalysis(payload)}
           onNavigate={navigateTo}
+          apiError={apiErrorMessage}
         />
       </div>
     {/if}

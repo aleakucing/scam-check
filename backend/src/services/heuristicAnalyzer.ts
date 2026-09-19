@@ -290,17 +290,17 @@ export function analyzeHeuristic(req: AnalyzeRequest): AnalyzeResponse {
         ];
       } else {
         indicators.push({
-          title: "Pola Teks Umum",
-          impact: "INFO",
-          level: "blue",
-          desc: "Pesan tidak memuat pola bahaya umum yang signifikan, namun tetap waspada jika ada permintaan transfer uang."
+          title: "Pola Pesan Bersih & Wajar",
+          impact: "AMAN",
+          level: "green",
+          desc: "Pesan tidak memuat indikator urgensi palsu, pemaksaan transfer, ataupun pencatutan institusi finansial."
         });
-        content_risk = 20;
-        confidence = 75;
-        summary = "Pesan menunjukkan tingkat risiko rendah. Tidak ditemukan pemicu bahaya yang mendesak.";
+        content_risk = 5;
+        confidence = 85;
+        summary = "Teks teridentifikasi normal dan aman. Tidak ditemukan indikator ancaman rekayasa sosial atau penipuan digital.";
         categories = [
-          { name: "Komunikasi Biasa", score: "88%" },
-          { name: "Spam Komersial", score: "30%" }
+          { name: "Komunikasi Normal", score: "95%" },
+          { name: "Bebas Ancaman", score: "90%" }
         ];
       }
     } else {

@@ -77,12 +77,23 @@ export async function analyzeEvidence(req: AnalyzeRequest): Promise<AnalyzeRespo
       if (res.ok) {
         return (await res.json()) as AnalyzeResponse;
       }
-    } catch (e) {
-      // try next endpoint or fallback
+
+      // If server rejected with 400 Bad Request / 413 / 429, don't fallback to dummy heuristic!
+      if (res.status === 400 || res.status === 413 || res.status === 429) {
+        const errData = await res.json().catch(() => ({ detail: "Permintaan tidak valid." }));
+        const validationError = new Error(errData.detail || "Permintaan tidak valid.");
+        (validationError as any).isValidationError = true;
+        throw validationError;
+      }
+    } catch (e: any) {
+      if (e.isValidationError) {
+        throw e;
+      }
+      // network error / timeout: continue loop to next endpoint
     }
   }
 
-  // Client-side fallback if backend is unreachable
+  // Client-side fallback ONLY if backend is completely offline/unreachable
   return fallbackClientHeuristic(req);
 }
 

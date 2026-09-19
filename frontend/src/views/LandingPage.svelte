@@ -1,12 +1,14 @@
 <script lang="ts">
   import type { EvidenceType } from "../types";
+  import { validateEvidenceInput } from "../services/inputValidator";
 
   interface Props {
     onSubmit: (payload: { content: string; type: EvidenceType; image_base64?: string | null }) => void;
     onNavigate?: (route: string, hash?: string) => void;
+    apiError?: string;
   }
 
-  let { onSubmit, onNavigate }: Props = $props();
+  let { onSubmit, onNavigate, apiError = "" }: Props = $props();
 
   let scamInput = $state<string>("");
   let isExpanded = $state<boolean>(false);
@@ -14,6 +16,12 @@
   let errorMessage = $state<string>("");
   let fileInputElement = $state<HTMLInputElement | null>(null);
   let selectedImage = $state<{ name: string; base64: string; previewUrl: string } | null>(null);
+
+  $effect(() => {
+    if (apiError) {
+      errorMessage = apiError;
+    }
+  });
 
   // FAQ Accordion state in landing page
   let activeFaqIndex = $state<number | null>(0);
@@ -73,14 +81,15 @@
       return;
     }
 
-    if (!val) {
-      errorMessage = "Silakan tempel teks atau tautan mencurigakan terlebih dahulu.";
+    const validation = validateEvidenceInput(val, undefined, false);
+    if (!validation.valid) {
+      errorMessage = validation.error || "Konten bukti tidak valid.";
       return;
     }
 
-    const isUrl = val.startsWith("http://") || val.startsWith("https://") || val.includes(".com") || val.includes(".id") || val.includes(".xyz");
+    errorMessage = "";
     onSubmit({
-      type: isUrl ? "url" : "text",
+      type: (validation.normalizedType as EvidenceType) || "text",
       content: val,
       image_base64: null
     });

@@ -289,4 +289,43 @@ describe("ScamGuard Bun API & Security Suite", () => {
     expect(b2.case_id).toMatch(/^SC-\d{8}-[A-F0-9]{8}$/);
     expect(b1.case_id).not.toBe(b2.case_id);
   });
+
+  it("Input Validation: Rejects gibberish, keyboard mashes, and repeated characters with HTTP 400", async () => {
+    const invalidInputs = [
+      "asdfghjkl",
+      "qwertyuiop",
+      "aaaaaaa",
+      "ngawur",
+      "123",
+      "http:// invalid domain.com",
+      "asdasdasd"
+    ];
+
+    for (const input of invalidInputs) {
+      const res = await app.request("/api/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "text", content: input })
+      });
+      expect(res.status).toBe(400);
+      const data = await res.json();
+      expect(data.detail).toBeDefined();
+    }
+  });
+
+  it("Input Validation: Accepts clean normal text and rates it accurately as SAFE (low risk)", async () => {
+    const res = await app.request("/api/analyze", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        type: "text",
+        content: "Selamat pagi rekan-rekan, rapat koordinasi bulanan akan dimulai pukul 10.00 di ruang rapat."
+      })
+    });
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.content_risk).toBeLessThanOrEqual(10);
+    expect(body.risk_level).toBe("LOW RISK / SAFE");
+    expect(body.indicators[0].impact).toBe("AMAN");
+  });
 });

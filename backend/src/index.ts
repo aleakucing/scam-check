@@ -13,6 +13,7 @@ import {
   InterviewRequest,
   CaseReportRequest
 } from "./types";
+import { validateEvidenceInput } from "./services/inputValidator";
 
 import { serveStatic } from "hono/bun";
 import { existsSync } from "fs";
@@ -212,6 +213,15 @@ app.post("/api/analyze", async (c) => {
   // Max content length check (50KB limit to prevent prompt flooding / resource exhaustion)
   if (body.content.length > 50000) {
     return c.json({ detail: "Panjang konten melebihi batas maksimal 50.000 karakter." }, 413);
+  }
+
+  // Anti-Gibberish & Input Validation
+  const validation = validateEvidenceInput(body.content, body.type, Boolean(body.image_base64));
+  if (!validation.valid) {
+    return c.json({ detail: validation.error || "Konten bukti tidak valid." }, 400);
+  }
+  if (validation.normalizedType && !body.type) {
+    body.type = validation.normalizedType;
   }
 
   // Image Upload Security: Dedicated Rate Limit (15 req/min) & Magic Bytes Validation
