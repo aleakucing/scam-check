@@ -545,14 +545,14 @@
 
   <!-- Senior Operator Button Callout -->
   <div class="p-5 rounded-2xl bg-brand-indigo-hero text-white flex flex-col sm:flex-row items-center justify-between gap-4 shadow-md">
-    <div class="flex items-center gap-3 text-center sm:text-left">
-      <div class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+    <div class="flex items-center gap-3.5 text-center sm:text-left">
+      <div class="w-12 h-12 rounded-xl bg-white/15 border border-white/20 flex items-center justify-center shrink-0">
         <span class="material-symbols-outlined text-white text-[28px]">support_agent</span>
       </div>
       <div>
-        <h3 class="text-base font-bold text-white">Butuh Panduan Khusus / Ramah Lansia?</h3>
+        <h3 class="text-base font-bold text-white">Panduan Khusus Orang Tua &amp; Keluarga</h3>
         <p class="text-xs text-white/80">
-          Gunakan panduan suara 1-per-1 dengan tombol berukuran besar dan instruksi telepon darurat bank.
+          Panduan suara langkah-demi-langkah dengan tombol berukuran besar dan tombol telepon langsung ke bank resmi.
         </p>
       </div>
     </div>
@@ -562,7 +562,7 @@
       onclick={onOpenOperator}
       class="px-5 py-2.5 rounded-full bg-white text-brand-indigo-hero font-bold text-xs hover:bg-surface-bright transition-all shadow-sm shrink-0 cursor-pointer"
     >
-      Buka Panduan Suara Lansia
+      Buka Panduan Keluarga
     </button>
   </div>
 
