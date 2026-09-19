@@ -21,6 +21,20 @@ import { resolve } from "path";
 
 const app = new Hono();
 
+// Global resilience handlers
+app.onError((err, c) => {
+  console.error("[ScamGuard Server Error]:", err?.message || err);
+  return c.json({ detail: "Terjadi gangguan pada layanan server.", error: String(err?.message || err) }, 500);
+});
+
+process.on("unhandledRejection", (reason) => {
+  console.warn("[ScamGuard Warning] Unhandled Promise Rejection:", reason);
+});
+
+process.on("uncaughtException", (err) => {
+  console.error("[ScamGuard Critical] Uncaught Exception caught:", err);
+});
+
 const candidates = [
   resolve(import.meta.dir, "../../frontend/dist"),
   resolve(import.meta.dir, "../frontend/dist"),

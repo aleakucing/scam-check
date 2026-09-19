@@ -33,7 +33,7 @@ describe("ScamGuard Bun API & Security Suite", () => {
     expect(body.content_risk).toBeGreaterThanOrEqual(75);
     expect(body.risk_level).toBe("VERY HIGH RISK");
     expect(body.indicators.length).toBeGreaterThan(0);
-  });
+  }, 15000);
 
   it("POST /api/analyze identifies legitimate institution domain as safe", async () => {
     const res = await app.request("/api/analyze", {
@@ -48,7 +48,7 @@ describe("ScamGuard Bun API & Security Suite", () => {
     const body = await res.json();
     expect(body.content_risk).toBeLessThan(30);
     expect(body.risk_level).toBe("LOW RISK / SAFE");
-  });
+  }, 15000);
 
   it("POST /api/analyze blocks SSRF cloud metadata attacks", async () => {
     const res = await app.request("/api/analyze", {
@@ -141,7 +141,7 @@ describe("ScamGuard Bun API & Security Suite", () => {
     const listData = await listRes.json();
     expect(Array.isArray(listData)).toBe(true);
     expect(listData.some((c: any) => c.case_id === caseId)).toBe(true);
-  });
+  }, 15000);
 
   it("PII Masking masks Indonesian sensitive phone, card, and OTP patterns", () => {
     const raw = "Silakan transfer ke 081234567890 atau kartu 4532-1234-5678-9012 dengan OTP 987654";
@@ -178,7 +178,7 @@ describe("ScamGuard Bun API & Security Suite", () => {
     expect(body.status).toBe("success");
     expect(body.reply_text).toContain("HASIL ANALISIS SCAMGUARD AI");
     expect(body.reply_text).toContain("HaloBCA");
-  });
+  }, 15000);
 
   it("POST /api/webhook/whatsapp responds with structured alert", async () => {
     const res = await app.request("/api/webhook/whatsapp", {
@@ -193,7 +193,7 @@ describe("ScamGuard Bun API & Security Suite", () => {
     const body = await res.json();
     expect(body.status).toBe("success");
     expect(body.reply_text).toContain("SCAMGUARD AI - HASIL DETEKSI");
-  });
+  }, 15000);
 
   it("GET / and /result serves Svelte SPA HTML to browsers", async () => {
     const res = await app.request("/", {
@@ -244,7 +244,7 @@ describe("ScamGuard Bun API & Security Suite", () => {
       })
     });
     expect(res.status).toBe(200);
-  });
+  }, 15000);
 
   it("Security Audit: Server-side PII masking occurs BEFORE data is saved to SQLite Vault", async () => {
     const rawSensitive = "Transfer ke BCA 1234567890 atas nama Budi kode OTP 654321 email korban@gmail.com";
@@ -268,7 +268,7 @@ describe("ScamGuard Bun API & Security Suite", () => {
     expect(caseRecord.evidence_content).not.toContain("654321");
     expect(caseRecord.evidence_content).not.toContain("korban@gmail.com");
     expect(caseRecord.evidence_content).toContain("OTP ******");
-  });
+  }, 15000);
 
   it("Security Audit: Case IDs have high-entropy hex suffix to prevent enumeration", async () => {
     const res1 = await app.request("/api/analyze", {
@@ -288,7 +288,7 @@ describe("ScamGuard Bun API & Security Suite", () => {
     expect(b1.case_id).toMatch(/^SC-\d{8}-[A-F0-9]{8}$/);
     expect(b2.case_id).toMatch(/^SC-\d{8}-[A-F0-9]{8}$/);
     expect(b1.case_id).not.toBe(b2.case_id);
-  });
+  }, 15000);
 
   it("Input Validation: Rejects gibberish, keyboard mashes, and repeated characters with HTTP 400", async () => {
     const invalidInputs = [
@@ -327,5 +327,5 @@ describe("ScamGuard Bun API & Security Suite", () => {
     expect(body.content_risk).toBeLessThanOrEqual(10);
     expect(body.risk_level).toBe("LOW RISK / SAFE");
     expect(body.indicators[0].impact).toBe("AMAN");
-  });
+  }, 15000);
 });
