@@ -262,43 +262,6 @@
         </div>
       {/if}
 
-      <!-- Quick Presets -->
-      <div class="flex flex-col gap-2 pt-2 border-t border-border-subtle/70">
-        <span class="text-[11px] font-bold text-on-surface-variant/80 uppercase tracking-wider text-center">
-          Uji Cepat Contoh Kasus Nyata:
-        </span>
-        <div class="flex flex-wrap items-center justify-center gap-1.5">
-          <button
-            type="button"
-            onclick={() => triggerPreset("bca")}
-            class="interactive-pill px-3 py-1.5 rounded-full bg-surface-container text-[11px] font-bold text-brand-indigo-hero hover:bg-brand-violet-vibrant hover:text-white transition-all cursor-pointer shadow-sm"
-          >
-            Phishing BCA
-          </button>
-          <button
-            type="button"
-            onclick={() => triggerPreset("tilang")}
-            class="interactive-pill px-3 py-1.5 rounded-full bg-surface-container text-[11px] font-bold text-brand-indigo-hero hover:bg-brand-violet-vibrant hover:text-white transition-all cursor-pointer shadow-sm"
-          >
-            Tilang ETLE APK
-          </button>
-          <button
-            type="button"
-            onclick={() => triggerPreset("apk")}
-            class="interactive-pill px-3 py-1.5 rounded-full bg-surface-container text-[11px] font-bold text-brand-indigo-hero hover:bg-brand-violet-vibrant hover:text-white transition-all cursor-pointer shadow-sm"
-          >
-            Undangan Resepsi APK
-          </button>
-          <button
-            type="button"
-            onclick={() => triggerPreset("idweb")}
-            class="interactive-pill px-3 py-1.5 rounded-full bg-emerald-50 text-[11px] font-bold text-status-safe-green border border-emerald-200 hover:bg-emerald-600 hover:text-white transition-all cursor-pointer shadow-sm"
-          >
-            Domain Resmi IDwebhost
-          </button>
-        </div>
-      </div>
-
       <!-- Bottom Hint -->
       <div class="flex items-center justify-center pt-1 text-xs text-on-surface-variant/70">
         <span>Didukung AI Multimodal &amp; Basis Data Intelijen Siber Indonesia</span>
