@@ -15,7 +15,6 @@
   let view = $state<"question" | "emergency" | "safe">("question");
   let isSpeaking = $state<boolean>(false);
   let isSubmitting = $state<boolean>(false);
-  let activeCaption = $state<string>("");
 
   const rawQuestions = t("operator.questions");
 
@@ -65,7 +64,6 @@
   }
 
   function speakText(text: string) {
-    activeCaption = text;
     isSpeaking = true;
     speakIndonesian(text, {
       rate: 0.90,
@@ -198,21 +196,6 @@
       <!-- Content Body -->
       <div class="p-5 sm:p-8 overflow-y-auto flex-1 flex flex-col gap-6">
         
-        <!-- Live Visual Subtitle Banner (TTS Caption Fallback for Hearing Impaired) -->
-        {#if activeCaption}
-          <div
-            class="p-3.5 rounded-xl bg-blue-50/90 border border-blue-200 text-brand-indigo-hero text-xs sm:text-sm flex items-start gap-2.5"
-            aria-live="polite"
-          >
-            <span class="material-symbols-outlined text-primary text-[20px] shrink-0 mt-0.5" aria-hidden="true">subtitles</span>
-            <div>
-              <span class="font-bold block text-primary text-[11px] uppercase tracking-wide">
-                {t("operator.caption_title")}
-              </span>
-              <p class="leading-relaxed font-medium">"{activeCaption}"</p>
-            </div>
-          </div>
-        {/if}
 
         {#if view === "question"}
           {@const q = questions[step - 1]}
