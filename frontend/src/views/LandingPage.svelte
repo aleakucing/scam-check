@@ -10,8 +10,18 @@
 
   let { onSubmit, onNavigate, apiError = "" }: Props = $props();
 
+  // Intake Mode: "url" or "media"
+  let activeTab = $state<"url" | "media">("url");
+
+  // URL state
   let urlInput = $state<string>("");
   let errorMessage = $state<string>("");
+
+  // Media state
+  let fileInputElement = $state<HTMLInputElement | null>(null);
+  let selectedImage = $state<{ name: string; base64: string; previewUrl: string; sizeStr?: string } | null>(null);
+  let isUploading = $state<boolean>(false);
+  let isDragging = $state<boolean>(false);
 
   $effect(() => {
     if (apiError) {
@@ -38,6 +48,67 @@
     }
   }
 
+  function formatFileSize(bytes: number): string {
+    if (bytes < 1024) return bytes + " B";
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+    return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+  }
+
+  function processFile(file: File) {
+    if (!file.type.startsWith("image/")) {
+      errorMessage = "Hanya berkas gambar (PNG, JPG, WebP) yang diizinkan.";
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      errorMessage = "Ukuran gambar melebihi batas maksimal 10MB.";
+      return;
+    }
+
+    isUploading = true;
+    errorMessage = "";
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const result = event.target?.result as string;
+      const base64 = result ? result.split(",")[1] : null;
+      isUploading = false;
+      if (base64) {
+        selectedImage = {
+          name: file.name,
+          base64,
+          previewUrl: result,
+          sizeStr: formatFileSize(file.size)
+        };
+        errorMessage = "";
+      }
+    };
+    reader.onerror = () => {
+      isUploading = false;
+      errorMessage = "Gagal memproses berkas gambar.";
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function handleFileChange(e: Event) {
+    const target = e.target as HTMLInputElement;
+    if (target.files && target.files[0]) {
+      processFile(target.files[0]);
+    }
+  }
+
+  function handleDrop(e: DragEvent) {
+    isDragging = false;
+    if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) {
+      processFile(e.dataTransfer.files[0]);
+    }
+  }
+
+  function removeSelectedImage() {
+    selectedImage = null;
+    if (fileInputElement) fileInputElement.value = "";
+    errorMessage = "";
+  }
+
   // Real-time URL inspector derived info
   let liveInspector = $derived.by(() => {
     const val = urlInput.trim();
@@ -62,7 +133,7 @@
     }
   });
 
-  function handleSubmit() {
+  function handleSubmitUrl() {
     const val = urlInput.trim();
 
     if (!val) {
@@ -85,10 +156,28 @@
     });
   }
 
+  function handleSubmitMedia() {
+    if (!selectedImage) {
+      errorMessage = "Silakan pilih atau unggah gambar tangkapan layar terlebih dahulu.";
+      return;
+    }
+
+    errorMessage = "";
+    onSubmit({
+      type: "screenshot",
+      content: selectedImage.name,
+      image_base64: selectedImage.base64
+    });
+  }
+
   function handleKeyDown(e: KeyboardEvent) {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      handleSubmit();
+      if (activeTab === "url") {
+        handleSubmitUrl();
+      } else if (selectedImage) {
+        handleSubmitMedia();
+      }
     }
   }
 
@@ -148,89 +237,190 @@
 
     <!-- Hero Title & Subtitle with Shimmer Effect -->
     <h1 class="text-3xl md:text-5xl font-extrabold shimmer-text max-w-2xl tracking-tight leading-tight mb-4">
-      Apakah tautan ini penipuan?<br />Cek keamanannya sekarang.
+      Apakah ini penipuan?<br />Cek keamanannya sekarang.
     </h1>
 
-    <div class="flex flex-col items-center gap-1.5 mb-8">
+    <div class="flex flex-col items-center gap-1.5 mb-6">
       <span class="text-xs sm:text-sm text-brand-violet-vibrant font-bold tracking-wide uppercase">
         GRATIS. TANPA PERLU DAFTAR.
       </span>
       <p class="text-sm sm:text-base text-on-surface-variant max-w-xl">
-        Tempel tautan atau alamat website mencurigakan dari WhatsApp, SMS, atau Email untuk mendeteksi indikasi phishing, typosquatting, dan malware APK berbahaya.
+        Periksa tautan website mencurigakan atau unggah tangkapan layar (screenshot) untuk mendeteksi indikasi phishing, typosquatting, dan malware APK.
       </p>
     </div>
 
-    <!-- Single URL Scanner Capsule -->
-    <div class="w-full max-w-2xl rounded-2xl bg-surface-container-lowest p-3 sm:p-4 shadow-xl flex flex-col gap-3 border border-border-subtle hover:shadow-2xl transition-all duration-300">
-      <form onsubmit={(e) => { e.preventDefault(); handleSubmit(); }} class="flex flex-col sm:flex-row items-center gap-2">
-        <div
-          class="relative flex-1 w-full flex items-center rounded-xl bg-surface-container-low px-3 py-2.5 sm:py-3 border transition-all duration-200 {errorMessage
-            ? 'border-status-scam-red ring-2 ring-status-scam-red/20'
-            : 'border-surface-container-high/60 focus-within:border-brand-violet-vibrant/60 focus-within:bg-white focus-within:shadow-md'}"
-        >
-          <span class="material-symbols-outlined text-brand-violet-vibrant/80 text-[22px] mr-2 shrink-0">link</span>
-          <input
-            type="url"
-            bind:value={urlInput}
-            oninput={handleInputChange}
-            onkeydown={handleKeyDown}
-            placeholder="Tempel tautan di sini (contoh: https://contoh-link.xyz/login)..."
-            class="w-full bg-transparent text-sm sm:text-base text-on-surface placeholder:text-on-surface-variant/60 focus:outline-none"
-          />
-          {#if urlInput}
-            <button
-              type="button"
-              onclick={() => { urlInput = ""; errorMessage = ""; }}
-              class="text-on-surface-variant/60 hover:text-on-surface p-1 rounded-full hover:bg-surface-container transition-colors cursor-pointer mr-1"
-              title="Hapus"
-            >
-              <span class="material-symbols-outlined text-[18px]">close</span>
-            </button>
-          {:else}
-            <button
-              type="button"
-              onclick={handlePaste}
-              class="hidden sm:inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-lg bg-surface-container text-brand-indigo-hero hover:bg-brand-violet-vibrant hover:text-white transition-all cursor-pointer mr-1"
-              title="Tempel dari Clipboard"
-            >
-              <span class="material-symbols-outlined text-[14px]">content_paste</span>
-              <span>Tempel</span>
-            </button>
-          {/if}
-        </div>
+    <!-- Mode Switcher: Link vs Media -->
+    <div class="inline-flex p-1 rounded-xl bg-surface-container mb-4 shadow-sm border border-border-subtle/80">
+      <button
+        type="button"
+        onclick={() => { activeTab = "url"; errorMessage = ""; }}
+        class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer {activeTab === 'url'
+          ? 'bg-white text-brand-indigo-hero shadow-sm'
+          : 'text-on-surface-variant hover:text-on-surface'}"
+      >
+        <span class="material-symbols-outlined text-[16px]">link</span>
+        <span>Periksa Tautan (URL)</span>
+      </button>
+      <button
+        type="button"
+        onclick={() => { activeTab = "media"; errorMessage = ""; }}
+        class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer {activeTab === 'media'
+          ? 'bg-white text-brand-indigo-hero shadow-sm'
+          : 'text-on-surface-variant hover:text-on-surface'}"
+      >
+        <span class="material-symbols-outlined text-[16px]">add_photo_alternate</span>
+        <span>Unggah Screenshot / Media</span>
+      </button>
+    </div>
 
-        <button
-          type="submit"
-          class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-brand-violet-vibrant hover:bg-brand-violet-hover text-on-primary font-bold text-sm transition-all shadow-md active:scale-95 cursor-pointer shrink-0"
-        >
-          <span>Periksa Tautan</span>
-          <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
-        </button>
-      </form>
+    <!-- Intake Capsule Container -->
+    <div class="w-full max-w-2xl rounded-2xl bg-surface-container-lowest p-4 sm:p-5 shadow-xl flex flex-col gap-3 border border-border-subtle hover:shadow-2xl transition-all duration-300">
+      {#if activeTab === "url"}
+        <!-- URL Scanner Bar -->
+        <form onsubmit={(e) => { e.preventDefault(); handleSubmitUrl(); }} class="flex flex-col sm:flex-row items-center gap-2">
+          <div
+            class="relative flex-1 w-full flex items-center rounded-xl bg-surface-container-low px-3 py-2.5 sm:py-3 border transition-all duration-200 {errorMessage
+              ? 'border-status-scam-red ring-2 ring-status-scam-red/20'
+              : 'border-surface-container-high/60 focus-within:border-brand-violet-vibrant/60 focus-within:bg-white focus-within:shadow-md'}"
+          >
+            <span class="material-symbols-outlined text-brand-violet-vibrant/80 text-[22px] mr-2 shrink-0">link</span>
+            <input
+              type="url"
+              bind:value={urlInput}
+              oninput={handleInputChange}
+              onkeydown={handleKeyDown}
+              placeholder="Tempel tautan di sini (contoh: https://contoh-link.xyz/login)..."
+              class="w-full bg-transparent text-sm sm:text-base text-on-surface placeholder:text-on-surface-variant/60 focus:outline-none"
+            />
+            {#if urlInput}
+              <button
+                type="button"
+                onclick={() => { urlInput = ""; errorMessage = ""; }}
+                class="text-on-surface-variant/60 hover:text-on-surface p-1 rounded-full hover:bg-surface-container transition-colors cursor-pointer mr-1"
+                title="Hapus"
+              >
+                <span class="material-symbols-outlined text-[18px]">close</span>
+              </button>
+            {:else}
+              <button
+                type="button"
+                onclick={handlePaste}
+                class="hidden sm:inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-lg bg-surface-container text-brand-indigo-hero hover:bg-brand-violet-vibrant hover:text-white transition-all cursor-pointer mr-1"
+                title="Tempel dari Clipboard"
+              >
+                <span class="material-symbols-outlined text-[14px]">content_paste</span>
+                <span>Tempel</span>
+              </button>
+            {/if}
+          </div>
 
-      {#if liveInspector}
-        <div class="flex flex-wrap items-center gap-2 px-3 py-2 rounded-lg bg-surface-container-low text-xs border border-border-subtle/60 text-left">
-          <span class="font-bold text-on-surface-variant flex items-center gap-1">
-            <span class="material-symbols-outlined text-[14px] text-brand-violet-vibrant">travel_explore</span>
-            Inspector:
-          </span>
-          <span class="px-2 py-0.5 rounded-full {liveInspector.isHttps ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'} font-semibold text-[11px]">
-            {liveInspector.protocol.toUpperCase()}
-          </span>
-          <span class="font-mono text-[11px] text-on-surface font-semibold truncate max-w-[240px]">
-            {liveInspector.hostname}
-          </span>
-          {#if liveInspector.hasApk}
-            <span class="px-2 py-0.5 rounded-full bg-red-100 text-red-700 font-bold text-[10px] animate-pulse">
-              .APK MALWARE
+          <button
+            type="submit"
+            class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-brand-violet-vibrant hover:bg-brand-violet-hover text-on-primary font-bold text-sm transition-all shadow-md active:scale-95 cursor-pointer shrink-0"
+          >
+            <span>Periksa Tautan</span>
+            <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+          </button>
+        </form>
+
+        {#if liveInspector}
+          <div class="flex flex-wrap items-center gap-2 px-3 py-2 rounded-lg bg-surface-container-low text-xs border border-border-subtle/60 text-left">
+            <span class="font-bold text-on-surface-variant flex items-center gap-1">
+              <span class="material-symbols-outlined text-[14px] text-brand-violet-vibrant">travel_explore</span>
+              Inspector:
             </span>
-          {/if}
-          {#if liveInspector.isSuspiciousTld}
-            <span class="px-2 py-0.5 rounded-full bg-orange-100 text-orange-800 font-bold text-[10px]">
-              TLD RISIKO TINGGI
+            <span class="px-2 py-0.5 rounded-full {liveInspector.isHttps ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'} font-semibold text-[11px]">
+              {liveInspector.protocol.toUpperCase()}
             </span>
-          {/if}
-        </div>
+            <span class="font-mono text-[11px] text-on-surface font-semibold truncate max-w-[240px]">
+              {liveInspector.hostname}
+            </span>
+            {#if liveInspector.hasApk}
+              <span class="px-2 py-0.5 rounded-full bg-red-100 text-red-700 font-bold text-[10px] animate-pulse">
+                .APK MALWARE
+              </span>
+            {/if}
+            {#if liveInspector.isSuspiciousTld}
+              <span class="px-2 py-0.5 rounded-full bg-orange-100 text-orange-800 font-bold text-[10px]">
+                TLD RISIKO TINGGI
+              </span>
+            {/if}
+          </div>
+        {/if}
+      {:else}
+        <!-- Media / Screenshot Upload Dropzone -->
+        <input
+          bind:this={fileInputElement}
+          onchange={handleFileChange}
+          accept="image/png,image/jpeg,image/webp"
+          type="file"
+          class="hidden"
+        />
+
+        {#if selectedImage}
+          <div class="flex flex-col sm:flex-row items-center justify-between p-4 rounded-xl bg-surface-container-high/60 border border-brand-violet-vibrant/40 gap-4 shadow-sm">
+            <div class="flex items-center gap-3.5 overflow-hidden w-full sm:w-auto">
+              <img
+                src={selectedImage.previewUrl}
+                alt="Pratinjau tangkapan layar"
+                class="w-16 h-16 rounded-xl object-cover border border-border-subtle shrink-0 shadow-md"
+              />
+              <div class="flex flex-col text-left overflow-hidden">
+                <span class="text-sm font-bold text-on-surface truncate">{selectedImage.name}</span>
+                <span class="text-xs text-on-surface-variant font-medium">{selectedImage.sizeStr || "Gambar siap"}</span>
+                <span class="text-[11px] text-brand-violet-vibrant font-semibold flex items-center gap-1 mt-0.5">
+                  <span class="material-symbols-outlined text-[14px]">check_circle</span>
+                  Siap dianalisis
+                </span>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+              <button
+                type="button"
+                onclick={removeSelectedImage}
+                class="px-3 py-2 rounded-xl hover:bg-surface-container text-xs font-semibold text-status-scam-red flex items-center gap-1 transition-colors cursor-pointer"
+              >
+                <span class="material-symbols-outlined text-[16px]">close</span>
+                <span>Ganti</span>
+              </button>
+              <button
+                type="button"
+                onclick={handleSubmitMedia}
+                class="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-brand-violet-vibrant hover:bg-brand-violet-hover text-on-primary font-bold text-sm transition-all shadow-md active:scale-95 cursor-pointer"
+              >
+                <span>Periksa Gambar</span>
+                <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+              </button>
+            </div>
+          </div>
+        {:else}
+          <!-- Dropzone -->
+          <div
+            role="button"
+            tabindex="0"
+            onclick={() => fileInputElement?.click()}
+            onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') fileInputElement?.click(); }}
+            ondragover={(e) => { e.preventDefault(); isDragging = true; }}
+            ondragleave={() => { isDragging = false; }}
+            ondrop={handleDrop}
+            class="w-full py-8 px-6 rounded-xl border-2 border-dashed transition-all duration-200 flex flex-col items-center justify-center gap-2.5 cursor-pointer text-center {isDragging
+              ? 'border-brand-violet-vibrant bg-purple-50/60 scale-[0.99]'
+              : 'border-border-subtle bg-surface-container-low hover:border-brand-violet-vibrant/60 hover:bg-surface-container/50'}"
+          >
+            <div class="w-12 h-12 rounded-full bg-purple-50 text-brand-violet-vibrant flex items-center justify-center shadow-sm">
+              <span class="material-symbols-outlined text-2xl">add_photo_alternate</span>
+            </div>
+            <div class="flex flex-col gap-0.5">
+              <span class="text-sm font-bold text-brand-indigo-hero">
+                Klik untuk memilih berkas atau tarik gambar ke sini
+              </span>
+              <span class="text-xs text-on-surface-variant">
+                Mendukung screenshot chat WhatsApp, bukti transfer, atau SMS (PNG, JPG, WebP maks 10MB)
+              </span>
+            </div>
+          </div>
+        {/if}
       {/if}
 
       {#if errorMessage}
@@ -244,7 +434,7 @@
       <div class="flex items-center justify-between pt-1 px-1 text-xs text-on-surface-variant/70">
         <span class="flex items-center gap-1 text-[11px]">
           <span class="material-symbols-outlined text-[14px] text-brand-violet-vibrant">verified_user</span>
-          Proteksi SSRF &amp; URL Shortener Expansion
+          Proteksi Privasi Sensor PII &amp; Anti-Malware
         </span>
         <span class="text-[11px] hidden sm:inline">Didukung Intelijen Keamanan Siber Indonesia</span>
       </div>
