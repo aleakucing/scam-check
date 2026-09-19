@@ -33,10 +33,10 @@
     }
   }
 
-  function handleNavClick(route: string, hash: string) {
+  function handleNavClick(route: string) {
     isMobileMenuOpen = false;
     if (onNavigate) {
-      onNavigate(route, hash);
+      onNavigate(route);
     } else if (onNavigateHome) {
       onNavigateHome();
     }
@@ -67,7 +67,7 @@
     <nav class="hidden lg:flex items-center gap-space-lg text-sm font-semibold">
       <button
         type="button"
-        onclick={() => handleNavClick("/how-it-works", "how-it-works")}
+        onclick={() => handleNavClick("/how-it-works")}
         class="transition-colors cursor-pointer {currentRoute === '/how-it-works' ? 'text-primary font-bold' : 'text-on-surface-variant hover:text-primary'}"
       >
         Cara kerja
@@ -75,7 +75,7 @@
 
       <button
         type="button"
-        onclick={() => handleNavClick("/faq", "faq")}
+        onclick={() => handleNavClick("/faq")}
         class="transition-colors cursor-pointer {currentRoute === '/faq' ? 'text-primary font-bold' : 'text-on-surface-variant hover:text-primary'}"
       >
         Tanya Jawab
@@ -83,7 +83,7 @@
 
       <button
         type="button"
-        onclick={() => handleNavClick("/download", "download")}
+        onclick={() => handleNavClick("/download")}
         class="transition-colors cursor-pointer {currentRoute === '/download' ? 'text-primary font-bold' : 'text-on-surface-variant hover:text-primary'}"
       >
         Unduh aplikasi
@@ -91,7 +91,7 @@
 
       <button
         type="button"
-        onclick={() => handleNavClick("/trends", "trends")}
+        onclick={() => handleNavClick("/trends")}
         class="transition-colors cursor-pointer {currentRoute === '/trends' ? 'text-primary font-bold' : 'text-on-surface-variant hover:text-primary'}"
       >
         Tren Penipuan
@@ -99,7 +99,7 @@
 
       <button
         type="button"
-        onclick={() => handleNavClick("/about", "about")}
+        onclick={() => handleNavClick("/about")}
         class="transition-colors cursor-pointer {currentRoute === '/about' ? 'text-primary font-bold' : 'text-on-surface-variant hover:text-primary'}"
       >
         Tentang Kami
@@ -196,35 +196,35 @@
     <div class="lg:hidden w-full bg-surface-container-lowest border-b border-border-subtle px-gutter py-4 flex flex-col gap-3 shadow-lg animate-in fade-in duration-200">
       <button
         type="button"
-        onclick={() => handleNavClick("/how-it-works", "how-it-works")}
+        onclick={() => handleNavClick("/how-it-works")}
         class="text-left py-2 px-3 rounded-lg text-sm font-bold text-brand-indigo-hero hover:bg-surface-container transition-colors"
       >
         Cara kerja
       </button>
       <button
         type="button"
-        onclick={() => handleNavClick("/faq", "faq")}
+        onclick={() => handleNavClick("/faq")}
         class="text-left py-2 px-3 rounded-lg text-sm font-bold text-brand-indigo-hero hover:bg-surface-container transition-colors"
       >
         Tanya Jawab
       </button>
       <button
         type="button"
-        onclick={() => handleNavClick("/download", "download")}
+        onclick={() => handleNavClick("/download")}
         class="text-left py-2 px-3 rounded-lg text-sm font-bold text-brand-indigo-hero hover:bg-surface-container transition-colors"
       >
         Unduh aplikasi
       </button>
       <button
         type="button"
-        onclick={() => handleNavClick("/trends", "trends")}
+        onclick={() => handleNavClick("/trends")}
         class="text-left py-2 px-3 rounded-lg text-sm font-bold text-brand-indigo-hero hover:bg-surface-container transition-colors"
       >
         Tren Penipuan
       </button>
       <button
         type="button"
-        onclick={() => handleNavClick("/about", "about")}
+        onclick={() => handleNavClick("/about")}
         class="text-left py-2 px-3 rounded-lg text-sm font-bold text-brand-indigo-hero hover:bg-surface-container transition-colors"
       >
         Tentang Kami

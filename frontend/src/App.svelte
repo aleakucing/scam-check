@@ -59,6 +59,8 @@
       }
       if (hash) {
         scrollToHash(hash.replace("#", ""));
+      } else {
+        window.scrollTo({ top: 0, behavior: "instant" });
       }
     };
 
@@ -80,19 +82,13 @@
   function navigateTo(route: string, hash?: string) {
     if (typeof window === "undefined") return;
 
-    if (hash && (currentRoute === "/" || route === "/")) {
-      currentRoute = "/";
-      window.history.pushState(null, "", `#${hash}`);
-      scrollToHash(hash);
-      return;
-    }
-
     currentRoute = (route as AppRoute) || "/";
-    window.history.pushState(null, "", route);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.history.pushState(null, "", hash ? `${route}#${hash}` : route);
 
     if (hash) {
       scrollToHash(hash);
+    } else {
+      window.scrollTo({ top: 0, behavior: "instant" });
     }
   }
 
@@ -140,10 +136,11 @@
       return;
     }
 
-    // Check hash on root
+    // When on root, always clear lingering hash and ensure view starts at top hero
     if (window.location.hash) {
-      scrollToHash(window.location.hash.replace("#", ""));
+      window.history.replaceState(null, "", window.location.pathname);
     }
+    window.scrollTo({ top: 0, behavior: "instant" });
 
     // Check sessionStorage
     try {
