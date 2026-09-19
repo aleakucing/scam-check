@@ -211,8 +211,25 @@
     }
   }
 
+  // Restore persisted checklist state from localStorage
+  $effect(() => {
+    if (typeof window !== "undefined" && analysis.case_id) {
+      try {
+        const saved = localStorage.getItem(`kroscheck_actions_${analysis.case_id}`);
+        if (saved) {
+          completedActions = JSON.parse(saved);
+        }
+      } catch {}
+    }
+  });
+
   function toggleActionCheck(step: number) {
     completedActions[step] = !completedActions[step];
+    if (typeof window !== "undefined" && analysis.case_id) {
+      try {
+        localStorage.setItem(`kroscheck_actions_${analysis.case_id}`, JSON.stringify(completedActions));
+      } catch {}
+    }
     if (completedActions[step]) {
       timelineEvents = [
         ...timelineEvents,

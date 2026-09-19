@@ -8,6 +8,13 @@
     padding: 0;
     font-family: 'Plus Jakarta Sans', sans-serif;
     scroll-behavior: smooth;
+    transition: font-size 0.15s ease-out;
+  }
+  html.font-scale-lg {
+    font-size: 112.5%;
+  }
+  html.font-scale-xl {
+    font-size: 125%;
   }
   body {
     overscroll-behavior-y: none;

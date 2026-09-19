@@ -34,6 +34,18 @@
 
   let resultPageRef = $state<any>(null);
 
+  const detectedEntity = $derived.by(() => {
+    const text = ((currentAnalysis?.summary || "") + " " + currentEvidence).toLowerCase();
+    if (text.includes("bca")) return "Bank BCA";
+    if (text.includes("bri")) return "Bank BRI";
+    if (text.includes("mandiri")) return "Bank Mandiri";
+    if (text.includes("bni")) return "Bank BNI";
+    if (text.includes("telkomsel")) return "Telkomsel";
+    if (text.includes("etle") || text.includes("tilang") || text.includes("polri") || text.includes("polisi")) return "Kepolisian (ETLE)";
+    if (text.includes("idwebhost")) return "IDwebhost";
+    return undefined;
+  });
+
   $effect(() => {
     updateHistoryCount();
     checkInitialUrl();
@@ -334,5 +346,6 @@
     isOpen={isOperatorOpen}
     onClose={() => { isOperatorOpen = false; }}
     onAnswerStep={handleOperatorAnswerStep}
+    targetEntity={detectedEntity}
   />
 </div>

@@ -6,9 +6,10 @@
     isOpen: boolean;
     onClose: () => void;
     onAnswerStep: (step: number, answer: boolean) => Promise<void>;
+    targetEntity?: string;
   }
 
-  let { isOpen, onClose, onAnswerStep }: Props = $props();
+  let { isOpen, onClose, onAnswerStep, targetEntity }: Props = $props();
 
   let step = $state<number>(1);
   let view = $state<"question" | "emergency" | "safe">("question");
@@ -16,7 +17,35 @@
   let isSubmitting = $state<boolean>(false);
   let activeCaption = $state<string>("");
 
-  const questions = t("operator.questions");
+  const rawQuestions = t("operator.questions");
+
+  // Dynamic Context Injection: interpolate targetEntity into questions if detected
+  const questions = $derived.by(() => {
+    if (!targetEntity) return rawQuestions;
+    return rawQuestions.map((q: any, idx: number) => {
+      if (idx === 0) {
+        return {
+          ...q,
+          question: `Apakah Anda sempat memencet atau membuka tautan/berkas yang mengatasnamakan ${targetEntity} ini?`,
+          speak_text: `Langkah satu. Apakah Bapak atau Ibu sempat memencet atau membuka tautan atau berkas yang mengatasnamakan ${targetEntity} ini?`
+        };
+      }
+      if (idx === 1) {
+        return {
+          ...q,
+          sub: `Catatan: Pihak ${targetEntity} resmi tidak pernah meminta kata sandi atau PIN melalui pesan atau tautan.`
+        };
+      }
+      if (idx === 2) {
+        return {
+          ...q,
+          question: `Apakah Anda sempat memberikan kode rahasia SMS (angka verifikasi OTP) dari ${targetEntity} kepada orang lain atau mengisinya ke layar?`,
+          speak_text: `Langkah tiga. Apakah Bapak atau Ibu sempat memberikan kode rahasia SMS atau angka verifikasi OTP dari ${targetEntity} kepada orang lain?`
+        };
+      }
+      return q;
+    });
+  });
 
   $effect(() => {
     if (isOpen) {
@@ -139,6 +168,11 @@
                 <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-700 text-white text-[11px] font-bold animate-pulse" aria-live="polite">
                   <span class="material-symbols-outlined text-[14px]">volume_up</span>
                   {t("operator.speaking_badge")}
+                </span>
+              {/if}
+              {#if targetEntity}
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/20 text-white text-[10px] font-bold">
+                  Konteks: {targetEntity}
                 </span>
               {/if}
             </div>
