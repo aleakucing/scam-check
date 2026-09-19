@@ -10,12 +10,8 @@
 
   let { onSubmit, onNavigate, apiError = "" }: Props = $props();
 
-  let scamInput = $state<string>("");
-  let isExpanded = $state<boolean>(false);
-  let isUploading = $state<boolean>(false);
+  let urlInput = $state<string>("");
   let errorMessage = $state<string>("");
-  let fileInputElement = $state<HTMLInputElement | null>(null);
-  let selectedImage = $state<{ name: string; base64: string; previewUrl: string } | null>(null);
 
   $effect(() => {
     if (apiError) {
@@ -27,76 +23,70 @@
   let activeFaqIndex = $state<number | null>(0);
 
   function handleInputChange() {
-    isExpanded = scamInput.trim().length > 0 || selectedImage !== null;
     if (errorMessage) errorMessage = "";
   }
 
-  function handleUploadClick() {
-    fileInputElement?.click();
-  }
-
-  function handleFileChange(e: Event) {
-    const target = e.target as HTMLInputElement;
-    if (target.files && target.files[0]) {
-      const file = target.files[0];
-      isUploading = true;
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const result = event.target?.result as string;
-        const base64 = result ? result.split(",")[1] : null;
-        isUploading = false;
-        if (base64) {
-          selectedImage = {
-            name: file.name,
-            base64,
-            previewUrl: result
-          };
-          isExpanded = true;
-          errorMessage = "";
-        }
-      };
-      reader.onerror = () => {
-        isUploading = false;
-        errorMessage = "Gagal memproses berkas gambar.";
-      };
-      reader.readAsDataURL(file);
+  async function handlePaste() {
+    try {
+      const text = await navigator.clipboard.readText();
+      if (text) {
+        urlInput = text.trim();
+        errorMessage = "";
+      }
+    } catch {
+      // clipboard access denied or unsupported
     }
   }
 
-  function removeSelectedImage() {
-    selectedImage = null;
-    if (fileInputElement) fileInputElement.value = "";
-    isExpanded = scamInput.trim().length > 0;
-  }
+  // Real-time URL inspector derived info
+  let liveInspector = $derived.by(() => {
+    const val = urlInput.trim();
+    if (!val || val.length < 4 || !val.includes(".")) return null;
+    try {
+      const urlToParse = val.startsWith("http://") || val.startsWith("https://") ? val : `http://${val}`;
+      const parsed = new URL(urlToParse);
+      const isHttps = parsed.protocol === "https:";
+      const hostname = parsed.hostname.toLowerCase();
+      const hasApk = val.toLowerCase().includes(".apk");
+      const suspiciousTlds = [".xyz", ".top", ".club", ".icu", ".site", ".online", ".live", ".work", ".click", ".buzz", ".link"];
+      const isSuspiciousTld = suspiciousTlds.some(tld => hostname.endsWith(tld));
+      return {
+        protocol: parsed.protocol.replace(":", ""),
+        isHttps,
+        hostname,
+        hasApk,
+        isSuspiciousTld
+      };
+    } catch {
+      return null;
+    }
+  });
 
   function handleSubmit() {
-    const val = scamInput.trim();
+    const val = urlInput.trim();
 
-    if (selectedImage) {
-      onSubmit({
-        type: "screenshot",
-        content: val || selectedImage.name,
-        image_base64: selectedImage.base64
-      });
+    if (!val) {
+      errorMessage = "Silakan masukkan atau tempel tautan yang ingin diperiksa.";
       return;
     }
 
-    const validation = validateEvidenceInput(val, undefined, false);
-    if (!validation.valid) {
-      errorMessage = validation.error || "Konten bukti tidak valid.";
+    const validation = validateEvidenceInput(val, "url", false);
+    if (!validation.valid || validation.normalizedType !== "url") {
+      errorMessage = validation.error || "Format tautan tidak valid. Masukkan URL lengkap (contoh: https://contoh-domain.com).";
       return;
     }
 
     errorMessage = "";
+    const cleanUrl = val.startsWith("http://") || val.startsWith("https://") ? val : `https://${val}`;
     onSubmit({
-      type: (validation.normalizedType as EvidenceType) || "text",
-      content: val,
+      type: "url",
+      content: cleanUrl,
       image_base64: null
     });
   }
 
   function handleKeyDown(e: KeyboardEvent) {
-    if (e.key === "Enter" && !e.shiftKey && scamInput.trim().length > 0) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSubmit();
     }
@@ -158,7 +148,7 @@
 
     <!-- Hero Title & Subtitle with Shimmer Effect -->
     <h1 class="text-3xl md:text-5xl font-extrabold shimmer-text max-w-2xl tracking-tight leading-tight mb-4">
-      Apakah ini penipuan?<br />Cek dengan cepat.
+      Apakah tautan ini penipuan?<br />Cek keamanannya sekarang.
     </h1>
 
     <div class="flex flex-col items-center gap-1.5 mb-8">
@@ -166,114 +156,97 @@
         GRATIS. TANPA PERLU DAFTAR.
       </span>
       <p class="text-sm sm:text-base text-on-surface-variant max-w-xl">
-        Tempel teks, unggah gambar, jelaskan situasinya, atau periksa nomor rekening secara instan.
+        Tempel tautan atau alamat website mencurigakan dari WhatsApp, SMS, atau Email untuk mendeteksi indikasi phishing, typosquatting, dan malware APK berbahaya.
       </p>
     </div>
 
-    <!-- Submission Box -->
-    <div class="w-full max-w-xl rounded-2xl bg-surface-container-lowest p-4 sm:p-5 shadow-xl flex flex-col gap-4 border border-border-subtle hover:shadow-2xl transition-shadow duration-300">
-      <!-- Upload File Trigger or Selected Preview -->
-      {#if selectedImage}
-        <div class="flex items-center justify-between p-3 rounded-xl bg-surface-container-high/60 border border-brand-violet-vibrant/40 shadow-sm">
-          <div class="flex items-center gap-3 overflow-hidden">
-            <img src={selectedImage.previewUrl} alt="Pratinjau berkas" class="w-12 h-12 rounded-lg object-cover border border-border-subtle shrink-0 shadow-sm" />
-            <div class="flex flex-col text-left overflow-hidden">
-              <span class="text-xs font-bold text-on-surface truncate">{selectedImage.name}</span>
-              <span class="text-[11px] text-brand-violet-vibrant font-semibold flex items-center gap-1">
-                <span class="material-symbols-outlined text-[14px]">check_circle</span>
-                Tangkapan layar siap dianalisis
-              </span>
-            </div>
-          </div>
-          <button
-            type="button"
-            onclick={removeSelectedImage}
-            class="px-2.5 py-1.5 rounded-lg hover:bg-surface-container text-xs font-semibold text-status-scam-red flex items-center gap-1 transition-colors cursor-pointer"
-          >
-            <span class="material-symbols-outlined text-[16px]">close</span>
-            <span>Ganti</span>
-          </button>
-        </div>
-      {:else}
-        <button
-          type="button"
-          onclick={handleUploadClick}
-          disabled={isUploading}
-          class="w-full py-3 px-6 rounded-full bg-brand-violet-vibrant hover:bg-brand-violet-hover text-on-primary font-semibold text-sm flex items-center justify-center gap-2.5 transition-all shadow-md active:scale-[0.99] cursor-pointer disabled:opacity-60"
+    <!-- Single URL Scanner Capsule -->
+    <div class="w-full max-w-2xl rounded-2xl bg-surface-container-lowest p-3 sm:p-4 shadow-xl flex flex-col gap-3 border border-border-subtle hover:shadow-2xl transition-all duration-300">
+      <form onsubmit={(e) => { e.preventDefault(); handleSubmit(); }} class="flex flex-col sm:flex-row items-center gap-2">
+        <div
+          class="relative flex-1 w-full flex items-center rounded-xl bg-surface-container-low px-3 py-2.5 sm:py-3 border transition-all duration-200 {errorMessage
+            ? 'border-status-scam-red ring-2 ring-status-scam-red/20'
+            : 'border-surface-container-high/60 focus-within:border-brand-violet-vibrant/60 focus-within:bg-white focus-within:shadow-md'}"
         >
-          {#if isUploading}
-            <span class="material-symbols-outlined text-[20px] animate-spin">progress_activity</span>
-            <span>Memproses berkas...</span>
+          <span class="material-symbols-outlined text-brand-violet-vibrant/80 text-[22px] mr-2 shrink-0">link</span>
+          <input
+            type="url"
+            bind:value={urlInput}
+            oninput={handleInputChange}
+            onkeydown={handleKeyDown}
+            placeholder="Tempel tautan di sini (contoh: https://contoh-link.xyz/login)..."
+            class="w-full bg-transparent text-sm sm:text-base text-on-surface placeholder:text-on-surface-variant/60 focus:outline-none"
+          />
+          {#if urlInput}
+            <button
+              type="button"
+              onclick={() => { urlInput = ""; errorMessage = ""; }}
+              class="text-on-surface-variant/60 hover:text-on-surface p-1 rounded-full hover:bg-surface-container transition-colors cursor-pointer mr-1"
+              title="Hapus"
+            >
+              <span class="material-symbols-outlined text-[18px]">close</span>
+            </button>
           {:else}
-            <span class="material-symbols-outlined text-[20px]">add_photo_alternate</span>
-            <span>Unggah gambar atau tangkapan layar</span>
+            <button
+              type="button"
+              onclick={handlePaste}
+              class="hidden sm:inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-lg bg-surface-container text-brand-indigo-hero hover:bg-brand-violet-vibrant hover:text-white transition-all cursor-pointer mr-1"
+              title="Tempel dari Clipboard"
+            >
+              <span class="material-symbols-outlined text-[14px]">content_paste</span>
+              <span>Tempel</span>
+            </button>
           {/if}
+        </div>
+
+        <button
+          type="submit"
+          class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-brand-violet-vibrant hover:bg-brand-violet-hover text-on-primary font-bold text-sm transition-all shadow-md active:scale-95 cursor-pointer shrink-0"
+        >
+          <span>Periksa Tautan</span>
+          <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
         </button>
+      </form>
+
+      {#if liveInspector}
+        <div class="flex flex-wrap items-center gap-2 px-3 py-2 rounded-lg bg-surface-container-low text-xs border border-border-subtle/60 text-left">
+          <span class="font-bold text-on-surface-variant flex items-center gap-1">
+            <span class="material-symbols-outlined text-[14px] text-brand-violet-vibrant">travel_explore</span>
+            Inspector:
+          </span>
+          <span class="px-2 py-0.5 rounded-full {liveInspector.isHttps ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'} font-semibold text-[11px]">
+            {liveInspector.protocol.toUpperCase()}
+          </span>
+          <span class="font-mono text-[11px] text-on-surface font-semibold truncate max-w-[240px]">
+            {liveInspector.hostname}
+          </span>
+          {#if liveInspector.hasApk}
+            <span class="px-2 py-0.5 rounded-full bg-red-100 text-red-700 font-bold text-[10px] animate-pulse">
+              .APK MALWARE
+            </span>
+          {/if}
+          {#if liveInspector.isSuspiciousTld}
+            <span class="px-2 py-0.5 rounded-full bg-orange-100 text-orange-800 font-bold text-[10px]">
+              TLD RISIKO TINGGI
+            </span>
+          {/if}
+        </div>
       {/if}
 
-      <input
-        bind:this={fileInputElement}
-        onchange={handleFileChange}
-        accept="image/*"
-        type="file"
-        class="hidden"
-      />
-
-      <div class="flex items-center gap-3">
-        <div class="h-[1px] flex-1 bg-surface-container-high"></div>
-        <span class="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider">
-          {selectedImage ? "CATATAN TAMBAHAN (OPSIONAL)" : "ATAU JELASKAN DI BAWAH"}
-        </span>
-        <div class="h-[1px] flex-1 bg-surface-container-high"></div>
-      </div>
-
-      <!-- Text Input & Submit Action -->
-      <div
-        class="relative flex flex-col rounded-xl bg-surface-container-low p-2.5 sm:p-3 border transition-all duration-300 ease-out {errorMessage
-          ? 'border-status-scam-red ring-2 ring-status-scam-red/20'
-          : 'border-surface-container-high/60 focus-within:border-brand-violet-vibrant/40 focus-within:bg-surface-container-lowest focus-within:shadow-md'}"
-      >
-        <textarea
-          bind:value={scamInput}
-          oninput={handleInputChange}
-          onkeydown={handleKeyDown}
-          placeholder={selectedImage ? "Ketik keterangan atau isi pesan di dalam gambar (opsional)..." : "Tempel teks/tautan atau ceritakan apa yang terjadi..."}
-          rows={isExpanded ? 3 : 1}
-          class="w-full bg-transparent resize-none p-1 text-on-surface placeholder:text-on-surface-variant/70 text-sm focus:outline-none transition-all duration-300 ease-out leading-relaxed"
-        ></textarea>
-
-        <!-- Dynamic Expandable Footer -->
-        <div
-          class="transition-all duration-300 ease-out flex items-center justify-between {isExpanded
-            ? 'opacity-100 min-h-[38px] pt-2.5'
-            : 'max-h-0 opacity-0 overflow-hidden pointer-events-none'}"
-        >
-          <span class="text-[11px] text-on-surface-variant/75 flex items-center gap-1.5 font-medium">
-            <span class="material-symbols-outlined text-[16px] text-brand-violet-vibrant/70">lock</span>
-            Terenkripsi &amp; privat
-          </span>
-
-          <button
-            type="button"
-            onclick={handleSubmit}
-            class="inline-flex items-center gap-1.5 px-5 py-2 rounded-full bg-brand-indigo-hero text-on-primary text-xs font-bold hover:bg-brand-violet-vibrant transition-all shadow-sm active:scale-95 cursor-pointer"
-          >
-            <span>{selectedImage ? "Periksa Gambar Sekarang" : "Periksa sekarang"}</span>
-            <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
-          </button>
-        </div>
-      </div>
-
       {#if errorMessage}
-        <div class="p-2.5 rounded-lg bg-status-scam-bg text-status-scam-red text-xs font-semibold flex items-center gap-1.5">
-          <span class="material-symbols-outlined text-[16px]">error</span>
+        <div class="p-3 rounded-xl bg-status-scam-bg text-status-scam-red text-xs font-semibold flex items-center gap-2 border border-status-scam-red/30 animate-shake">
+          <span class="material-symbols-outlined text-[18px] shrink-0">error</span>
           <span>{errorMessage}</span>
         </div>
       {/if}
 
       <!-- Bottom Hint -->
-      <div class="flex items-center justify-center pt-1 text-xs text-on-surface-variant/70">
-        <span>Didukung AI Multimodal &amp; Basis Data Intelijen Siber Indonesia</span>
+      <div class="flex items-center justify-between pt-1 px-1 text-xs text-on-surface-variant/70">
+        <span class="flex items-center gap-1 text-[11px]">
+          <span class="material-symbols-outlined text-[14px] text-brand-violet-vibrant">verified_user</span>
+          Proteksi SSRF &amp; URL Shortener Expansion
+        </span>
+        <span class="text-[11px] hidden sm:inline">Didukung Intelijen Keamanan Siber Indonesia</span>
       </div>
     </div>
   </section>
