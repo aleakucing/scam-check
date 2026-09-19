@@ -350,7 +350,7 @@
       <button
         type="button"
         onclick={toggleAudioNarration}
-        class="sg-btn-secondary {isSpeaking ? 'border-primary text-primary bg-purple-50' : ''}"
+        class="sg-btn-secondary {isSpeaking ? 'border-primary text-primary bg-blue-50' : ''}"
       >
         <span class="material-symbols-outlined text-[18px]">
           {isSpeaking ? "volume_off" : "volume_up"}
@@ -545,7 +545,7 @@
   </div>
 
   <!-- Senior Operator Button Callout -->
-  <div class="p-5 rounded-2xl bg-gradient-to-r from-brand-indigo-hero to-primary text-white flex flex-col sm:flex-row items-center justify-between gap-4 shadow-md">
+  <div class="p-5 rounded-2xl bg-brand-indigo-hero text-white flex flex-col sm:flex-row items-center justify-between gap-4 shadow-md">
     <div class="flex items-center gap-3 text-center sm:text-left">
       <div class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center shrink-0">
         <span class="material-symbols-outlined text-white text-[28px]">support_agent</span>

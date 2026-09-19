@@ -218,15 +218,11 @@
   <!-- Hero Scan & Submission Section -->
   <section
     id="top-input-hero"
-    class="relative w-full max-w-[1200px] mx-auto px-gutter pt-12 pb-16 md:pt-16 md:pb-24 flex flex-col items-center text-center justify-center overflow-hidden"
+    class="relative w-full max-w-[1200px] mx-auto px-gutter min-h-[calc(100vh-5rem)] min-h-[calc(100dvh-5rem)] py-16 md:py-24 flex flex-col items-center text-center justify-center overflow-hidden"
   >
-    <!-- Ambient Glowing Background Auras -->
-    <div class="absolute top-6 left-1/2 -translate-x-1/2 w-[600px] h-[320px] bg-gradient-to-tr from-brand-violet-vibrant/15 via-purple-300/20 to-sky-300/25 rounded-full blur-3xl pointer-events-none -z-10 animate-float"></div>
-    <div class="absolute top-36 left-1/3 -translate-x-1/2 w-[320px] h-[220px] bg-gradient-to-br from-sky-400/15 to-transparent rounded-full blur-2xl pointer-events-none -z-10 animate-pulse-glow" style="animation-duration: 6s;"></div>
-
     <!-- Stylized Animated Emblem with Pulsing Ripple -->
     <div class="relative mb-6 flex items-center justify-center">
-      <div class="absolute -inset-3 rounded-full bg-brand-violet-vibrant/20 animate-pulse-purple"></div>
+      <div class="absolute -inset-3 rounded-full bg-brand-violet-vibrant/20 animate-pulse-blue"></div>
       <div class="w-20 h-20 rounded-full bg-surface-container-high flex items-center justify-center shadow-inner relative z-10 animate-float">
         <span class="material-symbols-outlined text-brand-violet-vibrant text-[44px]">search_check</span>
       </div>
@@ -244,15 +240,6 @@
       <span class="text-xs sm:text-sm text-brand-violet-vibrant font-bold tracking-wide uppercase">
         GRATIS. TANPA PERLU DAFTAR.
       </span>
-      <p class="text-sm sm:text-base text-on-surface-variant max-w-xl">
-        Periksa tautan website mencurigakan atau unggah tangkapan layar (screenshot) untuk mendeteksi indikasi phishing, typosquatting, dan malware APK.
-      </p>
-    </div>
-
-    <!-- Anti-OTP Disclaimer -->
-    <div class="flex items-center gap-1.5 text-xs text-amber-800 bg-amber-50 px-3 py-2 rounded-lg border border-amber-200/80 mb-3">
-      <span class="material-symbols-outlined text-amber-600 text-[16px] shrink-0">security</span>
-      <span><strong>Penting:</strong> KrosCheck TIDAK PERNAH meminta password, PIN, atau kode OTP Anda.</span>
     </div>
 
     <!-- Mode Switcher: Link vs Media -->
@@ -411,10 +398,10 @@
             ondragleave={() => { isDragging = false; }}
             ondrop={handleDrop}
             class="w-full py-8 px-6 rounded-xl border-2 border-dashed transition-all duration-200 flex flex-col items-center justify-center gap-2.5 cursor-pointer text-center {isDragging
-              ? 'border-brand-violet-vibrant bg-purple-50/60 scale-[0.99]'
+              ? 'border-brand-violet-vibrant bg-blue-50/60 scale-[0.99]'
               : 'border-border-subtle bg-surface-container-low hover:border-brand-violet-vibrant/60 hover:bg-surface-container/50'}"
           >
-            <div class="w-12 h-12 rounded-full bg-purple-50 text-brand-violet-vibrant flex items-center justify-center shadow-sm">
+            <div class="w-12 h-12 rounded-full bg-blue-50 text-brand-violet-vibrant flex items-center justify-center shadow-sm">
               <span class="material-symbols-outlined text-2xl">add_photo_alternate</span>
             </div>
             <div class="flex flex-col gap-0.5">
@@ -461,7 +448,7 @@
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div class="p-6 rounded-2xl bg-white border border-border-subtle shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 group flex flex-col gap-3">
-          <div class="w-12 h-12 rounded-xl bg-purple-50 text-brand-violet-vibrant flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
+          <div class="w-12 h-12 rounded-xl bg-blue-50 text-brand-violet-vibrant flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
             <span class="material-symbols-outlined text-[26px]">network_check</span>
           </div>
           <h3 class="text-base font-bold text-brand-indigo-hero">Deteksi Tautan Phishing &amp; SSRF</h3>

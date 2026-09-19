@@ -98,13 +98,13 @@
 
     <!-- Channel 3: PWA / Mobile Web App -->
     <div class="p-6 rounded-3xl bg-white border border-border-subtle shadow-sm flex flex-col gap-4 relative overflow-hidden group hover:shadow-md transition-shadow">
-      <div class="w-12 h-12 rounded-2xl bg-purple-50 text-brand-violet-vibrant flex items-center justify-center">
+      <div class="w-12 h-12 rounded-2xl bg-blue-50 text-brand-violet-vibrant flex items-center justify-center">
         <span class="material-symbols-outlined text-[28px]">install_mobile</span>
       </div>
       <div class="flex flex-col gap-1">
         <div class="flex items-center gap-2">
           <h3 class="text-lg font-bold text-brand-indigo-hero">Pasang Web App (PWA)</h3>
-          <span class="px-2 py-0.5 rounded-full bg-purple-100 text-brand-violet-vibrant text-[10px] font-bold">Ringan</span>
+          <span class="px-2 py-0.5 rounded-full bg-blue-100 text-brand-violet-vibrant text-[10px] font-bold">Ringan</span>
         </div>
         <p class="text-xs text-on-surface-variant leading-relaxed">
           Tambahkan KrosCheck ke Layar Utama (*Home Screen*) HP Anda tanpa perlu unduhan berat dari App Store atau Play Store.

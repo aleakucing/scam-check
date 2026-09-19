@@ -38,7 +38,7 @@
   <!-- Story Section -->
   <div class="p-8 rounded-3xl bg-white border border-border-subtle shadow-sm flex flex-col gap-6">
     <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-xl bg-purple-50 text-brand-violet-vibrant flex items-center justify-center">
+      <div class="w-10 h-10 rounded-xl bg-blue-50 text-brand-violet-vibrant flex items-center justify-center">
         <span class="material-symbols-outlined text-[24px]">history_edu</span>
       </div>
       <div>

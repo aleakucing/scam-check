@@ -43,7 +43,7 @@
   }
 </script>
 
-<header class="fixed top-0 left-0 right-0 w-full z-50 bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(28,0,79,0.04)]">
+<header class="fixed top-0 left-0 right-0 w-full z-50 bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(11,25,44,0.05)]">
   <div class="h-20 max-w-[1200px] mx-auto px-gutter flex items-center justify-between gap-space-md">
     <!-- Brand Logo -->
     <button 

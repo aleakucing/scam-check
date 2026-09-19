@@ -201,7 +201,7 @@
         <!-- Live Visual Subtitle Banner (TTS Caption Fallback for Hearing Impaired) -->
         {#if activeCaption}
           <div
-            class="p-3.5 rounded-xl bg-purple-50/90 border border-purple-200 text-brand-indigo-hero text-xs sm:text-sm flex items-start gap-2.5"
+            class="p-3.5 rounded-xl bg-blue-50/90 border border-blue-200 text-brand-indigo-hero text-xs sm:text-sm flex items-start gap-2.5"
             aria-live="polite"
           >
             <span class="material-symbols-outlined text-primary text-[20px] shrink-0 mt-0.5" aria-hidden="true">subtitles</span>
@@ -241,7 +241,7 @@
               <button
                 type="button"
                 onclick={speakCurrentQuestion}
-                class="min-h-[44px] inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-purple-100 hover:bg-purple-200 text-purple-900 text-xs font-bold cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary"
+                class="min-h-[44px] inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-blue-100 hover:bg-blue-200 text-blue-900 text-xs font-bold cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary"
                 aria-label={t("operator.repeat_audio")}
               >
                 <span class="material-symbols-outlined text-[18px]">volume_up</span>
@@ -311,7 +311,7 @@
 
             <!-- Instant Status Feedback -->
             {#if isSubmitting}
-              <div class="p-2 rounded-lg bg-purple-50 text-purple-900 text-xs font-bold flex items-center gap-2" aria-live="assertive">
+              <div class="p-2 rounded-lg bg-blue-50 text-blue-900 text-xs font-bold flex items-center gap-2" aria-live="assertive">
                 <span class="material-symbols-outlined text-[16px] animate-spin">progress_activity</span>
                 <span>Menyimpan jawaban Anda...</span>
               </div>

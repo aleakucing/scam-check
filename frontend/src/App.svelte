@@ -233,21 +233,21 @@
           <div class="absolute inset-0 rounded-full bg-brand-violet-vibrant/10 animate-ping"></div>
           
           <!-- Concentric radar circles -->
-          <div class="absolute inset-2 rounded-full border-2 border-dashed border-purple-300 animate-spin" style="animation-duration: 12s;"></div>
-          <div class="absolute inset-6 rounded-full border border-purple-200"></div>
-          <div class="absolute inset-10 rounded-full border border-purple-100"></div>
+          <div class="absolute inset-2 rounded-full border-2 border-dashed border-blue-300 animate-spin" style="animation-duration: 12s;"></div>
+          <div class="absolute inset-6 rounded-full border border-blue-200"></div>
+          <div class="absolute inset-10 rounded-full border border-blue-100"></div>
           
           <!-- Radar sweep beam -->
-          <div class="absolute inset-0 rounded-full bg-gradient-to-tr from-brand-violet-vibrant/30 via-transparent to-transparent animate-radar pointer-events-none"></div>
+          <div class="absolute inset-0 rounded-full border-t-2 border-primary/40 animate-radar pointer-events-none"></div>
 
           <!-- Central Shield Badge -->
-          <div class="relative z-10 w-16 h-16 rounded-2xl bg-white shadow-xl border border-purple-100 flex items-center justify-center animate-bounce-subtle">
+          <div class="relative z-10 w-16 h-16 rounded-2xl bg-white shadow-xl border border-blue-100 flex items-center justify-center animate-bounce-subtle">
             <span class="material-symbols-outlined text-brand-violet-vibrant text-3xl animate-pulse">radar</span>
           </div>
         </div>
 
         <div class="flex flex-col gap-2 max-w-md">
-          <div class="inline-flex items-center justify-center gap-2 px-3 py-1 rounded-full bg-purple-50 text-brand-violet-vibrant text-xs font-bold border border-purple-200 mx-auto">
+          <div class="inline-flex items-center justify-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-brand-violet-vibrant text-xs font-bold border border-blue-200 mx-auto">
             <span class="w-2 h-2 rounded-full bg-brand-violet-vibrant animate-ping"></span>
             <span>PEMINDAIAN INTELIJEN AKTIF</span>
           </div>
@@ -260,7 +260,7 @@
           
           <!-- Animated scanning beam bar -->
           <div class="w-64 h-1.5 rounded-full bg-surface-container mx-auto mt-4 overflow-hidden relative">
-            <div class="h-full w-24 rounded-full bg-gradient-to-r from-brand-violet-vibrant via-sky-400 to-brand-violet-vibrant absolute" style="animation: shimmer-slide 1.5s infinite linear;"></div>
+            <div class="h-full w-24 rounded-full bg-primary absolute" style="animation: shimmer-slide 1.5s infinite linear;"></div>
           </div>
         </div>
       </div>
