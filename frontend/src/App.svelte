@@ -225,7 +225,7 @@
   <main class="flex-1 pt-20 flex flex-col">
     {#if isLoading}
       <!-- High-Tech Cyber Radar Threat Scanner Animation -->
-      <div in:fade={{ duration: 200 }} class="flex-1 flex flex-col items-center justify-center min-h-[65vh] gap-8 text-center px-4">
+      <div in:fade={{ duration: 200 }} class="flex-1 flex flex-col items-center justify-center min-h-[calc(100vh-5rem)] gap-8 text-center px-4">
         <div class="relative w-36 h-36 flex items-center justify-center">
           <!-- Outer pulsating wave -->
           <div class="absolute inset-0 rounded-full bg-brand-violet-vibrant/10 animate-ping"></div>
@@ -336,10 +336,12 @@
     {/if}
   </main>
 
-  <Footer
-    onNavigate={navigateTo}
-    onTestScenario={(content, type) => executeAnalysis({ content, type })}
-  />
+  {#if !isLoading}
+    <Footer
+      onNavigate={navigateTo}
+      onTestScenario={(content, type) => executeAnalysis({ content, type })}
+    />
+  {/if}
 
   <!-- Global Modals -->
   <CaseHistoryModal
