@@ -196,42 +196,6 @@
         </button>
       </div>
 
-      <!-- Step Progress Bar (For Questions View) -->
-      {#if view === "question"}
-        <div class="bg-surface-container-low px-6 py-3 border-b border-border-subtle flex items-center justify-between gap-2">
-          <div class="flex items-center gap-2 flex-1">
-            <!-- Step 1 Indicator -->
-            <div class="flex items-center gap-1.5 {step >= 1 ? 'text-primary font-bold' : 'text-on-surface-variant'}">
-              <span class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold {step > 1 ? 'bg-emerald-600 text-white' : step === 1 ? 'bg-primary text-white' : 'bg-surface-container text-on-surface-variant'}">
-                {step > 1 ? '✓' : '1'}
-              </span>
-              <span class="text-xs hidden sm:inline">Buka Link</span>
-            </div>
-            <div class="h-0.5 flex-1 {step >= 2 ? 'bg-primary' : 'bg-surface-container'}"></div>
-
-            <!-- Step 2 Indicator -->
-            <div class="flex items-center gap-1.5 {step >= 2 ? 'text-primary font-bold' : 'text-on-surface-variant'}">
-              <span class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold {step > 2 ? 'bg-emerald-600 text-white' : step === 2 ? 'bg-primary text-white' : 'bg-surface-container text-on-surface-variant'}">
-                {step > 2 ? '✓' : '2'}
-              </span>
-              <span class="text-xs hidden sm:inline">Ketik Data/PIN</span>
-            </div>
-            <div class="h-0.5 flex-1 {step >= 3 ? 'bg-primary' : 'bg-surface-container'}"></div>
-
-            <!-- Step 3 Indicator -->
-            <div class="flex items-center gap-1.5 {step === 3 ? 'text-primary font-bold' : 'text-on-surface-variant'}">
-              <span class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold {step === 3 ? 'bg-primary text-white' : 'bg-surface-container text-on-surface-variant'}">
-                3
-              </span>
-              <span class="text-xs hidden sm:inline">Kode OTP</span>
-            </div>
-          </div>
-
-          <span class="text-xs font-bold text-brand-indigo-hero px-2.5 py-1 rounded bg-white border border-border-subtle shrink-0">
-            Langkah {step} dari 3
-          </span>
-        </div>
-      {/if}
 
       <!-- Content Body -->
       <div class="p-5 sm:p-8 overflow-y-auto flex-1 flex flex-col gap-6">
@@ -242,16 +206,19 @@
             
             <!-- Controls Row: Re-play Audio & Back Button -->
             <div class="flex flex-wrap items-center justify-between gap-2">
-              <div>
+              <div class="flex items-center gap-2">
+                <span class="px-3 py-1.5 rounded-full bg-surface-container text-primary font-bold text-xs">
+                  {q.badge}
+                </span>
                 {#if step > 1}
                   <button
                     type="button"
                     onclick={handleBack}
-                    class="min-h-[44px] px-4 py-2 rounded-full bg-surface-container hover:bg-surface-container-high text-brand-indigo-hero text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-colors"
+                    class="min-h-[44px] px-3.5 py-1.5 rounded-full bg-surface-container hover:bg-surface-container-high text-brand-indigo-hero text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-colors"
                     aria-label={t("operator.back_button")}
                   >
-                    <span class="material-symbols-outlined text-[18px]">arrow_back</span>
-                    <span>Pertanyaan Sebelumnya</span>
+                    <span class="material-symbols-outlined text-[16px]">arrow_back</span>
+                    <span>Kembali</span>
                   </button>
                 {/if}
               </div>
