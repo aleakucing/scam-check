@@ -83,8 +83,9 @@
 
       <div class="mt-auto pt-4 border-t border-border-subtle flex flex-col gap-2">
         <a
-          href="https://t.me"
-          target="_blank"
+          href="#"
+          onclick={(e) => e.preventDefault()}
+          title="Bot Telegram segera hadir"
           rel="noreferrer"
           class="w-full py-2.5 rounded-full bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold flex items-center justify-center gap-2 shadow-sm transition-all"
         >
@@ -154,23 +155,7 @@
 
     <!-- Stylized QR Code Visual -->
     <div class="w-40 h-40 rounded-2xl bg-white p-3 shadow-md flex items-center justify-center shrink-0 border border-border-subtle">
-      <svg class="w-full h-full text-brand-indigo-hero" fill="currentColor" viewBox="0 0 100 100">
-        <rect x="10" y="10" width="25" height="25" rx="4"></rect>
-        <rect x="15" y="15" width="15" height="15" fill="#FFFFFF"></rect>
-        <rect x="19" y="19" width="7" height="7"></rect>
-        <rect x="65" y="10" width="25" height="25" rx="4"></rect>
-        <rect x="70" y="15" width="15" height="15" fill="#FFFFFF"></rect>
-        <rect x="74" y="19" width="7" height="7"></rect>
-        <rect x="10" y="65" width="25" height="25" rx="4"></rect>
-        <rect x="15" y="70" width="15" height="15" fill="#FFFFFF"></rect>
-        <rect x="19" y="74" width="7" height="7"></rect>
-        <circle cx="45" cy="22" r="4"></circle>
-        <circle cx="55" cy="35" r="4"></circle>
-        <circle cx="45" cy="50" r="4"></circle>
-        <circle cx="68" cy="65" r="4"></circle>
-        <circle cx="85" cy="75" r="4"></circle>
-        <circle cx="55" cy="85" r="4"></circle>
-      </svg>
+      <span class="text-xs font-bold text-center text-on-surface-variant px-2">Buka di browser smartphone:<br/><span class="text-primary mt-1 block">kroscheck.id</span></span>
     </div>
   </div>
 </div>

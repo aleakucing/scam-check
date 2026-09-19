@@ -71,8 +71,9 @@
           </button>
 
           <a
-            href="https://t.me"
-            target="_blank"
+            href="#"
+            onclick={(e) => e.preventDefault()}
+            title="Bot Telegram segera hadir"
             rel="noreferrer"
             class="px-3 py-1.5 rounded-full bg-surface-variant/10 flex items-center gap-1.5 hover:bg-surface-variant/20 transition-colors cursor-pointer text-xs font-semibold text-white"
           >
@@ -81,8 +82,9 @@
           </a>
 
           <a
-            href="https://wa.me"
-            target="_blank"
+            href="#"
+            onclick={(e) => e.preventDefault()}
+            title="Bot WhatsApp segera hadir"
             rel="noreferrer"
             class="px-3 py-1.5 rounded-full bg-surface-variant/10 flex items-center gap-1.5 hover:bg-surface-variant/20 transition-colors cursor-pointer text-xs font-semibold text-white"
           >

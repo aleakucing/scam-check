@@ -104,8 +104,9 @@
 
       <!-- Telegram Bot Link -->
       <a
-        href="https://t.me"
-        target="_blank"
+        href="#"
+        onclick={(e) => e.preventDefault()}
+        title="Bot Telegram segera hadir"
         rel="noreferrer"
         class="hidden sm:inline-flex items-center justify-center px-3.5 py-2 rounded-full bg-sky-600 text-white text-xs font-bold hover:bg-sky-700 transition-colors shadow-sm"
       >
@@ -114,8 +115,9 @@
 
       <!-- WhatsApp Bot Link -->
       <a
-        href="https://wa.me"
-        target="_blank"
+        href="#"
+        onclick={(e) => e.preventDefault()}
+        title="Bot WhatsApp segera hadir"
         rel="noreferrer"
         class="hidden sm:inline-flex items-center justify-center px-3.5 py-2 rounded-full bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-700 transition-colors shadow-sm"
       >
@@ -177,16 +179,18 @@
       
       <div class="pt-2 border-t border-border-subtle flex items-center gap-2">
         <a
-          href="https://t.me"
-          target="_blank"
+          href="#"
+          onclick={(e) => e.preventDefault()}
+          title="Bot Telegram segera hadir"
           rel="noreferrer"
           class="flex-1 py-2 rounded-full bg-sky-600 text-white text-xs font-bold text-center"
         >
           Telegram Bot
         </a>
         <a
-          href="https://wa.me"
-          target="_blank"
+          href="#"
+          onclick={(e) => e.preventDefault()}
+          title="Bot WhatsApp segera hadir"
           rel="noreferrer"
           class="flex-1 py-2 rounded-full bg-emerald-600 text-white text-xs font-bold text-center"
         >

@@ -15,8 +15,21 @@ export function validateEvidenceInput(
 ): ValidationResult {
   const content = (rawContent || "").trim();
 
-  // If user uploaded a valid image, content is optional description
+  // If user uploaded a valid image, content description is more flexible
+  // but still enforce basic safety checks (not a blanket bypass)
   if (hasImage) {
+    // Allow empty or short descriptions for image-only uploads
+    if (!content || content.length < 5) {
+      return { valid: true, normalizedType: "screenshot" };
+    }
+    // Still check for excessively long content (potential prompt injection payload)
+    if (content.length > 2000) {
+      return {
+        valid: false,
+        error: "Deskripsi tangkapan layar terlalu panjang (maks 2.000 karakter). Cukup berikan deskripsi singkat."
+      };
+    }
+    // Allow through — further anti-injection is handled by aiAgent prompt isolation
     return { valid: true, normalizedType: "screenshot" };
   }
 

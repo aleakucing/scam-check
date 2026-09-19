@@ -695,6 +695,7 @@
             <span class="text-[10px] text-orange-600 font-semibold">Bantuan Darurat</span>
           </a>
         </div>
+        <p class="text-[10px] text-on-surface-variant/60 text-center mt-2">Nomor terverifikasi sesuai direktori resmi OJK &amp; Bank Indonesia • September 2026</p>
       </div>
 
       <!-- Action Items Checklist -->

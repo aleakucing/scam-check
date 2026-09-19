@@ -249,6 +249,12 @@
       </p>
     </div>
 
+    <!-- Anti-OTP Disclaimer -->
+    <div class="flex items-center gap-1.5 text-xs text-amber-800 bg-amber-50 px-3 py-2 rounded-lg border border-amber-200/80 mb-3">
+      <span class="material-symbols-outlined text-amber-600 text-[16px] shrink-0">security</span>
+      <span><strong>Penting:</strong> KrosCheck TIDAK PERNAH meminta password, PIN, atau kode OTP Anda.</span>
+    </div>
+
     <!-- Mode Switcher: Link vs Media -->
     <div class="inline-flex p-1 rounded-xl bg-surface-container mb-4 shadow-sm border border-border-subtle/80">
       <button
@@ -673,8 +679,9 @@
 
         <div class="flex flex-wrap items-center gap-3">
           <a
-            href="https://wa.me"
-            target="_blank"
+            href="#"
+            onclick={(e) => e.preventDefault()}
+            title="Bot WhatsApp segera hadir"
             rel="noreferrer"
             class="px-5 py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-2 shadow-md transition-all"
           >
@@ -682,8 +689,9 @@
             <span>WhatsApp Bot</span>
           </a>
           <a
-            href="https://t.me"
-            target="_blank"
+            href="#"
+            onclick={(e) => e.preventDefault()}
+            title="Bot Telegram segera hadir"
             rel="noreferrer"
             class="px-5 py-2.5 rounded-full bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold flex items-center gap-2 shadow-md transition-all"
           >
@@ -704,23 +712,7 @@
       <div class="lg:col-span-6 flex justify-center">
         <div class="p-6 rounded-3xl bg-white shadow-xl border border-border-subtle flex flex-col sm:flex-row items-center gap-6 max-w-md">
           <div class="w-32 h-32 rounded-xl bg-surface-container-lowest p-2 shadow-sm flex items-center justify-center shrink-0 border">
-            <svg class="w-full h-full text-brand-indigo-hero" fill="currentColor" viewBox="0 0 100 100">
-              <rect x="10" y="10" width="25" height="25" rx="4"></rect>
-              <rect x="15" y="15" width="15" height="15" fill="#FFFFFF"></rect>
-              <rect x="19" y="19" width="7" height="7"></rect>
-              <rect x="65" y="10" width="25" height="25" rx="4"></rect>
-              <rect x="70" y="15" width="15" height="15" fill="#FFFFFF"></rect>
-              <rect x="74" y="19" width="7" height="7"></rect>
-              <rect x="10" y="65" width="25" height="25" rx="4"></rect>
-              <rect x="15" y="70" width="15" height="15" fill="#FFFFFF"></rect>
-              <rect x="19" y="74" width="7" height="7"></rect>
-              <circle cx="45" cy="22" r="4"></circle>
-              <circle cx="55" cy="35" r="4"></circle>
-              <circle cx="45" cy="50" r="4"></circle>
-              <circle cx="68" cy="65" r="4"></circle>
-              <circle cx="85" cy="75" r="4"></circle>
-              <circle cx="55" cy="85" r="4"></circle>
-            </svg>
+            <span class="text-xs font-bold text-center text-on-surface-variant px-2">Buka di browser smartphone:<br/><span class="text-primary mt-1 block">kroscheck.id</span></span>
           </div>
           <div class="flex flex-col gap-1 text-center sm:text-left">
             <h4 class="text-sm font-bold text-brand-indigo-hero">Pindai dari Smartphone</h4>
