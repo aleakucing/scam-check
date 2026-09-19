@@ -27,12 +27,13 @@
   let isEmergency = $state<boolean>(false);
   let statusDesc = $state<string>("Anda baru menerima pesan dan belum berinteraksi lanjut.");
 
-  // Assistance Prompt Popup (5 seconds after result/ratio loads)
+  // Assistance Prompt Popup (5 seconds after result loads, only if risk is high/elevated >= 50%)
   let showAssistPrompt = $state<boolean>(false);
   let assistDismissed = $state<boolean>(false);
 
   $effect(() => {
-    if (analysis && !assistDismissed) {
+    // Only trigger if risk is elevated/high (>= 50%) and not dismissed
+    if (analysis && analysis.content_risk >= 50 && !assistDismissed) {
       const timer = setTimeout(() => {
         if (!assistDismissed) {
           showAssistPrompt = true;
@@ -826,6 +827,7 @@
 </div>
 
 {#if showAssistPrompt}
+  {@const isCritical = analysis.content_risk >= 75}
   <div
     class="fixed inset-0 z-[90] flex items-center justify-center p-4 bg-brand-indigo-hero/60 backdrop-blur-sm animate-fade-in"
     role="dialog"
@@ -842,8 +844,14 @@
         <span class="material-symbols-outlined text-[20px]">close</span>
       </button>
 
-      <div class="w-14 h-14 rounded-2xl bg-blue-50 border border-blue-200 text-primary flex items-center justify-center">
-        <span class="material-symbols-outlined text-3xl">support_agent</span>
+      <!-- Threat indicator icon & badge based on risk level -->
+      <div class="w-14 h-14 rounded-2xl {isCritical ? 'bg-red-50 border border-red-200 text-status-scam-red' : 'bg-amber-50 border border-amber-200 text-amber-700'} flex items-center justify-center">
+        <span class="material-symbols-outlined text-3xl">{isCritical ? 'warning' : 'support_agent'}</span>
+      </div>
+
+      <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold {isCritical ? 'bg-status-scam-bg text-status-scam-red' : 'bg-amber-100 text-amber-800'}">
+        <span class="w-2 h-2 rounded-full {isCritical ? 'bg-status-scam-red' : 'bg-amber-600'} animate-ping"></span>
+        <span>Terdeteksi Risiko {analysis.content_risk}% ({analysis.risk_level})</span>
       </div>
 
       <div class="flex flex-col gap-1.5">
@@ -851,7 +859,9 @@
           Apakah Anda ingin dibantu?
         </h3>
         <p class="text-xs sm:text-sm text-on-surface-variant leading-relaxed">
-          Hasil evaluasi rasio risiko telah selesai dihitung. Operator Tanggap Darurat KrosCheck siap memandu Anda melalui beberapa pertanyaan klarifikasi untuk mengamankan akun dan dana Anda.
+          {isCritical
+            ? `Sistem mendeteksi indikator bahaya kritis (${analysis.content_risk}%). Operator Tanggap Darurat KrosCheck siap memandu Anda mengamankan rekening bank dan perangkat Anda sebelum terjadi kerugian.`
+            : `Ditemukan indikator manipulasi berisiko (${analysis.content_risk}%). Operator KrosCheck siap memandu klarifikasi cepat untuk memastikan tidak ada data pribadi yang bocor.`}
         </p>
       </div>
 
@@ -859,7 +869,7 @@
         <button
           type="button"
           onclick={acceptAssistance}
-          class="w-full sm:flex-1 py-2.5 px-4 rounded-full bg-primary hover:bg-primary-hover text-white text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm"
+          class="w-full sm:flex-1 py-2.5 px-4 rounded-full {isCritical ? 'bg-status-scam-red hover:bg-red-700' : 'bg-primary hover:bg-primary-hover'} text-white text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm"
         >
           <span class="material-symbols-outlined text-[18px]">support_agent</span>
           <span>Ya, Pandu Saya</span>
