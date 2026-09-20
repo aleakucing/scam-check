@@ -33,7 +33,7 @@
         return {
           ...q,
           question: `Apakah Anda sempat memencet atau membuka tautan/berkas yang mengatasnamakan ${targetEntity} ini?`,
-          speak_text: `Langkah satu. Apakah Bapak atau Ibu sempat memencet atau membuka tautan atau berkas yang mengatasnamakan ${targetEntity} ini?`
+          speak_text: `Apakah Bapak atau Ibu sempat memencet atau membuka tautan atau berkas yang mengatasnamakan ${targetEntity} ini?`
         };
       }
       if (idx === 1) {
@@ -46,7 +46,7 @@
         return {
           ...q,
           question: `Apakah Anda sempat memberikan kode rahasia SMS (angka verifikasi OTP) dari ${targetEntity} kepada orang lain atau mengisinya ke layar?`,
-          speak_text: `Langkah tiga. Apakah Bapak atau Ibu sempat memberikan kode rahasia SMS atau angka verifikasi OTP dari ${targetEntity} kepada orang lain?`
+          speak_text: `Apakah Bapak atau Ibu sempat memberikan kode rahasia SMS atau angka verifikasi OTP dari ${targetEntity} kepada orang lain?`
         };
       }
       return q;

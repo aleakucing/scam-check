@@ -10,28 +10,6 @@
   let { historyCount = 0, currentRoute = "/", onOpenHistory, onNavigateHome, onNavigate }: Props = $props();
 
   let isMobileMenuOpen = $state<boolean>(false);
-  let fontScale = $state<"normal" | "large" | "xlarge">("normal");
-
-  $effect(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("kroscheck_font_scale") as "normal" | "large" | "xlarge";
-      if (saved && (saved === "normal" || saved === "large" || saved === "xlarge")) {
-        setFontScale(saved);
-      }
-    }
-  });
-
-  function setFontScale(scale: "normal" | "large" | "xlarge") {
-    fontScale = scale;
-    if (typeof document !== "undefined") {
-      document.documentElement.classList.remove("font-scale-lg", "font-scale-xl");
-      if (scale === "large") document.documentElement.classList.add("font-scale-lg");
-      if (scale === "xlarge") document.documentElement.classList.add("font-scale-xl");
-      try {
-        localStorage.setItem("kroscheck_font_scale", scale);
-      } catch {}
-    }
-  }
 
   function handleNavClick(route: string) {
     isMobileMenuOpen = false;
@@ -108,37 +86,6 @@
 
     <!-- Header Actions -->
     <div class="flex items-center gap-2 sm:gap-space-sm">
-      <!-- Elderly Accessibility Font Scaler [A] [A+] [A++] -->
-      <div class="inline-flex items-center p-0.5 rounded-full bg-surface-container border border-border-subtle/80 text-[11px] font-bold" title="Ukuran Teks (Ramah Lansia)">
-        <button
-          type="button"
-          onclick={() => setFontScale("normal")}
-          class="px-2 py-0.5 rounded-full transition-all cursor-pointer {fontScale === 'normal' ? 'bg-brand-violet-vibrant text-white shadow-xs' : 'text-on-surface-variant hover:text-on-surface'}"
-          title="Ukuran Font Normal"
-          aria-label="Ukuran font normal"
-        >
-          A
-        </button>
-        <button
-          type="button"
-          onclick={() => setFontScale("large")}
-          class="px-2 py-0.5 rounded-full transition-all cursor-pointer {fontScale === 'large' ? 'bg-brand-violet-vibrant text-white shadow-xs' : 'text-on-surface-variant hover:text-on-surface'}"
-          title="Ukuran Font Besar (+12%)"
-          aria-label="Ukuran font besar"
-        >
-          A+
-        </button>
-        <button
-          type="button"
-          onclick={() => setFontScale("xlarge")}
-          class="px-2 py-0.5 rounded-full transition-all cursor-pointer {fontScale === 'xlarge' ? 'bg-brand-violet-vibrant text-white shadow-xs' : 'text-on-surface-variant hover:text-on-surface'}"
-          title="Ukuran Font Ekstra Besar (+25% Ramah Lansia)"
-          aria-label="Ukuran font ekstra besar"
-        >
-          A++
-        </button>
-      </div>
-
       <!-- History Vault Trigger -->
       <button
         type="button"
@@ -242,36 +189,6 @@
         {/if}
       </button>
       
-      <div class="py-2 px-3 flex items-center justify-between border-t border-border-subtle text-xs">
-        <span class="font-bold text-on-surface-variant flex items-center gap-1.5">
-          <span class="material-symbols-outlined text-[16px] text-brand-violet-vibrant">format_size</span>
-          <span>Ukuran Teks:</span>
-        </span>
-        <div class="inline-flex items-center p-0.5 rounded-full bg-surface-container border border-border-subtle/80 text-xs font-bold">
-          <button
-            type="button"
-            onclick={() => setFontScale("normal")}
-            class="px-2.5 py-1 rounded-full cursor-pointer {fontScale === 'normal' ? 'bg-brand-violet-vibrant text-white' : 'text-on-surface-variant'}"
-          >
-            A
-          </button>
-          <button
-            type="button"
-            onclick={() => setFontScale("large")}
-            class="px-2.5 py-1 rounded-full cursor-pointer {fontScale === 'large' ? 'bg-brand-violet-vibrant text-white' : 'text-on-surface-variant'}"
-          >
-            A+
-          </button>
-          <button
-            type="button"
-            onclick={() => setFontScale("xlarge")}
-            class="px-2.5 py-1 rounded-full cursor-pointer {fontScale === 'xlarge' ? 'bg-brand-violet-vibrant text-white' : 'text-on-surface-variant'}"
-          >
-            A++
-          </button>
-        </div>
-      </div>
-
       <div class="pt-2 border-t border-border-subtle flex items-center gap-2">
         <a
           href="#"

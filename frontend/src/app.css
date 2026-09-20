@@ -10,12 +10,6 @@
     scroll-behavior: smooth;
     transition: font-size 0.15s ease-out;
   }
-  html.font-scale-lg {
-    font-size: 112.5%;
-  }
-  html.font-scale-xl {
-    font-size: 125%;
-  }
   body {
     overscroll-behavior-y: none;
   }
@@ -213,10 +207,12 @@
   body * {
     visibility: hidden;
   }
-  #print-area, #print-area * {
+  #print-area, #print-area *,
+  #history-print-area, #history-print-area * {
     visibility: visible;
   }
-  #print-area {
+  #print-area,
+  #history-print-area {
     position: absolute;
     left: 0;
     top: 0;

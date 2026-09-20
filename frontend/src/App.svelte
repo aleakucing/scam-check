@@ -21,6 +21,7 @@
     EvidenceType
   } from "./types";
   import { analyzeEvidence, submitInterview } from "./services/api";
+  import { preloadIndonesianVoice } from "./services/tts";
 
   type AppRoute = "/" | "/result" | "/riwayat" | "/history" | "/how-it-works" | "/faq" | "/download" | "/trends" | "/about" | "/privacy" | "/terms";
 
@@ -50,6 +51,7 @@
   $effect(() => {
     updateHistoryCount();
     checkInitialUrl();
+    preloadIndonesianVoice();
 
     // Listen to browser popstate (back/forward)
     const handlePopState = () => {
@@ -116,10 +118,12 @@
       list.unshift({
         case_id: analysis.case_id,
         content: content.slice(0, 100),
+        fullContent: content,
         risk: analysis.content_risk,
         summary: analysis.summary,
         timestamp: new Date().toLocaleTimeString("id-ID") + " WIB",
-        evidence_type: analysis.evidence_type
+        evidence_type: analysis.evidence_type,
+        analysis
       });
       if (list.length > 15) list.pop();
       localStorage.setItem("kroscheck_history", JSON.stringify(list));
@@ -196,6 +200,21 @@
       content: item.content,
       type: (item.evidence_type as EvidenceType) || (item.content.startsWith("http") ? "url" : "text")
     });
+  }
+
+  function openSavedCase(item: CaseHistoryItem) {
+    // Arsip baru menyimpan hasil analisis lengkap — buka instan tanpa API.
+    if (item.analysis) {
+      currentAnalysis = item.analysis;
+      currentEvidence = item.fullContent ?? item.content;
+      currentRoute = "/result";
+      if (typeof window !== "undefined") {
+        window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
+      }
+      return;
+    }
+    // Arsip lama (tanpa analysis tersimpan) — fallback analisis ulang.
+    handleSelectHistoryItem(item);
   }
 
   async function handleOperatorAnswerStep(step: number, answer: boolean) {
@@ -276,7 +295,7 @@
       <div in:fade={{ duration: 200 }} class="flex-1 flex flex-col">
         <HistoryPage
           onNavigateHome={() => navigateTo("/")}
-          onSelectCase={handleSelectHistoryItem}
+          onSelectCase={openSavedCase}
           onNavigate={navigateTo}
         />
       </div>
@@ -347,7 +366,7 @@
   <CaseHistoryModal
     isOpen={isHistoryOpen}
     onClose={() => { isHistoryOpen = false; }}
-    onSelectCase={handleSelectHistoryItem}
+    onSelectCase={openSavedCase}
   />
 
   <TelephoneOperatorModal

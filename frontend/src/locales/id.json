@@ -21,7 +21,7 @@
         "yes_text": "Ya, Sempat Saya Buka",
         "no_text": "Tidak, Tidak Pernah Dibuka",
         "unsure_text": "Ragu-ragu / Lupa",
-        "speak_text": "Langkah satu. Apakah Bapak atau Ibu sempat memencet atau membuka tautan atau berkas yang dikirimkan ini?"
+        "speak_text": "Apakah Bapak atau Ibu sempat memencet atau membuka tautan atau berkas yang dikirimkan ini?"
       },
       {
         "step": 2,
@@ -31,7 +31,7 @@
         "yes_text": "Ya, Sempat Saya Ketik",
         "no_text": "Tidak, Tidak Ada Yang Diketik",
         "unsure_text": "Ragu-ragu / Tidak Yakin",
-        "speak_text": "Langkah dua. Apakah Bapak atau Ibu sempat mengetik nomor kartu ATM, nomor rekening, PIN, atau kata sandi di layar tersebut?"
+        "speak_text": "Apakah Bapak atau Ibu sempat mengetik nomor kartu ATM, nomor rekening, PIN, atau kata sandi di layar tersebut?"
       },
       {
         "step": 3,
@@ -41,7 +41,7 @@
         "yes_text": "Ya, Kode Rahasia Sempat Diberikan",
         "no_text": "Tidak, Kode Rahasia Tidak Diberikan",
         "unsure_text": "Ragu-ragu / Lupa Mengisi",
-        "speak_text": "Langkah tiga. Apakah Bapak atau Ibu sempat memberikan kode rahasia SMS atau angka verifikasi kepada orang lain?"
+        "speak_text": "Apakah Bapak atau Ibu sempat memberikan kode rahasia SMS atau angka verifikasi kepada orang lain?"
       }
     ],
     "safe_verdict": {
