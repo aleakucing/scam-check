@@ -65,4 +65,8 @@ export interface CaseHistoryItem {
   summary: string;
   timestamp: string;
   evidence_type?: string;
+  /** Hasil analisis lengkap saat pemeriksaan — untuk membuka ulang tanpa API. */
+  analysis?: AnalyzeResponse;
+  /** Konten bukti penuh (content di atas hanya pratinjau 100 karakter). */
+  fullContent?: string;
 }

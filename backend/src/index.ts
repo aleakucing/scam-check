@@ -4,6 +4,8 @@ import { config } from "./config";
 import { rateLimiter, uploadRateLimiter } from "./services/rateLimiter";
 import { maskSensitiveData } from "./services/privacy";
 import { analyzeWithAi } from "./services/aiAgent";
+import { synthesizeSpeechIndonesian } from "./services/geminiTts";
+import { synthesizeSpeechGoogle } from "./services/googleTranslateTts";
 import { analyzeHeuristic } from "./services/heuristicAnalyzer";
 import { evaluateExposure } from "./services/exposureEvaluator";
 import { saveCase, getCase, listRecentCases } from "./db/caseStore";
@@ -379,6 +381,57 @@ app.post("/api/report", async (c) => {
     formatted_text: lines.join("\n"),
     masked_evidence: cleanEvidence
   });
+});
+
+// Text-to-Speech (Gemini AI voice, Bahasa Indonesia)
+// API key tidak pernah diekspos ke browser — frontend memanggil endpoint ini,
+// dan otomatis fallback ke speechSynthesis bawaan jika layanan gagal.
+app.post("/api/tts", async (c) => {
+  const clientIp = getClientIp(c);
+  if (!rateLimiter.isAllowed(clientIp)) {
+    return c.json(
+      { detail: "Batas permintaan terlampaui (Rate limit 60 req/menit). Coba beberapa saat lagi." },
+      429
+    );
+  }
+
+  let body: { text?: string };
+  try {
+    body = await c.req.json();
+  } catch {
+    return c.json({ detail: "Format JSON tidak valid." }, 400);
+  }
+
+  const text = (body.text || "").trim();
+  if (!text) {
+    return c.json({ detail: "Teks tidak boleh kosong." }, 400);
+  }
+  if (text.length > 2000) {
+    return c.json({ detail: "Panjang teks melebihi batas maksimal 2000 karakter." }, 413);
+  }
+
+  // Tanpa API key pun Edge-TTS tetap bisa dipakai — jangan tolak di sini,
+  // biarkan rantai fallback (Gemini -> Edge -> suara browser) yang bekerja.
+  // Jangan kirim PII mentah ke pihak ketiga — samarkan dulu.
+  const safeText = maskSensitiveData(text);
+
+  // Lapis 1: Gemini AI (kualitas terbaik). Lapis 2: Google TTS gratis
+  // (tanpa key) bila Gemini gagal/kuota habis. Lapis 3 (frontend):
+  // suara browser bila keduanya gagal.
+  const gemini = await synthesizeSpeechIndonesian(safeText);
+  if (gemini.ok) {
+    return c.json({ audio_base64: gemini.audio.audioBase64, mime_type: gemini.audio.mimeType });
+  }
+  if (gemini.reason !== "quota") {
+    console.warn("Gemini TTS gagal, beralih ke Google TTS.");
+  }
+
+  const google = await synthesizeSpeechGoogle(safeText);
+  if (google) {
+    return c.json({ audio_base64: google.audioBase64, mime_type: google.mimeType });
+  }
+
+  return c.json({ detail: "Gagal menghasilkan suara AI. Coba beberapa saat lagi." }, 502);
 });
 
 // Telegram Webhook

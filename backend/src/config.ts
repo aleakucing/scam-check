@@ -36,6 +36,8 @@ export const config = {
   HOST: process.env.HOST || "0.0.0.0",
   GEMINI_API_KEY: resolvedKey,
   GEMINI_MODEL: process.env.GEMINI_MODEL || "gemini-3.1-flash-lite",
+  GEMINI_TTS_MODEL: process.env.GEMINI_TTS_MODEL || "gemini-2.5-flash-preview-tts",
+  GEMINI_TTS_VOICE: process.env.GEMINI_TTS_VOICE || "Kore",
   PROJECT_NAME: "ScamGuard AI",
   VERSION: "2.0.0",
   DATABASE_PATH: process.env.DATABASE_PATH || resolve(import.meta.dir, "../data/scamguard_cases.db")

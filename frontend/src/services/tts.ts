@@ -1,16 +1,15 @@
 /**
  * ScamGuard AI & KrosCheck - Indonesian TTS (Text-to-Speech) Audio Engine
  *
- * Memastikan suara yang keluar adalah suara ORANG INDONESIA asli
- * (Google Bahasa Indonesia / Microsoft Gadis / Ardi / Dimas),
- * bukan suara Inggris/bule bawaan browser.
+ * Prioritas 1: Suara AI Gemini (via backend /api/tts) — kualitas konsisten
+ * di semua perangkat. API key aman di backend, tidak diekspos ke browser.
+ * Hasil audio di-cache per teks agar pengulangan tidak menghabiskan kuota.
  *
- * Strategi:
- * 1. Scoring prioritas suara Indonesia (perempuan hangat diutamakan)
- * 2. Menunggu voiceschanged secara async (Chrome memuat voice terlambat)
- * 3. Rate 0.88 + pitch 1.05 agar terdengar ramah seperti operator keluarga
- * 4. Pecah kalimat panjang agar tidak terpotong
+ * Prioritas 2 (fallback otomatis): speechSynthesis bawaan browser dengan
+ * scoring suara Indonesia (Google Bahasa Indonesia / Microsoft Gadis /
+ * Ardi / Dimas) bila Gemini gagal, kuota habis, atau belum dikonfigurasi.
  */
+import { getApiBaseUrl } from "./api";
 
 export interface VoicePick {
   voice: SpeechSynthesisVoice | null;
@@ -20,6 +19,35 @@ export interface VoicePick {
 
 let cachedVoices: SpeechSynthesisVoice[] = [];
 let voicesReadyPromise: Promise<SpeechSynthesisVoice[]> | null = null;
+
+// State pemutaran suara Gemini (elemen Audio) + token anti-balapan.
+let activeAudio: HTMLAudioElement | null = null;
+let activeAudioUrl: string | null = null;
+let speakToken = 0;
+
+// Cache audio Gemini per teks — pengulangan (tombol ulangi, tombol kembali,
+// buka-tutup modal) bunyi instan tanpa memakan kuota API.
+interface CachedGeminiAudio {
+  mime: string;
+  base64: string;
+}
+const geminiCache = new Map<string, CachedGeminiAudio>();
+const geminiInflight = new Map<string, Promise<CachedGeminiAudio | null>>();
+const GEMINI_CACHE_LIMIT = 30;
+
+function geminiCacheGet(text: string): CachedGeminiAudio | null {
+  return geminiCache.get(text) ?? null;
+}
+
+function geminiCacheSet(text: string, entry: CachedGeminiAudio): void {
+  if (geminiCache.has(text)) geminiCache.delete(text);
+  geminiCache.set(text, entry);
+  while (geminiCache.size > GEMINI_CACHE_LIMIT) {
+    const oldest = geminiCache.keys().next();
+    if (oldest.done) break;
+    geminiCache.delete(oldest.value);
+  }
+}
 
 function readVoicesSync(): SpeechSynthesisVoice[] {
   try {
@@ -200,9 +228,10 @@ function chunkText(text: string, maxLen = 200): string[] {
 }
 
 /**
- * Speaks text using an Indonesian voice with optimal cadence and pitch for clarity.
- * Tetap sinkron dari sisi pemanggil (tidak perlu await), tapi di dalam
- * menunggu daftar voice siap dulu agar tidak jatuh ke suara Inggris.
+ * Speaks text using Gemini AI voice (via backend), falling back to the
+ * browser's Indonesian voice when unavailable. Tetap sinkron dari sisi
+ * pemanggil (tidak perlu await); signature tidak berubah sehingga semua
+ * pemanggil (ResultPage, HistoryPage, TelephoneOperatorModal) tetap jalan.
  */
 export function speakIndonesian(
   text: string,
@@ -213,12 +242,132 @@ export function speakIndonesian(
     onError?: (err?: unknown) => void;
   }
 ): void {
-  if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+  if (typeof window === "undefined") return;
 
   const cleanText = (text || "").trim();
   if (!cleanText) return;
 
-  void ensureVoicesLoaded(1200).then(() => {
+  stopSpeaking();
+  const token = ++speakToken;
+
+  // Gemini-first: tunggu suara AI (maks ~10 detik). Browser fallback hanya
+  // bila Gemini gagal/kuota habis — agar kualitas suara tetap bagus.
+  // Pengulangan teks yang sama bunyi instan dari cache.
+  void playViaGemini(cleanText, options, token).then((handled) => {
+    if (!handled && token === speakToken) {
+      playViaBrowserSpeech(cleanText, options);
+    }
+  });
+}
+
+/** Ambil audio Gemini dari backend (dengan cache + dedup). Return null bila gagal. */
+async function fetchGeminiAudio(text: string): Promise<CachedGeminiAudio | null> {
+  const hit = geminiCacheGet(text);
+  if (hit) return hit;
+
+  let p = geminiInflight.get(text);
+  if (!p) {
+    p = (async (): Promise<CachedGeminiAudio | null> => {
+      try {
+        const controller = new AbortController();
+        const timeoutId = window.setTimeout(() => controller.abort(), 10000);
+
+        const resp = await fetch(`${getApiBaseUrl()}/api/tts`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text: text.slice(0, 2000) }),
+          signal: controller.signal
+        });
+        window.clearTimeout(timeoutId);
+
+        if (!resp.ok) return null;
+        const data: any = await resp.json().catch(() => null);
+        if (!data?.audio_base64) return null;
+        return { mime: data.mime_type || "audio/wav", base64: data.audio_base64 };
+      } catch {
+        return null;
+      }
+    })();
+    geminiInflight.set(text, p);
+    void p
+      .then((entry) => {
+        if (entry) geminiCacheSet(text, entry);
+      })
+      .finally(() => {
+        if (geminiInflight.get(text) === p) geminiInflight.delete(text);
+      });
+  }
+  return p;
+}
+
+/** Putar satu entri audio Gemini. Return true bila audio diputar. */
+async function playAudioEntry(
+  entry: CachedGeminiAudio,
+  text: string,
+  options: { onEnd?: () => void; onError?: (err?: unknown) => void } | undefined,
+  token: number
+): Promise<boolean> {
+  try {
+    const binary = atob(entry.base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    const url = URL.createObjectURL(new Blob([bytes.buffer as ArrayBuffer], { type: entry.mime }));
+    const audio = new Audio(url);
+    activeAudio = audio;
+    activeAudioUrl = url;
+
+    const cleanup = () => {
+      if (activeAudio === audio) activeAudio = null;
+      URL.revokeObjectURL(url);
+      if (activeAudioUrl === url) activeAudioUrl = null;
+    };
+
+    audio.onended = () => {
+      cleanup();
+      if (token === speakToken) options?.onEnd?.();
+    };
+    audio.onerror = (e) => {
+      cleanup();
+      // Audio rusak di tengah jalan: fallback ke suara browser.
+      if (token === speakToken) playViaBrowserSpeech(text, options);
+      else options?.onError?.(e);
+    };
+
+    await audio.play();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** Ambil audio Gemini (cache/inflight) dan putar. Return true bila audio diputar. */
+async function playViaGemini(
+  text: string,
+  options: { onEnd?: () => void; onError?: (err?: unknown) => void } | undefined,
+  token: number
+): Promise<boolean> {
+  const entry = await fetchGeminiAudio(text);
+  if (token !== speakToken) return true; // sudah disusul panggilan baru
+  if (!entry) return false;
+  return playAudioEntry(entry, text, options, token);
+}
+
+/** Jalur fallback: speechSynthesis bawaan browser dengan suara Indonesia. */
+function playViaBrowserSpeech(
+  cleanText: string,
+  options?: {
+    rate?: number;
+    pitch?: number;
+    onEnd?: () => void;
+    onError?: (err?: unknown) => void;
+  }
+): void {
+  if (typeof window === "undefined" || !("speechSynthesis" in window)) {
+    options?.onError?.(new Error("TTS tidak didukung"));
+    return;
+  }
+
+  void ensureVoicesLoaded(800).then(() => {
     try {
       const synth = window.speechSynthesis;
       synth.cancel();
@@ -271,10 +420,30 @@ export function speakIndonesian(
 }
 
 /**
- * Cancels any active speech synthesis immediately.
+ * Cancels any active speech immediately (suara Gemini maupun browser).
  */
 export function stopSpeaking(): void {
-  if (typeof window !== "undefined" && "speechSynthesis" in window) {
+  speakToken++;
+  if (typeof window === "undefined") return;
+  if (activeAudio) {
+    try {
+      activeAudio.pause();
+      activeAudio.onended = null;
+      activeAudio.onerror = null;
+    } catch {
+      // abaikan
+    }
+    activeAudio = null;
+  }
+  if (activeAudioUrl) {
+    try {
+      URL.revokeObjectURL(activeAudioUrl);
+    } catch {
+      // abaikan
+    }
+    activeAudioUrl = null;
+  }
+  if ("speechSynthesis" in window) {
     try {
       window.speechSynthesis.cancel();
     } catch {
