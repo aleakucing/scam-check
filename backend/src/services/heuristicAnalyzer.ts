@@ -54,7 +54,7 @@ export function analyzeHeuristic(req: AnalyzeRequest): AnalyzeResponse {
   
   let content_risk = 15;
   let confidence = 80;
-  let summary = "Konten diperiksa melalui mesin analisis statis heuristik ScamGuard.";
+  let summary = "Konten diperiksa melalui mesin analisis statis heuristik KrosCheck.";
   
   const is_url_type = req.type === "url" ||
     content.startsWith("http://") ||
@@ -87,7 +87,7 @@ export function analyzeHeuristic(req: AnalyzeRequest): AnalyzeResponse {
         indicators,
         initial_exposure: 10,
         evidence_type: req.type || "url",
-        source_model: "ScamGuard Heuristic Safety Engine v2.0 (SSRF Shield)"
+        source_model: "KrosCheck Heuristic Safety Engine v2.0 (SSRF Shield)"
       };
     }
 
@@ -336,6 +336,6 @@ export function analyzeHeuristic(req: AnalyzeRequest): AnalyzeResponse {
     indicators,
     initial_exposure: 10,
     evidence_type: req.type || "url",
-    source_model: "ScamGuard Heuristic Safety Engine v2.0"
+    source_model: "KrosCheck Heuristic Safety Engine v2.0"
   };
 }

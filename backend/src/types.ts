@@ -30,10 +30,12 @@ export interface AnalyzeResponse {
   initial_exposure: number;
   evidence_type: string;
   source_model: string;
+  access_key?: string;
 }
 
 export interface InterviewRequest {
   case_id: string;
+  access_key?: string;
   content_risk?: number;
   opened_link?: boolean | null;
   entered_credentials?: boolean | null;

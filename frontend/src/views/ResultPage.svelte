@@ -17,9 +17,20 @@
     evidenceContent: string;
     onBack: () => void;
     onOpenOperator: () => void;
+    initialOpenedLink?: boolean | null;
+    initialEnteredCredentials?: boolean | null;
+    initialEnteredOtp?: boolean | null;
   }
 
-  let { analysis, evidenceContent, onBack, onOpenOperator }: Props = $props();
+  let {
+    analysis,
+    evidenceContent,
+    onBack,
+    onOpenOperator,
+    initialOpenedLink = null,
+    initialEnteredCredentials = null,
+    initialEnteredOtp = null
+  }: Props = $props();
 
   // State
   let userExposure = $state<number>(10);
@@ -114,9 +125,9 @@
     requestAnimationFrame(step);
   });
 
-  let openedLink = $state<boolean | null>(null);
-  let enteredCredentials = $state<boolean | null>(null);
-  let enteredOtp = $state<boolean | null>(null);
+  let openedLink = $state<boolean | null>(initialOpenedLink);
+  let enteredCredentials = $state<boolean | null>(initialEnteredCredentials);
+  let enteredOtp = $state<boolean | null>(initialEnteredOtp);
 
   let actions = $state<ActionItem[]>([]);
   let completedActions = $state<Record<number, boolean>>({});
@@ -210,6 +221,7 @@
     try {
       const resp: InterviewResponse = await submitInterview({
         case_id: analysis.case_id,
+        access_key: analysis.access_key,
         content_risk: analysis.content_risk,
         opened_link: openedLink,
         entered_credentials: enteredCredentials,

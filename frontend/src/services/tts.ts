@@ -1,5 +1,5 @@
 /**
- * ScamGuard AI & KrosCheck - Indonesian TTS (Text-to-Speech) Audio Engine
+ * KrosCheck - Indonesian TTS (Text-to-Speech) Audio Engine
  *
  * Prioritas 1: Suara AI Gemini (via backend /api/tts) — kualitas konsisten
  * di semua perangkat. API key aman di backend, tidak diekspos ke browser.

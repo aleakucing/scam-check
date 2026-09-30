@@ -30,6 +30,7 @@ export interface AnalyzeResponse {
   initial_exposure: number;
   evidence_type: string;
   source_model: string;
+  access_key?: string;
 }
 
 export interface ActionItem {

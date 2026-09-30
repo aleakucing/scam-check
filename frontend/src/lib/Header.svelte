@@ -102,27 +102,23 @@
         {/if}
       </button>
 
-      <!-- Telegram Bot Link -->
-      <a
-        href="#"
-        onclick={(e) => e.preventDefault()}
+      <button
+        type="button"
+        onclick={() => handleNavClick("/coming-soon?channel=telegram")}
         title="Bot Telegram segera hadir"
-        rel="noreferrer"
-        class="hidden sm:inline-flex items-center justify-center px-3.5 py-2 rounded-full bg-sky-600 text-white text-xs font-bold hover:bg-sky-700 transition-colors shadow-sm"
+        class="hidden sm:inline-flex items-center justify-center px-3.5 py-2 rounded-full bg-sky-600 text-white text-xs font-bold hover:bg-sky-700 transition-colors shadow-sm cursor-pointer"
       >
         Telegram
-      </a>
+      </button>
 
-      <!-- WhatsApp Bot Link -->
-      <a
-        href="#"
-        onclick={(e) => e.preventDefault()}
+      <button
+        type="button"
+        onclick={() => handleNavClick("/coming-soon?channel=whatsapp")}
         title="Bot WhatsApp segera hadir"
-        rel="noreferrer"
-        class="hidden sm:inline-flex items-center justify-center px-3.5 py-2 rounded-full bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-700 transition-colors shadow-sm"
+        class="hidden sm:inline-flex items-center justify-center px-3.5 py-2 rounded-full bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-700 transition-colors shadow-sm cursor-pointer"
       >
         WhatsApp
-      </a>
+      </button>
 
       <!-- Mobile Hamburger Toggle -->
       <button
@@ -190,24 +186,22 @@
       </button>
       
       <div class="pt-2 border-t border-border-subtle flex items-center gap-2">
-        <a
-          href="#"
-          onclick={(e) => e.preventDefault()}
+        <button
+          type="button"
+          onclick={() => handleNavClick("/coming-soon?channel=telegram")}
           title="Bot Telegram segera hadir"
-          rel="noreferrer"
-          class="flex-1 py-2 rounded-full bg-sky-600 text-white text-xs font-bold text-center"
+          class="flex-1 py-2 rounded-full bg-sky-600 text-white text-xs font-bold text-center cursor-pointer"
         >
           Telegram Bot
-        </a>
-        <a
-          href="#"
-          onclick={(e) => e.preventDefault()}
+        </button>
+        <button
+          type="button"
+          onclick={() => handleNavClick("/coming-soon?channel=whatsapp")}
           title="Bot WhatsApp segera hadir"
-          rel="noreferrer"
-          class="flex-1 py-2 rounded-full bg-emerald-600 text-white text-xs font-bold text-center"
+          class="flex-1 py-2 rounded-full bg-emerald-600 text-white text-xs font-bold text-center cursor-pointer"
         >
           WhatsApp Bot
-        </a>
+        </button>
       </div>
     </div>
   {/if}

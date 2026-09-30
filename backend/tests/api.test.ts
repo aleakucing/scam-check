@@ -4,7 +4,7 @@ import { rateLimiter } from "../src/services/rateLimiter";
 import { maskSensitiveData } from "../src/services/privacy";
 import { validateUrlSafety } from "../src/services/ssrf";
 
-describe("ScamGuard Bun API & Security Suite", () => {
+describe("KrosCheck Bun API & Security Suite", () => {
   beforeEach(() => {
     rateLimiter.reset();
   });
@@ -115,8 +115,7 @@ describe("ScamGuard Bun API & Security Suite", () => {
     expect(b3.actions.length).toBeGreaterThan(0);
   });
 
-  it("Evidence Vault: stores and retrieves cases by ID and lists recent", async () => {
-    // First analyze
+  it("Evidence Vault: opens a case only with its private access key", async () => {
     const analyzeRes = await app.request("/api/analyze", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -127,20 +126,24 @@ describe("ScamGuard Bun API & Security Suite", () => {
     });
     const analyzeBody = await analyzeRes.json();
     const caseId = analyzeBody.case_id;
+    const accessKey = analyzeBody.access_key;
+    expect(accessKey).toMatch(/^[a-f0-9]{64}$/);
 
-    // Retrieve from GET /api/cases/:id
-    const getRes = await app.request(`/api/cases/${caseId}`);
+    const missingKey = await app.request(`/api/cases/${caseId}`);
+    expect(missingKey.status).toBe(404);
+
+    const wrongKey = await app.request(`/api/cases/${caseId}?k=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa`);
+    expect(wrongKey.status).toBe(404);
+
+    const getRes = await app.request(`/api/cases/${caseId}?k=${accessKey}`);
     expect(getRes.status).toBe(200);
     const caseData = await getRes.json();
     expect(caseData.case_id).toBe(caseId);
     expect(caseData.evidence_content).toContain("surat_tilang.apk");
+    expect(caseData.access_token).toBeUndefined();
 
-    // List recent
     const listRes = await app.request("/api/cases?limit=5");
-    expect(listRes.status).toBe(200);
-    const listData = await listRes.json();
-    expect(Array.isArray(listData)).toBe(true);
-    expect(listData.some((c: any) => c.case_id === caseId)).toBe(true);
+    expect(listRes.status).toBe(404);
   }, 15000);
 
   it("PII Masking masks Indonesian sensitive phone, card, and OTP patterns", () => {
@@ -162,7 +165,7 @@ describe("ScamGuard Bun API & Security Suite", () => {
     expect(validateUrlSafety("https://google.com").safe).toBe(true);
   });
 
-  it("POST /api/webhook/telegram responds with structured alert", async () => {
+  it("POST /api/webhook/telegram is closed until the bot exists", async () => {
     const res = await app.request("/api/webhook/telegram", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -173,14 +176,12 @@ describe("ScamGuard Bun API & Security Suite", () => {
         }
       })
     });
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(503);
     const body = await res.json();
-    expect(body.status).toBe("success");
-    expect(body.reply_text).toContain("HASIL ANALISIS SCAMGUARD AI");
-    expect(body.reply_text).toContain("HaloBCA");
-  }, 15000);
+    expect(body.status).toBe("coming_soon");
+  });
 
-  it("POST /api/webhook/whatsapp responds with structured alert", async () => {
+  it("POST /api/webhook/whatsapp is closed until the bot exists", async () => {
     const res = await app.request("/api/webhook/whatsapp", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -189,11 +190,10 @@ describe("ScamGuard Bun API & Security Suite", () => {
         text: "Undangan Pernikahan digital mohon buka link http://wedding-undangan.apk"
       })
     });
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(503);
     const body = await res.json();
-    expect(body.status).toBe("success");
-    expect(body.reply_text).toContain("SCAMGUARD AI - HASIL DETEKSI");
-  }, 15000);
+    expect(body.status).toBe("coming_soon");
+  });
 
   it("GET / and /result serves Svelte SPA HTML to browsers", async () => {
     const res = await app.request("/", {
@@ -259,9 +259,9 @@ describe("ScamGuard Bun API & Security Suite", () => {
     expect(res.status).toBe(200);
     const body = await res.json();
     const caseId = body.case_id;
+    const accessKey = body.access_key;
 
-    // Check retrieved case from SQLite
-    const caseRes = await app.request(`/api/cases/${caseId}`);
+    const caseRes = await app.request(`/api/cases/${caseId}?k=${accessKey}`);
     expect(caseRes.status).toBe(200);
     const caseRecord = await caseRes.json();
     expect(caseRecord.evidence_content).not.toContain("1234567890");

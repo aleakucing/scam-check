@@ -97,8 +97,37 @@ export async function analyzeEvidence(req: AnalyzeRequest): Promise<AnalyzeRespo
   return fallbackClientHeuristic(req);
 }
 
+export interface SavedCaseRecord {
+  case_id: string;
+  timestamp: string;
+  evidence_type: string;
+  evidence_content: string;
+  content_risk: number;
+  confidence: number;
+  user_exposure: number;
+  risk_level: string;
+  summary: string;
+  indicators: Indicator[];
+  categories: CategoryScore[];
+  source_model?: string;
+  opened_link?: boolean | null;
+  entered_credentials?: boolean | null;
+  entered_otp?: boolean | null;
+}
+
+export async function fetchSavedCase(caseId: string, accessKey: string): Promise<SavedCaseRecord> {
+  const base = getApiBaseUrl();
+  const res = await fetch(`${base}/api/cases/${encodeURIComponent(caseId)}?k=${encodeURIComponent(accessKey)}`);
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({ detail: "Kasus tidak dapat dibuka." }));
+    throw new Error(errData.detail || "Kasus tidak dapat dibuka.");
+  }
+  return res.json();
+}
+
 export async function submitInterview(params: {
   case_id: string;
+  access_key?: string;
   content_risk?: number;
   opened_link?: boolean | null;
   entered_credentials?: boolean | null;
@@ -247,7 +276,7 @@ function fallbackClientHeuristic(req: AnalyzeRequest): AnalyzeResponse {
       ],
       initial_exposure: 10,
       evidence_type: req.type,
-      source_model: "ScamGuard Client Heuristic Engine"
+      source_model: "KrosCheck Client Heuristic Engine"
     };
   }
 
@@ -301,6 +330,6 @@ function fallbackClientHeuristic(req: AnalyzeRequest): AnalyzeResponse {
           ],
     initial_exposure: 10,
     evidence_type: req.type,
-    source_model: "ScamGuard Client Heuristic Fallback"
+    source_model: "KrosCheck Client Heuristic Fallback"
   };
 }

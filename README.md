@@ -1,4 +1,4 @@
-# ScamGuard AI
+# KrosCheck
 > **Sistem Intelijen Keamanan Siber, Penilaian Risiko Multidimensi, dan Mitigasi Insiden Penipuan Digital**  
 > *Target: IDwebhost AI HackFest 2026 | Kategori: Cyber Security & Anti Scam*
 
@@ -6,7 +6,7 @@
 
 ## 1. Ringkasan Eksekutif
 
-ScamGuard AI adalah platform perlindungan penipuan digital (*anti-scam intelligence*) berbasis kecerdasan buatan (AI) yang dirancang khusus untuk memverifikasi keaslian pesan, tautan (URL), dokumen APK, tangkapan layar, maupun panggilan suara yang mencurigakan. Platform ini dirancang dengan prinsip **Trustworthy Security Intelligence**, mengutamakan aksesibilitas bagi kelompok rentan—khususnya orang tua dan lansia yang kerap menjadi sasaran empuk rekayasa sosial (*social engineering*).
+KrosCheck adalah platform perlindungan penipuan digital (*anti-scam intelligence*) berbasis kecerdasan buatan (AI) yang dirancang khusus untuk memverifikasi keaslian pesan, tautan (URL), dokumen APK, tangkapan layar, maupun panggilan suara yang mencurigakan. Platform ini dirancang dengan prinsip **Trustworthy Security Intelligence**, mengutamakan aksesibilitas bagi kelompok rentan—khususnya orang tua dan lansia yang kerap menjadi sasaran empuk rekayasa sosial (*social engineering*).
 
 Sistem tidak memberikan vonis biner yang terburu-buru, melainkan menghitung **Penilaian Risiko Tiga Dimensi**:
 1. **Content Risk (0–100%)**: Bobot bahaya teknis konten berdasarkan indikator heuristik dan analisis AI.
@@ -88,7 +88,7 @@ docker compose up -d --build
 docker compose ps
 ```
 
-*Catatan: Jika `GEMINI_API_KEY` dikosongkan pada `.env`, ScamGuard AI otomatis beroperasi penuh secara mandiri menggunakan mesin analisis heuristik keamanan siber lokal.*
+*Catatan: Jika `GEMINI_API_KEY` dikosongkan pada `.env`, KrosCheck otomatis beroperasi penuh secara mandiri menggunakan mesin analisis heuristik keamanan siber lokal.*
 
 ---
 
@@ -137,14 +137,14 @@ Buka `http://localhost:5173` di peramban Anda.
 | `POST` | `/api/analyze` | Melakukan analisis risiko bukti digital (URL, pesan teks, transkrip, screenshot). |
 | `POST` | `/api/interview` | Mengevaluasi skor keterpaparan (*User Exposure*) dan tindakan kedaruratan. |
 | `POST` | `/api/report` | Menghasilkan salinan laporan audit insiden digital resmi. |
-| `GET` | `/api/cases` | Mengambil daftar kasus investigasi terbaru dari *Evidence Vault* SQLite. |
-| `GET` | `/api/cases/:id` | Mengambil detail riwayat kasus audit digital berdasarkan ID kasus. |
-| `POST` | `/api/webhook/telegram` | Endpoint integrasi webhook bot Telegram untuk analisis instan. |
-| `POST` | `/api/webhook/whatsapp` | Endpoint integrasi webhook bot WhatsApp untuk pelaporan warga. |
+| `GET` | `/api/cases` | Daftar kasus tidak dibuka untuk umum. |
+| `GET` | `/api/cases/:id?k=` | Membuka satu kasus hanya jika kode akses `k` pada tautan pribadi cocok. |
+| `POST` | `/api/webhook/telegram` | Belum aktif. Mengembalikan status coming soon. |
+| `POST` | `/api/webhook/whatsapp` | Belum aktif. Mengembalikan status coming soon. |
 
 ---
 
 ## 7. Lisensi & Hak Cipta
 
-Dikembangkan oleh Tim ScamGuard AI untuk **IDwebhost AI HackFest 2026**.  
+Dikembangkan oleh Tim KrosCheck untuk **IDwebhost AI HackFest 2026**.  
 Seluruh hak cipta dilindungi undang-undang.

@@ -114,7 +114,7 @@ export function evaluateExposure(req: InterviewInput): InterviewResult {
       {
         step: 3,
         title: "Simpan dokumen kasus sebagai catatan bukti",
-        desc: "Gunakan ringkasan laporan kasus ScamGuard bila sewaktu-waktu diperlukan pelaporan aduan resmi ke pihak berwajib.",
+        desc: "Gunakan ringkasan laporan kasus KrosCheck bila sewaktu-waktu diperlukan pelaporan aduan resmi ke pihak berwajib.",
         is_urgent: false
       }
     ];

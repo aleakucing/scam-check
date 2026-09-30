@@ -153,7 +153,7 @@ BUKTI DIGITAL YANG DIPERIKSA (PII MASKED):
 ${selectedItem.content}
 ---------------------------------------------------------------
 RINGKASAN TEMUAN SISTEM:
-${selectedItem.summary || "Pemeriksaan selesai melalui ScamGuard AI & Heuristic Shield."}
+${selectedItem.summary || "Pemeriksaan selesai melalui KrosCheck."}
 ===============================================================
 Diverifikasi oleh KrosCheck Cyber Defense System.
 Hak Cipta © 2026 KrosCheck PRO - IDwebhost Cyber Security.

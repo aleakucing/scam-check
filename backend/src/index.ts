@@ -8,7 +8,7 @@ import { synthesizeSpeechIndonesian } from "./services/geminiTts";
 import { synthesizeSpeechGoogle } from "./services/googleTranslateTts";
 import { analyzeHeuristic } from "./services/heuristicAnalyzer";
 import { evaluateExposure } from "./services/exposureEvaluator";
-import { saveCase, getCase, listRecentCases } from "./db/caseStore";
+import { saveCase, getCase, accessGranted } from "./db/caseStore";
 import {
   AnalyzeRequest,
   AnalyzeResponse,
@@ -25,16 +25,16 @@ const app = new Hono();
 
 // Global resilience handlers
 app.onError((err, c) => {
-  console.error("[ScamGuard Server Error]:", err?.message || err);
+  console.error("[KrosCheck Server Error]:", err?.message || err);
   return c.json({ detail: "Terjadi gangguan pada layanan server.", error: String(err?.message || err) }, 500);
 });
 
 process.on("unhandledRejection", (reason) => {
-  console.warn("[ScamGuard Warning] Unhandled Promise Rejection:", reason);
+  console.warn("[KrosCheck Warning] Unhandled Promise Rejection:", reason);
 });
 
 process.on("uncaughtException", (err) => {
-  console.error("[ScamGuard Critical] Uncaught Exception caught:", err);
+  console.error("[KrosCheck Critical] Uncaught Exception caught:", err);
 });
 
 const candidates = [
@@ -145,7 +145,8 @@ const spaRoutes = [
   "/trends",
   "/about",
   "/privacy",
-  "/terms"
+  "/terms",
+  "/coming-soon"
 ];
 
 for (const route of spaRoutes) {
@@ -165,7 +166,7 @@ app.get("/openapi.json", (c) =>
     info: {
       title: config.PROJECT_NAME,
       version: config.VERSION,
-      description: "ScamGuard AI & KrosCheck PRO API Engine (Bun + Hono)"
+      description: "KrosCheck API Engine (Bun + Hono)"
     }
   })
 );
@@ -187,23 +188,30 @@ app.get("/api/health", (c) => {
   });
 });
 
-// List recent cases from vault
-app.get("/api/cases", (c) => {
-  const limitQuery = c.req.query("limit");
-  const limit = limitQuery ? Math.min(100, Math.max(1, parseInt(limitQuery, 10))) : 15;
-  const cases = listRecentCases(limit);
-  return c.json(cases);
+app.get("/hasil/:caseId", async (c) => {
+  if (existsSync(distIndexHtml)) {
+    return c.html(await Bun.file(distIndexHtml).text());
+  }
+  return c.json({ status: "hasil page" });
 });
 
-// Get specific case by ID
+// The case list is private. A case opens only with its unguessable access key.
+app.get("/api/cases", (c) => {
+  return c.json(
+    { detail: "Daftar kasus tidak tersedia. Buka kasus lewat tautan pribadi yang berisi kode akses." },
+    404
+  );
+});
+
 app.get("/api/cases/:id", (c) => {
   const caseId = c.req.param("id");
+  const key = c.req.query("k") || "";
   const caseData = getCase(caseId);
-  if (!caseData) {
-    return c.json({ detail: "Kasus tidak ditemukan dalam evidence vault." }, 404);
+  if (!caseData || !accessGranted(caseData.access_token, key)) {
+    return c.json({ detail: "Kasus tidak ditemukan atau kode akses tidak valid." }, 404);
   }
-  // Defense-in-depth: Ensure evidence_content is masked when retrieved
   caseData.evidence_content = maskSensitiveData(caseData.evidence_content || "");
+  delete caseData.access_token;
   return c.json(caseData);
 });
 
@@ -268,7 +276,7 @@ app.post("/api/analyze", async (c) => {
   // Persist to Evidence Vault with Server-Side PII Masking BEFORE SQLite write
   const safeContent = maskSensitiveData(body.content);
   try {
-    saveCase({
+    const saved = saveCase({
       case_id: response.case_id,
       timestamp: response.timestamp,
       evidence_type: response.evidence_type,
@@ -278,8 +286,11 @@ app.post("/api/analyze", async (c) => {
       user_exposure: response.initial_exposure,
       risk_level: response.risk_level,
       summary: response.summary,
-      indicators: response.indicators
+      indicators: response.indicators,
+      categories: response.categories,
+      source_model: response.source_model
     });
+    response.access_key = saved.access_token;
   } catch (err: any) {
     console.error("Failed to auto-save case in vault:", err.message);
   }
@@ -302,17 +313,22 @@ app.post("/api/interview", async (c) => {
 
   try {
     const evalResp = evaluateExposure(body);
-
-    // Update case record in Vault
-    saveCase({
-      case_id: body.case_id,
-      user_exposure: evalResp.user_exposure,
-      opened_link: body.opened_link,
-      entered_credentials: body.entered_credentials,
-      entered_otp: body.entered_otp,
-      is_emergency: evalResp.is_emergency,
-      actions: evalResp.actions
-    });
+    const key = (body.access_key || "").trim();
+    if (key) {
+      const existing = getCase(body.case_id);
+      if (!existing || !accessGranted(existing.access_token, key)) {
+        return c.json({ detail: "Kasus tidak ditemukan atau kode akses tidak valid." }, 404);
+      }
+      saveCase({
+        case_id: body.case_id,
+        user_exposure: evalResp.user_exposure,
+        opened_link: body.opened_link,
+        entered_credentials: body.entered_credentials,
+        entered_otp: body.entered_otp,
+        is_emergency: evalResp.is_emergency,
+        actions: evalResp.actions
+      });
+    }
 
     return c.json(evalResp);
   } catch (err: any) {
@@ -339,7 +355,7 @@ app.post("/api/report", async (c) => {
 
   const lines: string[] = [
     "==================================================================",
-    "             SCAMGUARD AI - LAPORAN INSIDEN RESMI                 ",
+    "             KROSCHECK - LAPORAN INSIDEN RESMI                    ",
     "==================================================================",
     `ID KASUS       : ${body.case_id}`,
     `TIPE BUKTI     : ${(body.evidence_type || "UNKNOWN").toUpperCase()}`,
@@ -434,189 +450,22 @@ app.post("/api/tts", async (c) => {
   return c.json({ detail: "Gagal menghasilkan suara AI. Coba beberapa saat lagi." }, 502);
 });
 
-// Telegram Webhook
-app.post("/api/webhook/telegram", async (c) => {
-  let payload: any = {};
-  try {
-    payload = await c.req.json();
-  } catch {
-    return c.json({ status: "error", detail: "Invalid JSON" }, 400);
-  }
-
-  const message = payload.message || {};
-  let text = (message.text || payload.text || "").trim();
-  const chatId = message.chat?.id || payload.chat_id;
-
-  if (text.startsWith("/check")) {
-    text = text.replace("/check", "").trim();
-  } else if (text.startsWith("/start")) {
-    return c.json({
-      status: "welcome",
-      chat_id: chatId,
-      reply_text:
-        "🛡️ *Selamat datang di ScamGuard AI Bot!*\n\nKirimkan tautan mencurigakan, pesan WhatsApp, atau ketik `/check <link>` untuk analisis instan."
-    });
-  }
-
-  if (!text) {
-    return c.json({ status: "ignored", detail: "Pesan kosong atau tanpa teks." });
-  }
-
-  const evidenceType = text.startsWith("http") ? "url" : "text";
-  const reqData: AnalyzeRequest = { type: evidenceType, content: text };
-
-  let analysis: AnalyzeResponse;
-  try {
-    analysis = await analyzeWithAi(reqData);
-  } catch {
-    analysis = analyzeHeuristic(reqData);
-  }
-
-  try {
-    saveCase({
-      case_id: analysis.case_id,
-      timestamp: analysis.timestamp,
-      evidence_type: analysis.evidence_type,
-      evidence_content: maskSensitiveData(text),
-      content_risk: analysis.content_risk,
-      confidence: analysis.confidence,
-      user_exposure: analysis.initial_exposure,
-      risk_level: analysis.risk_level,
-      summary: analysis.summary,
-      indicators: analysis.indicators
-    });
-  } catch (err: any) {
-    console.error("Failed to auto-save telegram case:", err.message);
-  }
-
-  const statusEmoji =
-    analysis.content_risk >= 75 ? "🚨" : analysis.content_risk >= 50 ? "⚠️" : "✅";
-  let reply =
-    `${statusEmoji} *HASIL ANALISIS SCAMGUARD AI*\n` +
-    `━━━━━━━━━━━━━━━━━━\n` +
-    `📋 *ID Kasus*: \`${analysis.case_id}\`\n` +
-    `⚠️ *Tingkat Risiko*: *${analysis.content_risk}/100* (${analysis.risk_level.toUpperCase()})\n` +
-    `🎯 *Keyakinan AI*: ${analysis.confidence}%\n\n` +
-    `📝 *Ringkasan*: ${analysis.summary}\n\n`;
-
-  if (analysis.indicators && analysis.indicators.length > 0) {
-    reply += "*Temuan Indikator:*\n";
-    analysis.indicators.slice(0, 3).forEach((ind) => {
-      reply += `• [${ind.impact}] ${ind.title}\n`;
-    });
-  }
-
-  if (analysis.content_risk >= 75) {
-    reply +=
-      `\n🚨 *PANDUAN DARURAT:*\n` +
-      `Jika sudah terlanjur membuka tautan / mengisi data:\n` +
-      `• HaloBCA: 1500888\n` +
-      `• BRI: 14017\n` +
-      `• Mandiri: 14000\n`;
-  }
-
+// Bot channels are not live. Reject every webhook instead of accepting unsigned payloads.
+app.post("/api/webhook/telegram", (c) => {
   return c.json({
-    status: "success",
-    case_id: analysis.case_id,
-    chat_id: chatId,
-    reply_text: reply
-  });
+    status: "coming_soon",
+    detail: "Bot Telegram KrosCheck belum tersedia."
+  }, 503);
 });
 
-// WhatsApp Webhook
-app.post("/api/webhook/whatsapp", async (c) => {
-  let payload: any = {};
-  try {
-    payload = await c.req.json();
-  } catch {
-    return c.json({ status: "error", detail: "Invalid JSON" }, 400);
-  }
-
-  let text = "";
-  let sender = "";
-
-  if (payload.entry && Array.isArray(payload.entry)) {
-    for (const entry of payload.entry) {
-      for (const change of entry.changes || []) {
-        const value = change.value || {};
-        const messages = value.messages || [];
-        if (messages.length > 0) {
-          const msg = messages[0];
-          sender = msg.from || "";
-          if (msg.type === "text") {
-            text = msg.text?.body || "";
-          }
-        }
-      }
-    }
-  }
-
-  if (!text) {
-    text = payload.text || payload.body || "";
-    sender = payload.from || payload.sender || "";
-  }
-
-  if (!text || !text.trim()) {
-    return c.json({ status: "ignored", detail: "Pesan kosong." });
-  }
-
-  const evidenceType = text.trim().startsWith("http") ? "url" : "text";
-  const reqData: AnalyzeRequest = { type: evidenceType, content: text.trim() };
-
-  let analysis: AnalyzeResponse;
-  try {
-    analysis = await analyzeWithAi(reqData);
-  } catch {
-    analysis = analyzeHeuristic(reqData);
-  }
-
-  try {
-    saveCase({
-      case_id: analysis.case_id,
-      timestamp: analysis.timestamp,
-      evidence_type: analysis.evidence_type,
-      evidence_content: text,
-      content_risk: analysis.content_risk,
-      confidence: analysis.confidence,
-      user_exposure: analysis.initial_exposure,
-      risk_level: analysis.risk_level,
-      summary: analysis.summary,
-      indicators: analysis.indicators
-    });
-  } catch (err: any) {
-    console.error("Failed to auto-save whatsapp case:", err.message);
-  }
-
-  const statusEmoji =
-    analysis.content_risk >= 75 ? "🚨" : analysis.content_risk >= 50 ? "⚠️" : "✅";
-  let reply =
-    `🛡️ *SCAMGUARD AI - HASIL DETEKSI*\n` +
-    `ID Kasus: ${analysis.case_id}\n\n` +
-    `${statusEmoji} *Tingkat Risiko: ${analysis.content_risk}/100*\n` +
-    `Keyakinan AI: ${analysis.confidence}%\n\n` +
-    `📋 *Penjelasan:*\n${analysis.summary}\n\n`;
-
-  if (analysis.content_risk >= 75) {
-    reply +=
-      `🚨 *TINDAKAN DARURAT (JIKA SUDAH KLIK/ISI DATA):*\n` +
-      `Segera hubungi bank untuk blokir rekening:\n` +
-      `1. HaloBCA: 1500888\n` +
-      `2. BRI: 14017\n` +
-      `3. Mandiri: 14000\n\n` +
-      `Jangan berikan kode OTP kepada siapapun!`;
-  } else {
-    reply += `💡 Saran: Selalu cek keaslian domain resmi sebelum bertransaksi.`;
-  }
-
+app.post("/api/webhook/whatsapp", (c) => {
   return c.json({
-    status: "success",
-    case_id: analysis.case_id,
-    recipient: sender,
-    reply_text: reply
-  });
+    status: "coming_soon",
+    detail: "Bot WhatsApp KrosCheck belum tersedia."
+  }, 503);
 });
 
-console.log(`[ScamGuard Bun] Server running at http://${config.HOST}:${config.PORT}`);
+console.log(`[KrosCheck] Server running at http://${config.HOST}:${config.PORT}`);
 
 export default {
   port: config.PORT,

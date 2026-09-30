@@ -11,8 +11,9 @@
   import TrendsPage from "./views/TrendsPage.svelte";
   import AboutPage from "./views/AboutPage.svelte";
   import LegalPage from "./views/LegalPage.svelte";
-  import HistoryPage from "./views/HistoryPage.svelte";
-  import { fade, fly } from "svelte/transition";
+import HistoryPage from "./views/HistoryPage.svelte";
+import ComingSoonPage from "./views/ComingSoonPage.svelte";
+import { fade, fly } from "svelte/transition";
 
   import type {
     AnalyzeRequest,
@@ -20,10 +21,12 @@
     CaseHistoryItem,
     EvidenceType
   } from "./types";
-  import { analyzeEvidence, submitInterview } from "./services/api";
+  import { analyzeEvidence, fetchSavedCase, submitInterview } from "./services/api";
   import { preloadIndonesianVoice } from "./services/tts";
 
-  type AppRoute = "/" | "/result" | "/riwayat" | "/history" | "/how-it-works" | "/faq" | "/download" | "/trends" | "/about" | "/privacy" | "/terms";
+  type AppRoute = "/" | "/result" | "/hasil" | "/riwayat" | "/history" | "/how-it-works" | "/faq" | "/download" | "/trends" | "/about" | "/privacy" | "/terms" | "/coming-soon";
+
+  const staticRoutes: AppRoute[] = ["/", "/riwayat", "/history", "/how-it-works", "/faq", "/download", "/trends", "/about", "/privacy", "/terms", "/coming-soon", "/result"];
 
   // State
   let currentRoute = $state<AppRoute>("/");
@@ -55,11 +58,8 @@
 
     // Listen to browser popstate (back/forward)
     const handlePopState = () => {
-      const path = window.location.pathname as AppRoute;
       const hash = window.location.hash;
-      if (path && ["/", "/riwayat", "/history", "/how-it-works", "/faq", "/download", "/trends", "/about", "/privacy", "/terms"].includes(path)) {
-        currentRoute = path;
-      }
+      void syncRouteFromLocation();
       if (hash) {
         scrollToHash(hash.replace("#", ""));
       } else {
@@ -85,7 +85,14 @@
   function navigateTo(route: string, hash?: string) {
     if (typeof window === "undefined") return;
 
-    currentRoute = (route as AppRoute) || "/";
+    restoreRequest += 1;
+    isLoading = false;
+    const pathOnly = route.split("?")[0].split("#")[0] || "/";
+    const query = new URLSearchParams((route.split("?")[1] || "").split("#")[0]);
+    if (pathOnly === "/coming-soon") {
+      comingSoonChannel = query.get("channel") || "";
+    }
+    currentRoute = (pathOnly as AppRoute) || "/";
     window.history.pushState(null, "", hash ? `${route}#${hash}` : route);
 
     if (hash) {
@@ -133,13 +140,8 @@
 
   async function checkInitialUrl() {
     if (typeof window === "undefined") return;
-    
-    // Check pathname
-    const path = window.location.pathname as AppRoute;
-    if (["/riwayat", "/history", "/how-it-works", "/faq", "/download", "/trends", "/about", "/privacy", "/terms"].includes(path)) {
-      currentRoute = path;
-      return;
-    }
+
+    if (syncRouteFromLocation()) return;
 
     // When on root, always clear lingering hash and ensure view starts at top hero
     if (window.location.hash) {
@@ -170,8 +172,91 @@
   }
 
   let apiErrorMessage = $state<string>("");
+  let restoredInterview = $state<{
+    opened_link: boolean | null;
+    entered_credentials: boolean | null;
+    entered_otp: boolean | null;
+  } | null>(null);
+  let restoreRequest = 0;
+  let comingSoonChannel = $state("");
+
+  function resultUrl(caseId: string, accessKey: string) {
+    return `/hasil/${encodeURIComponent(caseId)}?k=${encodeURIComponent(accessKey)}`;
+  }
+
+  function publishResult(analysis: AnalyzeResponse, evidence: string) {
+    currentAnalysis = analysis;
+    currentEvidence = evidence;
+    restoredInterview = null;
+    if (typeof window !== "undefined" && analysis.access_key) {
+      window.history.pushState(null, "", resultUrl(analysis.case_id, analysis.access_key));
+      currentRoute = "/hasil";
+      return;
+    }
+    currentRoute = "/result";
+  }
+
+  async function restoreResult(caseId: string, accessKey: string) {
+    const requestId = ++restoreRequest;
+    isLoading = true;
+    apiErrorMessage = "";
+    currentRoute = "/hasil";
+    try {
+      const record = await fetchSavedCase(caseId, accessKey);
+      if (requestId !== restoreRequest) return;
+      currentEvidence = record.evidence_content || "";
+      currentAnalysis = {
+        case_id: record.case_id,
+        timestamp: record.timestamp,
+        content_risk: record.content_risk,
+        confidence: record.confidence,
+        risk_level: record.risk_level,
+        summary: record.summary,
+        categories: record.categories || [],
+        indicators: record.indicators || [],
+        initial_exposure: record.user_exposure ?? 10,
+        evidence_type: record.evidence_type,
+        source_model: record.source_model || "KrosCheck",
+        access_key: accessKey
+      };
+      restoredInterview = {
+        opened_link: record.opened_link ?? null,
+        entered_credentials: record.entered_credentials ?? null,
+        entered_otp: record.entered_otp ?? null
+      };
+    } catch (err: any) {
+      if (requestId !== restoreRequest) return;
+      currentAnalysis = null;
+      restoredInterview = null;
+      apiErrorMessage = err?.message || "Kasus tidak dapat dibuka.";
+      currentRoute = "/";
+      window.history.replaceState(null, "", "/");
+    } finally {
+      if (requestId === restoreRequest) isLoading = false;
+    }
+  }
+
+  function syncRouteFromLocation() {
+    const path = window.location.pathname;
+    const hasilMatch = path.match(/^\/hasil\/([^/]+)\/?$/);
+    if (hasilMatch) {
+      const caseId = decodeURIComponent(hasilMatch[1]);
+      const key = new URLSearchParams(window.location.search).get("k") || "";
+      void restoreResult(caseId, key);
+      return true;
+    }
+    if (staticRoutes.includes(path as AppRoute)) {
+      if (path === "/coming-soon") {
+        comingSoonChannel = new URLSearchParams(window.location.search).get("channel") || "";
+      }
+      currentRoute = path as AppRoute;
+      return path !== "/";
+    }
+    return false;
+  }
 
   async function executeAnalysis(payload: { content: string; type: EvidenceType; image_base64?: string | null }) {
+    restoreRequest += 1;
     isLoading = true;
     apiErrorMessage = "";
     currentEvidence = payload.content;
@@ -184,7 +269,7 @@
       });
       currentAnalysis = resp;
       saveToLocalHistory(resp, payload.content);
-      currentRoute = "/result";
+      publishResult(resp, payload.content);
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err: any) {
       console.error("Analysis execution failed:", err);
@@ -207,7 +292,7 @@
     if (item.analysis) {
       currentAnalysis = item.analysis;
       currentEvidence = item.fullContent ?? item.content;
-      currentRoute = "/result";
+      publishResult(item.analysis, currentEvidence);
       if (typeof window !== "undefined") {
         window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
       }
@@ -223,6 +308,7 @@
     } else if (currentAnalysis) {
       await submitInterview({
         case_id: currentAnalysis.case_id,
+        access_key: currentAnalysis.access_key,
         content_risk: currentAnalysis.content_risk,
         opened_link: step === 1 ? answer : undefined,
         entered_credentials: step === 2 ? answer : undefined,
@@ -281,15 +367,20 @@
           </div>
         </div>
       </div>
-    {:else if currentRoute === "/result" && currentAnalysis}
+    {:else if (currentRoute === "/result" || currentRoute === "/hasil") && currentAnalysis}
       <div in:fade={{ duration: 250 }} class="flex-1 flex flex-col">
-        <ResultPage
-          bind:this={resultPageRef}
-          analysis={currentAnalysis}
-          evidenceContent={currentEvidence}
-          onBack={() => navigateTo("/")}
-          onOpenOperator={() => { isOperatorOpen = true; }}
-        />
+        {#key currentAnalysis.case_id}
+          <ResultPage
+            bind:this={resultPageRef}
+            analysis={currentAnalysis}
+            evidenceContent={currentEvidence}
+            initialOpenedLink={restoredInterview?.opened_link ?? null}
+            initialEnteredCredentials={restoredInterview?.entered_credentials ?? null}
+            initialEnteredOtp={restoredInterview?.entered_otp ?? null}
+            onBack={() => navigateTo("/")}
+            onOpenOperator={() => { isOperatorOpen = true; }}
+          />
+        {/key}
       </div>
     {:else if currentRoute === "/riwayat" || currentRoute === "/history"}
       <div in:fade={{ duration: 200 }} class="flex-1 flex flex-col">
@@ -315,6 +406,7 @@
       <div in:fade={{ duration: 200 }} class="flex-1 flex flex-col">
         <DownloadPage
           onNavigateHome={() => navigateTo("/")}
+          onNavigate={navigateTo}
         />
       </div>
     {:else if currentRoute === "/trends"}
@@ -322,6 +414,13 @@
         <TrendsPage
           onNavigateHome={() => navigateTo("/")}
           onTestScenario={(content, type) => executeAnalysis({ content, type })}
+        />
+      </div>
+    {:else if currentRoute === "/coming-soon"}
+      <div in:fade={{ duration: 200 }} class="flex-1 flex flex-col">
+        <ComingSoonPage
+          channel={comingSoonChannel}
+          onNavigateHome={() => navigateTo("/")}
         />
       </div>
     {:else if currentRoute === "/about"}

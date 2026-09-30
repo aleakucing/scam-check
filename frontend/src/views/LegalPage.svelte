@@ -62,7 +62,7 @@
       <div class="space-y-4 text-xs sm:text-sm text-on-surface-variant leading-relaxed">
         <h3 class="text-base font-bold text-brand-indigo-hero">1. Komitmen Prinsip Zero-Log</h3>
         <p>
-          KrosCheck PRO (ScamGuard AI) beroperasi dengan prinsip dasar bahwa privasi korban adalah prioritas tertinggi. Kami tidak melacak alamat IP asli Anda, tidak memasang pelacak iklan (*ad trackers*), dan tidak membuat profil pengguna untuk tujuan komersial.
+          KrosCheck beroperasi dengan prinsip dasar bahwa privasi korban adalah prioritas tertinggi. Kami tidak melacak alamat IP asli Anda, tidak memasang pelacak iklan (*ad trackers*), dan tidak membuat profil pengguna untuk tujuan komersial.
         </p>
 
         <h3 class="text-base font-bold text-brand-indigo-hero">2. Sensor Data Pribadi Sensitif (PII Masking)</h3>

@@ -1,9 +1,10 @@
 <script lang="ts">
   interface Props {
     onNavigateHome: () => void;
+    onNavigate: (route: string) => void;
   }
 
-  let { onNavigateHome }: Props = $props();
+  let { onNavigateHome, onNavigate }: Props = $props();
 </script>
 
 <div class="w-full max-w-[1100px] mx-auto px-gutter py-12 flex flex-col gap-12">
@@ -31,7 +32,7 @@
       Akses KrosCheck di Mana Saja
     </h1>
     <p class="text-sm sm:text-base text-on-surface-variant leading-relaxed">
-      Lindungi keluarga Anda dari penipuan digital 24/7. Gunakan KrosCheck langsung melalui Web, Bot WhatsApp, Telegram, maupun dipasang di layar utama ponsel Anda.
+      Pemeriksaan lewat web sudah bisa dipakai. Bot WhatsApp dan Telegram masih dalam pengembangan.
     </p>
   </div>
 
@@ -45,7 +46,7 @@
       <div class="flex flex-col gap-1">
         <div class="flex items-center gap-2">
           <h3 class="text-lg font-bold text-brand-indigo-hero">Bot WhatsApp Resmi</h3>
-          <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">Resmi</span>
+          <span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-bold">Segera hadir</span>
         </div>
         <p class="text-xs text-on-surface-variant leading-relaxed">
           Cukup teruskan (*forward*) screenshot chat atau link mencurigakan dari grup keluarga ke WhatsApp Bot kami untuk audit instan.
@@ -53,16 +54,15 @@
       </div>
 
       <div class="mt-auto pt-4 border-t border-border-subtle flex flex-col gap-2">
-        <a
-          href="https://wa.me/?text=Halo%20KrosCheck,%20saya%20ingin%20memeriksa%20pesan%20ini"
-          target="_blank"
-          rel="noreferrer"
-          class="w-full py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center justify-center gap-2 shadow-sm transition-all"
+        <button
+          type="button"
+          onclick={() => onNavigate("/coming-soon?channel=whatsapp")}
+          class="w-full py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer"
         >
-          <span>Buka di WhatsApp</span>
-          <span class="material-symbols-outlined text-[16px]">arrow_outward</span>
-        </a>
-        <span class="text-[11px] text-center text-on-surface-variant/70">Tersedia 24 Jam Nonstop</span>
+          <span>Lihat status</span>
+          <span class="material-symbols-outlined text-[16px]">schedule</span>
+        </button>
+        <span class="text-[11px] text-center text-on-surface-variant/70">Belum tersedia</span>
       </div>
     </div>
 
@@ -74,7 +74,7 @@
       <div class="flex flex-col gap-1">
         <div class="flex items-center gap-2">
           <h3 class="text-lg font-bold text-brand-indigo-hero">Bot Telegram Cerdas</h3>
-          <span class="px-2 py-0.5 rounded-full bg-sky-100 text-sky-800 text-[10px] font-bold">Cepat</span>
+          <span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-bold">Segera hadir</span>
         </div>
         <p class="text-xs text-on-surface-variant leading-relaxed">
           Kirimkan foto surat tilang atau APK ke bot Telegram untuk verifikasi OCR real-time dengan menu keyboard interaktif.
@@ -82,17 +82,15 @@
       </div>
 
       <div class="mt-auto pt-4 border-t border-border-subtle flex flex-col gap-2">
-        <a
-          href="#"
-          onclick={(e) => e.preventDefault()}
-          title="Bot Telegram segera hadir"
-          rel="noreferrer"
-          class="w-full py-2.5 rounded-full bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold flex items-center justify-center gap-2 shadow-sm transition-all"
+        <button
+          type="button"
+          onclick={() => onNavigate("/coming-soon?channel=telegram")}
+          class="w-full py-2.5 rounded-full bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer"
         >
-          <span>Buka di Telegram</span>
-          <span class="material-symbols-outlined text-[16px]">arrow_outward</span>
-        </a>
-        <span class="text-[11px] text-center text-on-surface-variant/70">Respon dalam hitungan detik</span>
+          <span>Lihat status</span>
+          <span class="material-symbols-outlined text-[16px]">schedule</span>
+        </button>
+        <span class="text-[11px] text-center text-on-surface-variant/70">Belum tersedia</span>
       </div>
     </div>
 

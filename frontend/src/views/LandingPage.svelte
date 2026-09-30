@@ -661,30 +661,28 @@
           Gunakan KrosCheck di Mana Saja
         </h2>
         <p class="text-sm text-on-surface-variant leading-relaxed">
-          Pemeriksaan penipuan instan dapat diakses tanpa hambatan melalui Web browser, Bot Telegram, maupun Bot WhatsApp resmi.
+          Pemeriksaan lewat web sudah bisa dipakai. Bot Telegram dan WhatsApp masih dalam pengembangan.
         </p>
 
         <div class="flex flex-wrap items-center gap-3">
-          <a
-            href="#"
-            onclick={(e) => e.preventDefault()}
+          <button
+            type="button"
+            onclick={() => onNavigate && onNavigate("/coming-soon?channel=whatsapp")}
             title="Bot WhatsApp segera hadir"
-            rel="noreferrer"
-            class="px-5 py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-2 shadow-md transition-all"
+            class="px-5 py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-2 shadow-md transition-all cursor-pointer"
           >
             <span class="material-symbols-outlined text-[18px]">chat</span>
             <span>WhatsApp Bot</span>
-          </a>
-          <a
-            href="#"
-            onclick={(e) => e.preventDefault()}
+          </button>
+          <button
+            type="button"
+            onclick={() => onNavigate && onNavigate("/coming-soon?channel=telegram")}
             title="Bot Telegram segera hadir"
-            rel="noreferrer"
-            class="px-5 py-2.5 rounded-full bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold flex items-center gap-2 shadow-md transition-all"
+            class="px-5 py-2.5 rounded-full bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold flex items-center gap-2 shadow-md transition-all cursor-pointer"
           >
             <span class="material-symbols-outlined text-[18px]">send</span>
             <span>Telegram Bot</span>
-          </a>
+          </button>
           <button
             type="button"
             onclick={() => onNavigate && onNavigate("/download")}

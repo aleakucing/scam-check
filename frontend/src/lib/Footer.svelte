@@ -70,27 +70,25 @@
             <span>Akses Ponsel</span>
           </button>
 
-          <a
-            href="#"
-            onclick={(e) => e.preventDefault()}
+          <button
+            type="button"
+            onclick={() => onNavigate && onNavigate("/coming-soon?channel=telegram")}
             title="Bot Telegram segera hadir"
-            rel="noreferrer"
             class="px-3 py-1.5 rounded-full bg-surface-variant/10 flex items-center gap-1.5 hover:bg-surface-variant/20 transition-colors cursor-pointer text-xs font-semibold text-white"
           >
             <span class="material-symbols-outlined text-[16px]">send</span>
             <span>Telegram Bot</span>
-          </a>
+          </button>
 
-          <a
-            href="#"
-            onclick={(e) => e.preventDefault()}
+          <button
+            type="button"
+            onclick={() => onNavigate && onNavigate("/coming-soon?channel=whatsapp")}
             title="Bot WhatsApp segera hadir"
-            rel="noreferrer"
             class="px-3 py-1.5 rounded-full bg-surface-variant/10 flex items-center gap-1.5 hover:bg-surface-variant/20 transition-colors cursor-pointer text-xs font-semibold text-white"
           >
             <span class="material-symbols-outlined text-[16px]">chat</span>
             <span>WhatsApp Bot</span>
-          </a>
+          </button>
         </div>
       </div>
 
@@ -275,7 +273,7 @@
 
     <!-- Bottom Bar -->
     <div class="pt-space-lg border-t border-surface-variant/10 flex flex-col md:flex-row items-center justify-between gap-space-sm text-surface-variant/60 text-xs">
-      <p>© {currentYear} ITK Industries • ScamGuard AI. Dikembangkan untuk IDwebhost AI HackFest 2026.</p>
+      <p>© {currentYear} ITK Industries • KrosCheck. Dikembangkan untuk IDwebhost AI HackFest 2026.</p>
       <div class="flex items-center gap-space-md">
         <button
           type="button"
