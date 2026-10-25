@@ -64,6 +64,10 @@ export function initDb(): Promise<void> {
       await sql`ALTER TABLE cases ADD COLUMN IF NOT EXISTS access_token TEXT`;
       await sql`ALTER TABLE cases ADD COLUMN IF NOT EXISTS categories TEXT DEFAULT '[]'`;
       await sql`ALTER TABLE cases ADD COLUMN IF NOT EXISTS source_model TEXT DEFAULT ''`;
+      // Supabase exposes the public schema through PostgREST. RLS with no
+      // policies blocks anon/authenticated access while the backend (table
+      // owner) keeps full access.
+      await sql`ALTER TABLE cases ENABLE ROW LEVEL SECURITY`;
     })().catch((err) => {
       initPromise = null;
       throw err;

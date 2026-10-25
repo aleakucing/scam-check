@@ -136,6 +136,23 @@ pause setelah 7 hari tanpa aktivitas.
 
 ---
 
+## Opsional — aktifkan Gemini
+
+Tanpa API key, aplikasi tetap berjalan memakai **heuristik bawaan**. Kalau ingin
+analisis AI:
+
+1. Render → service **kroscheck-api** → **Environment**.
+2. Tambahkan:
+   - `GEMINI_API_KEY` = API key dari Google AI Studio.
+   - (Opsional) `GEMINI_MODEL` = model yang tersedia untuk key kamu.
+3. **Save Changes** → **Manual Deploy → Deploy latest commit**.
+4. Cek `https://api.domainkamu.com/api/health`; `ai_key_configured` harus `true`.
+
+Kalau kuota Gemini habis atau model tidak valid, backend otomatis kembali ke
+heuristik — situs tidak ikut mati.
+
+---
+
 ## Langkah 6 — Verifikasi
 
 Jalankan dari komputer mana pun:
@@ -242,3 +259,6 @@ pause permanen seperti Supabase.
 - Simpan `DATABASE_URL` dan `GEMINI_API_KEY` hanya di **Render → Environment**.
 - Kalau connection string bocor, ganti password database di Supabase.
 - Aplikasi sudah memask PII sebelum menyimpan bukti ke database.
+- Tabel `cases` dibuat dengan **Row Level Security (RLS) aktif**, sehingga tidak
+  bisa dibaca lewat Supabase REST API memakai anon key. Backend tetap bisa
+  mengaksesnya karena memakai role pemilik tabel.
