@@ -9,5 +9,16 @@
     "types": ["node"],
     "noEmit": true
   },
-  "include": ["server.ts"]
+  "include": [
+    "server.ts",
+    "backend/src/app.ts",
+    "backend/src/config.ts",
+    "backend/src/types.ts",
+    "backend/src/db/activeStore.ts",
+    "backend/src/db/pgStore.ts",
+    "backend/src/db/store.ts",
+    "backend/src/db/types.ts",
+    "backend/src/services/**/*"
+  ],
+  "exclude": ["node_modules"]
 }
