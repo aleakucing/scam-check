@@ -1,32 +1,24 @@
-import type { CaseRecord } from "./types";
+import type { CaseStore } from "./store";
 
 /**
- * The storage driver is selected at runtime:
+ * Selects the storage driver once per process:
  * - DATABASE_URL present  -> Postgres (Supabase / Neon / any Postgres)
  * - DATABASE_URL absent   -> local SQLite file (VPS / local development)
  *
- * Both drivers expose the same async-friendly surface so the HTTP layer does
- * not need to know which database is behind it.
- *
- * The import is dynamic on purpose: on Render (Postgres) we never load
- * `bun:sqlite` or touch the ephemeral filesystem.
+ * Only the Bun/VPS entry imports this module. The Vercel entry imports
+ * `pgStore` directly, so `bun:sqlite` is never part of the serverless bundle.
  */
 export const isPostgres = Boolean((process.env.DATABASE_URL || "").trim());
 
-const store = isPostgres ? await import("./pgStore") : await import("./sqliteStore");
+let storePromise: Promise<CaseStore> | null = null;
 
-export async function saveCase(
-  data: Partial<CaseRecord>
-): Promise<{ case_id: string; access_token: string }> {
-  return store.saveCase(data);
-}
-
-export async function getCase(caseId: string): Promise<any | null> {
-  return store.getCase(caseId);
-}
-
-export async function pingDb(): Promise<void> {
-  await store.pingDb();
+export function getCaseStore(): Promise<CaseStore> {
+  if (!storePromise) {
+    storePromise = (isPostgres ? import("./pgStore") : import("./sqliteStore")).then(
+      (mod) => mod as unknown as CaseStore
+    );
+  }
+  return storePromise;
 }
 
 export { accessGranted } from "./types";

@@ -1,6 +1,21 @@
 import { resolve } from "path";
 import { existsSync, readFileSync } from "fs";
 
+// Bun exposes import.meta.dir; Node 20.11+ exposes import.meta.dirname.
+// Bundlers that compile to CommonJS may leave neither, so fall back to cwd.
+function getModuleDir(): string {
+  try {
+    const meta = import.meta as any;
+    if (meta?.dir) return meta.dir;
+    if (meta?.dirname) return meta.dirname;
+  } catch {
+    // import.meta is not available in this runtime
+  }
+  return process.cwd();
+}
+
+const moduleDir = getModuleDir();
+
 function resolveGeminiKey(): string {
   // Never exhaust API quota during automated test runner execution
   if (process.env.NODE_ENV === "test" || process.env.BUN_ENV === "test") {
@@ -11,7 +26,7 @@ function resolveGeminiKey(): string {
     return envKey;
   }
   // Check parent root .env if running from backend folder
-  const rootEnvPath = resolve(import.meta.dir, "../../.env");
+  const rootEnvPath = resolve(moduleDir, "../../.env");
   if (existsSync(rootEnvPath)) {
     try {
       const content = readFileSync(rootEnvPath, "utf8");
@@ -40,5 +55,5 @@ export const config = {
   GEMINI_TTS_VOICE: process.env.GEMINI_TTS_VOICE || "Kore",
   PROJECT_NAME: "KrosCheck",
   VERSION: "2.0.0",
-  DATABASE_PATH: process.env.DATABASE_PATH || resolve(import.meta.dir, "../data/scamguard_cases.db")
+  DATABASE_PATH: process.env.DATABASE_PATH || resolve(moduleDir, "../data/scamguard_cases.db")
 };

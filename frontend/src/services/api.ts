@@ -71,7 +71,11 @@ export async function analyzeEvidence(req: AnalyzeRequest): Promise<AnalyzeRespo
   for (const ep of endpoints) {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 12000);
+      // The backend's Gemini call has a 12s internal timeout and then falls
+      // back to the heuristic engine. Allow enough time for that fallback to
+      // arrive before aborting (Vercel functions can take a few seconds to
+      // start, especially on the first request).
+      const timeoutId = setTimeout(() => controller.abort(), 20000);
 
       const res = await fetch(ep, {
         method: "POST",

@@ -45,11 +45,13 @@ function ensureColumn(name: string, statement: string) {
   }
 }
 
-export function pingDb(): void {
+export async function pingDb(): Promise<void> {
   db.prepare("SELECT 1").get();
 }
 
-export function saveCase(data: Partial<CaseRecord>): { case_id: string; access_token: string } {
+export async function saveCase(
+  data: Partial<CaseRecord>
+): Promise<{ case_id: string; access_token: string }> {
   const caseId = data.case_id;
   if (!caseId) throw new Error("case_id is required");
 
@@ -112,7 +114,7 @@ export function saveCase(data: Partial<CaseRecord>): { case_id: string; access_t
   return { case_id: caseId, access_token: stored?.access_token || accessToken };
 }
 
-export function getCase(caseId: string): any | null {
+export async function getCase(caseId: string): Promise<any | null> {
   const stmt = db.prepare("SELECT * FROM cases WHERE case_id = ?");
   const row: any = stmt.get(caseId);
   if (!row) return null;

@@ -54,8 +54,47 @@
     return (bytes / (1024 * 1024)).toFixed(1) + " MB";
   }
 
-  function processFile(file: File) {
-    if (!file.type.startsWith("image/")) {
+  function readFileAsDataURL(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result || ""));
+      reader.onerror = () => reject(new Error("read"));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function loadImage(src: string): Promise<HTMLImageElement> {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = () => reject(new Error("image"));
+      img.src = src;
+    });
+  }
+
+  async function compressImage(dataUrl: string): Promise<string> {
+    const img = await loadImage(dataUrl);
+    const maxDim = 2000;
+    const scale = Math.min(1, maxDim / Math.max(img.naturalWidth, img.naturalHeight));
+    const width = Math.max(1, Math.round(img.naturalWidth * scale));
+    const height = Math.max(1, Math.round(img.naturalHeight * scale));
+
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("canvas");
+
+    // JPEG has no alpha channel; fill white so transparent screenshots stay readable.
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, width, height);
+    ctx.drawImage(img, 0, 0, width, height);
+    return canvas.toDataURL("image/jpeg", 0.85);
+  }
+
+  async function processFile(file: File) {
+    const allowedTypes = ["image/png", "image/jpeg", "image/webp"];
+    if (!allowedTypes.includes(file.type)) {
       errorMessage = "Hanya berkas gambar (PNG, JPG, WebP) yang diizinkan.";
       return;
     }
@@ -67,39 +106,48 @@
 
     isUploading = true;
     errorMessage = "";
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const result = event.target?.result as string;
-      const base64 = result ? result.split(",")[1] : null;
+    try {
+      const originalDataUrl = await readFileAsDataURL(file);
+      // Keep small files untouched. Larger screenshots/photos are resized and
+      // re-encoded in the browser because Vercel caps function request bodies
+      // at 4.5 MB (and the backend accepts at most 4 MB of base64).
+      const dataUrl =
+        file.size <= 2 * 1024 * 1024
+          ? originalDataUrl
+          : await compressImage(originalDataUrl);
+      const base64 = dataUrl.split(",")[1] || "";
+      if (!base64) throw new Error("empty");
+      if (base64.length > 4 * 1024 * 1024) throw new Error("too-large");
+
+      selectedImage = {
+        name: file.name,
+        base64,
+        previewUrl: dataUrl,
+        sizeStr: formatFileSize(Math.round((base64.length * 3) / 4))
+      };
+      errorMessage = "";
+    } catch (err: any) {
+      // Keep any previously selected image; only report the failed upload.
+      errorMessage =
+        err?.message === "too-large"
+          ? "Gambar masih terlalu besar setelah dikompres. Pilih gambar lain."
+          : "Gagal memproses berkas gambar.";
+    } finally {
       isUploading = false;
-      if (base64) {
-        selectedImage = {
-          name: file.name,
-          base64,
-          previewUrl: result,
-          sizeStr: formatFileSize(file.size)
-        };
-        errorMessage = "";
-      }
-    };
-    reader.onerror = () => {
-      isUploading = false;
-      errorMessage = "Gagal memproses berkas gambar.";
-    };
-    reader.readAsDataURL(file);
+    }
   }
 
   function handleFileChange(e: Event) {
     const target = e.target as HTMLInputElement;
     if (target.files && target.files[0]) {
-      processFile(target.files[0]);
+      void processFile(target.files[0]);
     }
   }
 
   function handleDrop(e: DragEvent) {
     isDragging = false;
     if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) {
-      processFile(e.dataTransfer.files[0]);
+      void processFile(e.dataTransfer.files[0]);
     }
   }
 
@@ -409,7 +457,7 @@
                 Klik untuk memilih berkas atau tarik gambar ke sini
               </span>
               <span class="text-xs text-on-surface-variant">
-                Mendukung screenshot chat WhatsApp, bukti transfer, atau SMS (PNG, JPG, WebP maks 10MB)
+                Mendukung screenshot chat WhatsApp, bukti transfer, atau SMS (PNG, JPG, WebP maks 10MB, otomatis dikompres)
               </span>
             </div>
           </div>

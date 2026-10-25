@@ -1,0 +1,22 @@
+{
+  "name": "kroscheck-vercel-api",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Vercel Hono entry for the KrosCheck backend",
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.vercel.json --noEmit"
+  },
+  "dependencies": {
+    "hono": "^4.13.14",
+    "postgres": "^3.4.9"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.3",
+    "tsx": "^4.23.0",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": "22.x"
+  }
+}

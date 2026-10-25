@@ -1,8 +1,15 @@
 # Deploy Gratis Tanpa VPS — Render + Supabase
 
-Panduan ini membuat KrosCheck online **tanpa VPS, tanpa kartu kredit, dan tanpa biaya**.
-Frontend dan backend tetap kode yang sama; yang berubah hanya cara penyajian dan
-lapisan database.
+Panduan ini membuat KrosCheck online **tanpa VPS dan tanpa biaya**. Frontend dan
+backend tetap kode yang sama; yang berubah hanya cara penyajian dan lapisan
+database.
+
+> **Catatan kartu (penting):** Render dapat meminta verifikasi kartu untuk akun
+> baru, bahkan pada Free tier (temporary $1 authorization, tidak ditagih). Kalau
+> kamu tidak mau memasukkan kartu sama sekali, gunakan
+> [DEPLOY_FREE_VERCEL.md](DEPLOY_FREE_VERCEL.md) — Vercel Hobby tidak meminta
+> kartu, tidak tidur, dan tetap gratis. Panduan Render ini cocok kalau akunmu
+> tidak diminta kartu atau kamu bersedia verifikasi.
 
 ## Arsitektur
 
@@ -34,7 +41,9 @@ Pengunjung
 ## Yang perlu disiapkan
 
 - Repository GitHub yang berisi kode ini (sudah ada: `aleakucing/scam-check`).
-- Akun [Render](https://dashboard.render.com/register) — gratis, tanpa kartu.
+- Akun [Render](https://dashboard.render.com/register) — Free tier; beberapa
+  akun baru diminta verifikasi kartu ($1 hold sementara, tidak ditagih). Kalau
+  tidak mau, gunakan panduan Vercel di atas.
 - Project [Supabase](https://supabase.com/dashboard) yang sudah kamu punya.
 - Akun [UptimeRobot](https://uptimerobot.com/) — gratis, tanpa kartu.
 - Domain yang sudah kamu punya.
@@ -196,7 +205,7 @@ Kalau `database_ok` bernilai `false`, lihat bagian Troubleshooting.
 | Supabase 500 MB | Data kasus hanya teks; sangat jauh dari batas |
 | Supabase pause | Dicegah oleh health check tiap 5 menit |
 | Gemini free tier | Opsional; tanpa key aplikasi tetap jalan dengan heuristik |
-| Kartu kredit | Tidak diperlukan di Render, Supabase, UptimeRobot |
+| Verifikasi kartu | Render dapat meminta kartu untuk akun baru ($1 hold); Supabase/UptimeRobot tidak. Jika tidak mau, gunakan Vercel |
 
 ---
 

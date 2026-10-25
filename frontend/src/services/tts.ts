@@ -275,7 +275,7 @@ async function fetchGeminiAudio(text: string): Promise<CachedGeminiAudio | null>
         const resp = await fetch(`${getApiBaseUrl()}/api/tts`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text: text.slice(0, 2000) }),
+          body: JSON.stringify({ text: text.slice(0, 600) }),
           signal: controller.signal
         });
         window.clearTimeout(timeoutId);

@@ -1,0 +1,18 @@
+{
+  "buildCommand": "npm ci --include=dev && npm run build",
+  "outputDirectory": "dist",
+  "rewrites": [
+    { "source": "/result", "destination": "/index.html" },
+    { "source": "/riwayat", "destination": "/index.html" },
+    { "source": "/history", "destination": "/index.html" },
+    { "source": "/how-it-works", "destination": "/index.html" },
+    { "source": "/faq", "destination": "/index.html" },
+    { "source": "/download", "destination": "/index.html" },
+    { "source": "/trends", "destination": "/index.html" },
+    { "source": "/about", "destination": "/index.html" },
+    { "source": "/privacy", "destination": "/index.html" },
+    { "source": "/terms", "destination": "/index.html" },
+    { "source": "/coming-soon", "destination": "/index.html" },
+    { "source": "/hasil/:caseId", "destination": "/index.html" }
+  ]
+}

@@ -51,35 +51,45 @@ flowchart TD
         Backend --> Heuristic["Indonesian Cyber Heuristic Rules Engine"]
         Backend --> Gemini["Google Gemini Multimodal API (Optional)"]
         Backend --> ExposureEvaluator["User Exposure & Emergency State Machine"]
-        Backend --> SQLite["Evidence Vault (bun:sqlite WAL Mode)"]
+        Backend --> SQLite["Evidence Vault (SQLite untuk VPS / Supabase Postgres untuk Vercel)"]
     end
 
     Backend --> ReportGen["Official Incident Case Report Generator"]
 ```
 
 - **Frontend**: Svelte 5 (Runes architecture `$state`, `$derived`) + Tailwind CSS + Lucide Icons + Vite.
-- **Backend API**: Bun 1.4 Runtime + Hono v4 Framework + TypeScript + `bun:sqlite` Evidence Vault.
+- **Backend API**: Bun 1.4 Runtime + Hono v4 Framework + TypeScript. Entry VPS ada di `backend/src/index.ts`; entry Vercel ada di `server.ts`.
+- **Evidence Vault**: `bun:sqlite` (VPS/local) atau Supabase Postgres via pooler transaction mode (Vercel/Render). Driver dipilih otomatis dari `DATABASE_URL`.
 - **AI & Heuristic Engine**:
-  - *Primary*: Google Gemini 1.5 Flash multimodal vision & text API.
+  - *Primary*: Google Gemini multimodal vision & text API.
   - *Autonomous Fallback*: Built-in Indonesian Cybersecurity Heuristic Rules Engine yang tetap bekerja 100% offline tanpa ketergantungan API eksternal.
-- **Web Server & Reverse Proxy**: Nginx Alpine dengan kompresi Gzip, CORS headers, rate limiting, dan isolasi jaringan.
+- **Web Server & Reverse Proxy**: Nginx Alpine dengan kompresi Gzip, CORS headers, rate limiting, dan isolasi jaringan (jalur VPS).
 - **Containerization**: Multi-stage Docker Compose untuk deployment otomatis sekali jalan.
-- **Target Infrastruktur**: Linux / Cloud VPS (Ubuntu 24.04 LTS), Docker & Docker Compose ready.
+- **Target Infrastruktur**: Linux / Cloud VPS (Ubuntu 24.04 LTS), Docker & Docker Compose; atau Vercel Hobby + Supabase (tanpa VPS/kartu).
 - **Legacy Archive**: Implementasi awal (Python FastAPI & Vanilla HTML) tersimpan rapi di direktori `legacy/`.
 
 ---
 
 ## 4. Panduan Deployment
 
-### Opsi A — Gratis Tanpa VPS (Render + Supabase)
+### Opsi A — Gratis Tanpa VPS & Tanpa Kartu (Vercel + Supabase) — direkomendasikan
 
-Cocok kalau belum punya VPS dan tidak ingin mengeluarkan biaya. Frontend menjadi
-static site, backend berjalan sebagai Docker service gratis di Render, dan data
-disimpan di Supabase Postgres.
+Frontend menjadi static site di Vercel, backend menjadi Vercel Hono function,
+dan data disimpan di Supabase Postgres. Vercel Hobby gratis permanen dan
+**tidak meminta kartu**; fungsi serverless juga tidak tidur seperti Render Free.
 
-Panduan lengkap: **[docs/DEPLOY_FREE_RENDER.md](docs/DEPLOY_FREE_RENDER.md)**
+Panduan lengkap: **[docs/DEPLOY_FREE_VERCEL.md](docs/DEPLOY_FREE_VERCEL.md)**
 
-### Opsi B — VPS dengan Docker Compose
+### Opsi B — Render + Supabase (jika akun Render tidak meminta kartu)
+
+Render Free bisa meminta verifikasi kartu (temporary $1 authorization) untuk
+akun baru. Kalau kamu tidak mau memasukkan kartu sama sekali, gunakan Opsi A.
+Kalau akunmu tidak diminta kartu (atau kamu bersedia verifikasi), panduan
+Render tetap tersedia:
+
+**[docs/DEPLOY_FREE_RENDER.md](docs/DEPLOY_FREE_RENDER.md)**
+
+### Opsi C — VPS dengan Docker Compose
 
 Aplikasi telah dilengkapi konfigurasi Docker multi-stage yang siap dijalankan di server produksi maupun mesin lokal:
 
@@ -135,7 +145,8 @@ bun run check
 # Membangun berkas produksi:
 bun run build
 ```
-Buka `http://localhost:5173` di peramban Anda.
+Buka `http://localhost:3000` di peramban Anda (Vite dev server mem-proxy `/api`
+ke backend di `http://localhost:8000`).
 
 ---
 
