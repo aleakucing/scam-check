@@ -396,7 +396,7 @@ app.post("/api/tts", async (c) => {
     if (gemini.ok) {
       return c.json({ audio_base64: gemini.audio.audioBase64, mime_type: gemini.audio.mimeType });
     }
-    if (gemini.reason !== "quota") {
+    if ("reason" in gemini && gemini.reason !== "quota") {
       console.warn("Gemini TTS gagal, beralih ke Google TTS.");
     }
   }
