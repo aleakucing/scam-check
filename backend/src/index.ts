@@ -8,7 +8,7 @@ import { synthesizeSpeechIndonesian } from "./services/geminiTts";
 import { synthesizeSpeechGoogle } from "./services/googleTranslateTts";
 import { analyzeHeuristic } from "./services/heuristicAnalyzer";
 import { evaluateExposure } from "./services/exposureEvaluator";
-import { saveCase, getCase, accessGranted } from "./db/caseStore";
+import { saveCase, getCase, accessGranted, pingDb, isPostgres } from "./db/caseStore";
 import {
   AnalyzeRequest,
   AnalyzeResponse,
@@ -64,15 +64,19 @@ if (existsSync(distPath)) {
 
 // Helper to get client IP for rate limiting (spoofing-resistant)
 function getClientIp(c: any): string {
-  // Prefer X-Real-IP set by trusted upstream reverse proxy (Nginx)
+  // Cloudflare / CDN in front of the app
+  const cfIp = c.req.header("cf-connecting-ip");
+  if (cfIp) return cfIp.trim();
+
+  // Prefer X-Real-IP set by a trusted upstream reverse proxy (Nginx / Render)
   const realIp = c.req.header("x-real-ip");
   if (realIp) return realIp.trim();
 
-  // If X-Forwarded-For is provided, take the last IP (closest to trusted proxy)
+  // With a single trusted proxy in front, the first entry is the real client.
   const forwarded = c.req.header("x-forwarded-for");
   if (forwarded) {
     const parts = forwarded.split(",").map((s: string) => s.trim());
-    return parts[parts.length - 1] || parts[0];
+    return parts[0] || "127.0.0.1";
   }
 
   return "127.0.0.1";
@@ -171,11 +175,20 @@ app.get("/openapi.json", (c) =>
   })
 );
 
-// Health check endpoint
-app.get("/api/health", (c) => {
+// Health check endpoint (also keeps the free database awake when polled)
+app.get("/api/health", async (c) => {
   const hasGemini = Boolean(config.GEMINI_API_KEY);
+
+  let databaseOk = true;
+  try {
+    await pingDb();
+  } catch (err: any) {
+    databaseOk = false;
+    console.error("[KrosCheck] Database health check failed:", err?.message || err);
+  }
+
   return c.json({
-    status: "healthy",
+    status: databaseOk ? "healthy" : "degraded",
     version: config.VERSION,
     ai_engine: hasGemini
       ? `Gemini (${config.GEMINI_MODEL})`
@@ -184,7 +197,13 @@ app.get("/api/health", (c) => {
     ssrf_protection: "active",
     pii_masking: "active",
     rate_limiting: "active (60 req/min)",
-    case_vault: "persistent_sqlite_bun"
+    case_vault: databaseOk
+      ? isPostgres
+        ? "postgres"
+        : "persistent_sqlite_bun"
+      : "unavailable",
+    database: isPostgres ? "postgres" : "sqlite",
+    database_ok: databaseOk
   });
 });
 
@@ -203,10 +222,10 @@ app.get("/api/cases", (c) => {
   );
 });
 
-app.get("/api/cases/:id", (c) => {
+app.get("/api/cases/:id", async (c) => {
   const caseId = c.req.param("id");
   const key = c.req.query("k") || "";
-  const caseData = getCase(caseId);
+  const caseData = await getCase(caseId);
   if (!caseData || !accessGranted(caseData.access_token, key)) {
     return c.json({ detail: "Kasus tidak ditemukan atau kode akses tidak valid." }, 404);
   }
@@ -273,10 +292,10 @@ app.post("/api/analyze", async (c) => {
     response = analyzeHeuristic(body);
   }
 
-  // Persist to Evidence Vault with Server-Side PII Masking BEFORE SQLite write
+  // Persist to Evidence Vault with Server-Side PII Masking BEFORE the database write
   const safeContent = maskSensitiveData(body.content);
   try {
-    const saved = saveCase({
+    const saved = await saveCase({
       case_id: response.case_id,
       timestamp: response.timestamp,
       evidence_type: response.evidence_type,
@@ -315,11 +334,11 @@ app.post("/api/interview", async (c) => {
     const evalResp = evaluateExposure(body);
     const key = (body.access_key || "").trim();
     if (key) {
-      const existing = getCase(body.case_id);
+      const existing = await getCase(body.case_id);
       if (!existing || !accessGranted(existing.access_token, key)) {
         return c.json({ detail: "Kasus tidak ditemukan atau kode akses tidak valid." }, 404);
       }
-      saveCase({
+      await saveCase({
         case_id: body.case_id,
         user_exposure: evalResp.user_exposure,
         opened_link: body.opened_link,

@@ -8,6 +8,13 @@ import type {
 
 // Determine API base URL dynamically
 export function getApiBaseUrl(): string {
+  // Set at build time on hosting platforms (Render, Cloudflare Pages, etc.).
+  // Example: VITE_API_BASE_URL=https://api.yourdomain.com
+  const configuredBase = (import.meta.env.VITE_API_BASE_URL || "").trim();
+  if (configuredBase) {
+    return configuredBase.replace(/\/+$/, "");
+  }
+
   if (typeof window === "undefined") return "http://localhost:8000";
   // If running on Vite dev server (e.g. port 5173 or 3000), backend is likely on 8000
   if (window.location.port === "5173" || window.location.port === "3000") {

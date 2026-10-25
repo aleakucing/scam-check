@@ -69,7 +69,17 @@ flowchart TD
 
 ---
 
-## 4. Panduan Deployment dengan Docker Compose
+## 4. Panduan Deployment
+
+### Opsi A — Gratis Tanpa VPS (Render + Supabase)
+
+Cocok kalau belum punya VPS dan tidak ingin mengeluarkan biaya. Frontend menjadi
+static site, backend berjalan sebagai Docker service gratis di Render, dan data
+disimpan di Supabase Postgres.
+
+Panduan lengkap: **[docs/DEPLOY_FREE_RENDER.md](docs/DEPLOY_FREE_RENDER.md)**
+
+### Opsi B — VPS dengan Docker Compose
 
 Aplikasi telah dilengkapi konfigurasi Docker multi-stage yang siap dijalankan di server produksi maupun mesin lokal:
 
