@@ -1,5 +1,3 @@
-import * as sqlite from "./sqliteStore";
-import * as pg from "./pgStore";
 import type { CaseRecord } from "./types";
 
 /**
@@ -9,9 +7,13 @@ import type { CaseRecord } from "./types";
  *
  * Both drivers expose the same async-friendly surface so the HTTP layer does
  * not need to know which database is behind it.
+ *
+ * The import is dynamic on purpose: on Render (Postgres) we never load
+ * `bun:sqlite` or touch the ephemeral filesystem.
  */
 export const isPostgres = Boolean((process.env.DATABASE_URL || "").trim());
-const store = isPostgres ? pg : sqlite;
+
+const store = isPostgres ? await import("./pgStore") : await import("./sqliteStore");
 
 export async function saveCase(
   data: Partial<CaseRecord>
