@@ -132,7 +132,8 @@ hal sekaligus:
 
 Kalau UptimeRobot tidak dipakai, aplikasi tetap jalan, tetapi request pertama
 setelah 15 menit idle akan menunggu ±1 menit (cold start), dan Supabase bisa
-pause setelah 7 hari tanpa aktivitas.
+pause setelah 7 hari tanpa aktivitas. Alternatif gratis lain: **cron-job.org**
+(monitor HTTP tiap 5 menit) — yang penting ada request masuk secara berkala.
 
 ---
 

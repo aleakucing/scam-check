@@ -30,7 +30,7 @@ services:
   - type: web
     name: kroscheck-web
     runtime: static
-    buildCommand: cd frontend && npm ci && npm run build
+    buildCommand: cd frontend && npm ci --include=dev && npm run build
     staticPublishPath: ./frontend/dist
     envVars:
       - key: VITE_API_BASE_URL
